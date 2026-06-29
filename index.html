@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>面交訂單表</title>
+<style>
+  :root{
+    --ink:#1c2b22;
+    --paper:#f6f3ea;
+    --line:#cdbfa0;
+    --stamp:#b5482e;
+    --stamp-dark:#8f3520;
+    --leaf:#3c5b43;
+    --leaf-dark:#2a4030;
+    --paper-card:#fffdf8;
+    --muted:#7a7060;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(28,43,34,0.06) 1px, transparent 0);
+    background-size: 18px 18px;
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    color:var(--ink);
+    padding:28px 16px 80px;
+  }
+  .sheet{max-width:640px; margin:0 auto;}
+  header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    border-bottom:3px double var(--line);
+    padding-bottom:14px;
+    margin-bottom:18px;
+  }
+  .title-block h1{font-size:26px; margin:0 0 4px; letter-spacing:1px; font-weight:900;}
+  .title-block p{margin:0; font-size:12.5px; color:var(--muted);}
+  .stamp{
+    flex-shrink:0; width:64px; height:64px;
+    border:2.5px solid var(--stamp); border-radius:8px; color:var(--stamp);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:900; font-size:13px; line-height:1.2; text-align:center;
+    transform:rotate(-6deg); opacity:0.85;
+  }
+  .order-no{font-size:11px; color:var(--muted); margin-bottom:16px; text-align:right;}
+  .order-no span{font-weight:700; color:var(--ink);}
+
+  section{
+    background:var(--paper-card); border:1px solid var(--line); border-radius:10px;
+    padding:18px; margin-bottom:16px; box-shadow:0 1px 0 rgba(0,0,0,0.02);
+  }
+  .sec-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .sec-label{display:flex; align-items:center; gap:8px; font-weight:800; font-size:14.5px; color:var(--leaf-dark);}
+  .sec-label .tag{
+    background:var(--leaf); color:#fff; font-size:11px; padding:3px 8px;
+    border-radius:5px; font-weight:700; letter-spacing:0.5px;
+  }
+  .admin-btn{
+    background:#fff; border:1px solid var(--line); color:var(--muted);
+    font-size:11px; font-weight:700; padding:6px 10px; border-radius:7px;
+    cursor:pointer; font-family:inherit;
+  }
+
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:12.5px; font-weight:700; margin-bottom:5px; color:#4a4438;}
+  .field .hint{font-weight:400; font-size:11px; color:var(--muted); margin-left:4px;}
+  input[type=text], input[type=number], input[type=email], input[type=tel], input[type=password]{
+    width:100%; padding:10px 11px; border:1px solid var(--line); border-radius:7px;
+    font-size:15px; background:#fff; font-family:inherit; color:var(--ink);
+  }
+  input:focus{outline:2px solid var(--leaf); outline-offset:1px;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+
+  .seg{display:flex; border:1px solid var(--line); border-radius:8px; overflow:hidden;}
+  .seg button{
+    flex:1; padding:10px 6px; border:none; background:#fff; font-size:13.5px;
+    font-weight:700; color:var(--muted); cursor:pointer; font-family:inherit;
+  }
+  .seg button.active{background:var(--leaf); color:#fff;}
+  .seg button:not(:last-child){border-right:1px solid var(--line);}
+
+  .radio-row{
+    display:flex; align-items:center; gap:8px; padding:9px 4px;
+    border-bottom:1px solid #ece5d3; font-size:13.5px;
+  }
+  .radio-row:last-child{border-bottom:none;}
+  .radio-row input[type=radio]{width:17px; height:17px; accent-color:var(--leaf); flex-shrink:0;}
+  .radio-row .sub-input{flex:1; margin-top:0;}
+  .radio-row .sub-input input{padding:7px 9px; font-size:13.5px;}
+  .hidden{display:none !important;}
+
+  .catalog-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px;
+  }
+  .product-card{
+    border:1.5px solid var(--line); border-radius:10px; background:#fff;
+    padding:12px 10px; text-align:left; cursor:pointer; font-family:inherit;
+    transition:border-color 0.15s, background 0.15s;
+  }
+  .product-card:active{transform:translateY(1px);}
+  .product-card.in-cart{border-color:var(--leaf); background:#f1f6f0;}
+  .product-card .p-name{display:block; font-weight:700; font-size:14px; margin-bottom:4px;}
+  .product-card .p-price{display:block; font-size:13px; color:var(--stamp-dark); font-weight:700;}
+  .product-card .p-badge{
+    display:inline-block; margin-top:6px; font-size:11px; font-weight:700;
+    background:var(--leaf); color:#fff; padding:1px 7px; border-radius:10px;
+  }
+  .catalog-loading, .catalog-empty{
+    font-size:13px; color:var(--muted); text-align:center; padding:18px 0;
+  }
+
+  .cart{margin-top:14px; border-top:1px dashed var(--line); padding-top:12px;}
+  .cart-title{font-size:12px; font-weight:700; color:var(--muted); margin-bottom:8px;}
+  .cart-row{
+    display:flex; align-items:center; gap:8px; padding:8px 0;
+    border-bottom:1px solid #ece5d3; font-size:13.5px;
+  }
+  .cart-row:last-child{border-bottom:none;}
+  .cart-row .c-name{flex:1; font-weight:700;}
+  .cart-row .c-price{font-size:11.5px; color:var(--muted); display:block; font-weight:400;}
+  .qty-ctrl{display:flex; align-items:center; gap:6px; flex-shrink:0;}
+  .qty-ctrl button{
+    width:26px; height:26px; border-radius:6px; border:1px solid var(--line);
+    background:#fff; font-size:15px; font-weight:700; cursor:pointer; color:var(--leaf-dark);
+    font-family:inherit; line-height:1;
+  }
+  .qty-ctrl .qty-num{min-width:20px; text-align:center; font-weight:700;}
+  .cart-row .c-sub{width:64px; text-align:right; font-weight:800; flex-shrink:0;}
+  .cart-row .c-del{
+    background:none; border:none; color:var(--stamp); font-size:17px;
+    cursor:pointer; padding:0 0 0 2px; flex-shrink:0;
+  }
+  .empty-cart{font-size:12.5px; color:var(--muted); padding:6px 0;}
+
+  .totals{margin-top:14px; border-top:1px dashed var(--line); padding-top:12px;}
+  .totals .line{display:flex; justify-content:space-between; font-size:13px; padding:3px 0; color:#55503f;}
+  .totals .grand{
+    display:flex; justify-content:space-between; align-items:baseline; margin-top:6px;
+    padding-top:8px; border-top:2px solid var(--ink); font-size:18px; font-weight:900;
+  }
+  .totals .grand .amt{color:var(--stamp-dark);}
+
+  .submit-bar{position:sticky; bottom:14px; margin-top:8px;}
+  .submit-btn{
+    width:100%; padding:15px; background:var(--leaf); color:#fff; border:none;
+    border-radius:9px; font-size:16px; font-weight:800; letter-spacing:1px; cursor:pointer;
+    box-shadow:0 4px 14px rgba(42,64,48,0.3); font-family:inherit;
+  }
+  .submit-btn:active{transform:translateY(1px);}
+  .submit-btn:disabled{opacity:0.6; cursor:default;}
+  .note-text{font-size:11.5px; color:var(--muted); text-align:center; margin-top:10px; line-height:1.6;}
+
+  .validation-banner{
+    background:#fdeeea; border:1.5px solid var(--stamp); border-radius:9px;
+    padding:11px 13px; margin-bottom:10px; font-size:12.5px; line-height:1.7; color:var(--stamp-dark);
+  }
+  .validation-banner b{display:block; margin-bottom:3px; font-size:13px;}
+
+  input.field-error{
+    border-color:var(--stamp) !important;
+    background:#fdf3f1;
+  }
+
+  .overlay{
+    position:fixed; inset:0; background:rgba(28,43,34,0.55);
+    display:flex; align-items:flex-end; justify-content:center; z-index:50;
+  }
+  .overlay.hidden{display:none;}
+  .modal{
+    background:var(--paper-card); width:100%; max-width:640px; border-radius:16px 16px 0 0;
+    padding:22px 18px 26px; max-height:85vh; overflow-y:auto; animation:slideUp 0.25s ease-out;
+  }
+  @keyframes slideUp{from{transform:translateY(30px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+  .modal h2{margin:0 0 4px; font-size:18px; font-weight:900;}
+  .modal .modal-sub{font-size:12.5px; color:var(--muted); margin:0 0 14px; line-height:1.6;}
+  .modal pre{
+    white-space:pre-wrap; font-family:inherit; background:#fff; border:1px solid var(--line);
+    border-radius:8px; padding:14px; font-size:13.5px; line-height:1.7;
+  }
+  .modal-actions{display:flex; gap:10px; margin-top:14px;}
+  .modal-actions button{
+    flex:1; padding:12px; border-radius:8px; font-weight:700; font-size:14px;
+    cursor:pointer; font-family:inherit; border:none;
+  }
+  .close-btn{background:var(--leaf); color:#fff;}
+  .ghost-btn{background:#fff; border:1px solid var(--line) !important; color:var(--ink);}
+  .icon-circle{
+    width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:24px; margin-bottom:10px;
+  }
+  .icon-circle.ok{background:#eef4ec; color:var(--leaf-dark);}
+  .icon-circle.err{background:#fdeeea; color:var(--stamp-dark);}
+
+  .admin-row{
+    display:flex; align-items:center; gap:8px; padding:8px 0;
+    border-bottom:1px solid #ece5d3; font-size:13.5px;
+  }
+  .admin-row:last-child{border-bottom:none;}
+  .admin-row .a-name{flex:1; font-weight:700;}
+  .admin-row .a-price{color:var(--stamp-dark); font-weight:700; margin-right:6px;}
+  .admin-row .a-del{
+    background:none; border:none; color:var(--stamp); font-size:17px; cursor:pointer; padding:0 2px;
+  }
+  .admin-add-form{display:flex; gap:8px; margin-top:14px;}
+  .admin-add-form input.a-name-input{flex:1.4;}
+  .admin-add-form input.a-price-input{flex:1;}
+  .admin-add-btn{
+    background:var(--leaf); color:#fff; border:none; border-radius:7px;
+    padding:0 14px; font-weight:700; cursor:pointer; font-family:inherit;
+  }
+
+  @media (prefers-reduced-motion: reduce){.modal{animation:none;}}
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <header>
+    <div class="title-block">
+      <h1>面交訂單表</h1>
+      <p>請選擇商品並填寫資料，送出後請至前台核對取貨</p>
+    </div>
+    <div class="stamp">面交<br>確認</div>
+  </header>
+
+  <div class="order-no">訂單編號 <span id="orderNo"></span> ・ <span id="orderDate"></span></div>
+
+  <!-- Buyer info -->
+  <section>
+    <div class="sec-head"><div class="sec-label"><span class="tag">01</span>買受人資料</div></div>
+
+    <div class="field">
+      <label>發票類別</label>
+      <div class="seg" id="buyerTypeSeg">
+        <button type="button" class="active" data-type="個人">個人</button>
+        <button type="button" data-type="公司">公司行號</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>姓名 / 聯絡人</label>
+      <input type="text" id="buyerName" placeholder="王小明">
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>聯絡電話 <span class="hint">(必填)</span></label>
+        <input type="tel" id="buyerPhone" placeholder="09xx-xxx-xxx">
+      </div>
+      <div class="field">
+        <label>Email <span class="hint">(選填，接收電子發票)</span></label>
+        <input type="email" id="buyerEmail" placeholder="example@mail.com">
+      </div>
+    </div>
+
+    <div id="individualBlock">
+      <div class="field" style="margin-bottom:6px;"><label>發票載具</label></div>
+      <div class="carrier-options">
+        <label class="radio-row">
+          <input type="radio" name="carrier" value="mobile" checked>
+          手機載具條碼
+          <span class="sub-input"><input type="text" id="mobileCarrier" placeholder="/ABC1234"></span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="carrier" value="duplicate">
+          二聯式發票 <span class="hint">(不使用載具)</span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="carrier" value="donate">
+          捐贈發票
+          <span class="sub-input"><input type="text" id="donateCode" placeholder="愛心碼 (預設：919)" value="919"></span>
+        </label>
+      </div>
+    </div>
+
+    <div id="businessBlock" class="hidden">
+      <div class="row2">
+        <div class="field">
+          <label>統一編號</label>
+          <input type="text" id="taxId" placeholder="8 位數字" maxlength="8">
+        </div>
+        <div class="field">
+          <label>發票抬頭 (公司名稱)</label>
+          <input type="text" id="companyName" placeholder="○○股份有限公司">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Items -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-label"><span class="tag">02</span>選擇商品</div>
+      <button type="button" class="admin-btn" id="adminBtn">🔒 商品管理</button>
+    </div>
+
+    <div class="catalog-loading" id="catalogLoading">商品載入中...</div>
+    <div class="catalog-grid hidden" id="catalogGrid"></div>
+    <div class="catalog-empty hidden" id="catalogEmpty">目前沒有上架商品，請洽前台</div>
+
+    <div class="cart">
+      <div class="cart-title">已選購商品</div>
+      <div id="cartBody"></div>
+      <div class="empty-cart" id="emptyCart">尚未選擇任何商品</div>
+    </div>
+
+    <div class="totals">
+      <div class="line"><span>未稅金額</span><span id="untaxed">$0</span></div>
+      <div class="line"><span>稅額 (5%)</span><span id="taxAmt">$0</span></div>
+      <div class="grand"><span>應付總額</span><span class="amt" id="grandTotal">$0</span></div>
+    </div>
+  </section>
+
+  <div class="validation-banner hidden" id="validationBanner"></div>
+  <div class="submit-bar">
+    <button class="submit-btn" id="submitBtn">送出訂單</button>
+  </div>
+  <div class="note-text">送出後資料會直接傳送給工作人員，請至前台等候核對取貨</div>
+</div>
+
+<!-- Result modal -->
+<div class="overlay hidden" id="overlay">
+  <div class="modal">
+    <div class="icon-circle ok" id="resultIcon">✓</div>
+    <h2 id="resultTitle">訂單已送出</h2>
+    <p class="modal-sub" id="resultSub">請至前台出示此畫面，工作人員會為您核對</p>
+    <pre id="summaryText"></pre>
+    <div class="modal-actions">
+      <button class="close-btn" id="closeBtn">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin password modal -->
+<div class="overlay hidden" id="passwordOverlay">
+  <div class="modal">
+    <h2>員工專用</h2>
+    <p class="modal-sub">商品管理僅限公司內部人員，請輸入密碼</p>
+    <div class="field">
+      <input type="password" id="adminPasswordInput" placeholder="請輸入密碼" inputmode="numeric">
+    </div>
+    <div class="modal-actions">
+      <button class="ghost-btn" id="passwordCancelBtn">取消</button>
+      <button class="close-btn" id="passwordConfirmBtn">確認</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin manage products modal -->
+<div class="overlay hidden" id="adminOverlay">
+  <div class="modal">
+    <h2>商品管理</h2>
+    <p class="modal-sub">新增或下架的商品，所有人掃碼後都會看到最新版本</p>
+    <div id="adminList"></div>
+    <div class="admin-add-form">
+      <input type="text" class="a-name-input" id="newProductName" placeholder="商品名稱">
+      <input type="number" class="a-price-input" id="newProductPrice" placeholder="單價" min="0" step="1">
+      <button type="button" class="admin-add-btn" id="addProductSubmitBtn">新增</button>
+    </div>
+    <div class="modal-actions">
+      <button class="ghost-btn" id="adminDoneBtn" style="flex:1;">完成</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Google Apps Script Web App 網址
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3mSHjqW7SZvsP4uNT_J-HoFRgT4VXZmEhP8_gANktGd_Mj9BbE-TvYwrtS9DLPW6I/exec';
+const ADMIN_PASSWORD = '1225';
+
+// 萬一連不上 Google 試算表時的備用商品（避免頁面完全沒東西可賣）
+const FALLBACK_CATALOG = [
+  {id: 1, name: '純手工布丁', price: 90},
+  {id: 2, name: '提拉米蘇', price: 110}
+];
+
+let catalog = [];
+let cart = [];
+let adminUnlocked = false;
+
+const catalogGrid = document.getElementById('catalogGrid');
+const catalogLoading = document.getElementById('catalogLoading');
+const catalogEmpty = document.getElementById('catalogEmpty');
+const cartBody = document.getElementById('cartBody');
+
+function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function loadCatalog(){
+  const callbackName = 'catalogCb_' + Date.now();
+  const script = document.createElement('script');
+  let settled = false;
+
+  window[callbackName] = (data) => {
+    settled = true;
+    delete window[callbackName];
+    script.remove();
+    catalog = (data && data.products && data.products.length > 0) ? data.products : FALLBACK_CATALOG;
+    renderCatalog();
+  };
+
+  script.src = GOOGLE_SCRIPT_URL + '?action=getCatalog&callback=' + callbackName;
+  script.onerror = () => {
+    if (!settled){
+      delete window[callbackName];
+      catalog = FALLBACK_CATALOG;
+      renderCatalog();
+    }
+  };
+  document.body.appendChild(script);
+
+  setTimeout(() => {
+    if (!settled){
+      settled = true;
+      catalog = FALLBACK_CATALOG;
+      renderCatalog();
+    }
+  }, 3000);
+}
+
+function renderCatalog(){
+  catalogLoading.classList.add('hidden');
+  if (catalog.length === 0){
+    catalogEmpty.classList.remove('hidden');
+    catalogGrid.classList.add('hidden');
+    return;
+  }
+  catalogEmpty.classList.add('hidden');
+  catalogGrid.classList.remove('hidden');
+  catalogGrid.innerHTML = '';
+  catalog.forEach(p => {
+    const inCart = cart.find(c => c.catalogId === p.id);
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'product-card' + (inCart ? ' in-cart' : '');
+    card.innerHTML = `
+      <span class="p-name">${escapeHtml(p.name)}</span>
+      <span class="p-price">${fmt(p.price)}</span>
+      ${inCart ? `<span class="p-badge">已選 ${inCart.qty}</span>` : ''}
+    `;
+    card.addEventListener('click', () => {
+      const existing = cart.find(c => c.catalogId === p.id);
+      if (existing){ existing.qty += 1; }
+      else { cart.push({catalogId: p.id, name: p.name, price: p.price, qty: 1}); }
+      renderCatalog();
+      renderCart();
+    });
+    catalogGrid.appendChild(card);
+  });
+}
+
+function renderCart(){
+  cartBody.innerHTML = '';
+  document.getElementById('emptyCart').classList.toggle('hidden', cart.length > 0);
+  cart.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'cart-row';
+    row.innerHTML = `
+      <div class="c-name">${escapeHtml(item.name)}<span class="c-price">${fmt(item.price)} / 件</span></div>
+      <div class="qty-ctrl">
+        <button type="button" class="q-minus">−</button>
+        <span class="qty-num">${item.qty}</span>
+        <button type="button" class="q-plus">+</button>
+      </div>
+      <div class="c-sub">${fmt(item.price * item.qty)}</div>
+      <button type="button" class="c-del">×</button>
+    `;
+    row.querySelector('.q-minus').addEventListener('click', () => {
+      item.qty -= 1;
+      if (item.qty <= 0){ cart = cart.filter(c => c !== item); }
+      renderCatalog(); renderCart();
+    });
+    row.querySelector('.q-plus').addEventListener('click', () => {
+      item.qty += 1;
+      renderCatalog(); renderCart();
+    });
+    row.querySelector('.c-del').addEventListener('click', () => {
+      cart = cart.filter(c => c !== item);
+      renderCatalog(); renderCart();
+    });
+    cartBody.appendChild(row);
+  });
+  recalcTotals();
+}
+
+function recalcTotals(){
+  const total = cart.reduce((sum, c) => sum + c.price * c.qty, 0);
+  const untaxed = total / 1.05;
+  const tax = total - untaxed;
+  document.getElementById('untaxed').textContent = fmt(untaxed);
+  document.getElementById('taxAmt').textContent = fmt(tax);
+  document.getElementById('grandTotal').textContent = fmt(total);
+}
+
+loadCatalog();
+renderCart();
+
+const segBtns = document.querySelectorAll('#buyerTypeSeg button');
+segBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    segBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const isCompany = btn.dataset.type === '公司';
+    document.getElementById('businessBlock').classList.toggle('hidden', !isCompany);
+    document.getElementById('individualBlock').classList.toggle('hidden', isCompany);
+  });
+});
+
+function newOrderNumber(){
+  const now = new Date();
+  document.getElementById('orderNo').textContent =
+    'M' + now.getFullYear().toString().slice(2) +
+    String(now.getMonth()+1).padStart(2,'0') +
+    String(now.getDate()).padStart(2,'0') + '-' +
+    String(Math.floor(Math.random()*900)+100);
+  document.getElementById('orderDate').textContent =
+    `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
+}
+newOrderNumber();
+
+function clearFieldErrors(){
+  document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+}
+
+function markFieldError(el){
+  el.classList.add('field-error');
+}
+
+function validateForm(){
+  clearFieldErrors();
+  const errors = [];
+
+  const buyerType = document.querySelector('#buyerTypeSeg button.active').dataset.type;
+  const nameInput = document.getElementById('buyerName');
+  const phoneInput = document.getElementById('buyerPhone');
+
+  if (!nameInput.value.trim()){
+    errors.push('請填寫姓名／聯絡人');
+    markFieldError(nameInput);
+  }
+  if (!phoneInput.value.trim()){
+    errors.push('請填寫聯絡電話');
+    markFieldError(phoneInput);
+  }
+
+  if (buyerType === '個人'){
+    const carrier = document.querySelector('input[name=carrier]:checked').value;
+    if (carrier === 'mobile'){
+      const mc = document.getElementById('mobileCarrier');
+      if (!mc.value.trim()){
+        errors.push('請填寫手機載具條碼，或改選捐贈發票');
+        markFieldError(mc);
+      }
+    }
+  } else {
+    const taxIdInput = document.getElementById('taxId');
+    const companyInput = document.getElementById('companyName');
+    if (!taxIdInput.value.trim()){
+      errors.push('請填寫統一編號');
+      markFieldError(taxIdInput);
+    }
+    if (!companyInput.value.trim()){
+      errors.push('請填寫發票抬頭（公司名稱）');
+      markFieldError(companyInput);
+    }
+  }
+
+  if (cart.length === 0){
+    errors.push('請至少選擇一項商品');
+  }
+
+  return errors;
+}
+
+function showValidationBanner(errors){
+  const banner = document.getElementById('validationBanner');
+  banner.innerHTML = '<b>請完成以下項目再送出：</b>' + errors.map(e => '・' + e).join('<br>');
+  banner.classList.remove('hidden');
+  banner.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function hideValidationBanner(){
+  document.getElementById('validationBanner').classList.add('hidden');
+}
+
+['buyerName','buyerPhone','buyerEmail','mobileCarrier','taxId','companyName'].forEach(id => {
+  document.getElementById(id).addEventListener('input', e => e.target.classList.remove('field-error'));
+});
+
+function resetFormForNextOrder(){
+  document.getElementById('buyerName').value = '';
+  document.getElementById('buyerPhone').value = '';
+  document.getElementById('buyerEmail').value = '';
+  document.getElementById('mobileCarrier').value = '';
+  document.getElementById('donateCode').value = '919';
+  document.getElementById('taxId').value = '';
+  document.getElementById('companyName').value = '';
+  document.querySelector('input[name=carrier][value=mobile]').checked = true;
+  segBtns.forEach(b => b.classList.remove('active'));
+  document.querySelector('#buyerTypeSeg button[data-type="個人"]').classList.add('active');
+  document.getElementById('businessBlock').classList.add('hidden');
+  document.getElementById('individualBlock').classList.remove('hidden');
+  cart = [];
+  renderCatalog();
+  renderCart();
+  newOrderNumber();
+  clearFieldErrors();
+  hideValidationBanner();
+}
+
+const submitBtn = document.getElementById('submitBtn');
+
+submitBtn.addEventListener('click', () => {
+  const errors = validateForm();
+  if (errors.length > 0){
+    showValidationBanner(errors);
+    return;
+  }
+  hideValidationBanner();
+
+  const orderNo = document.getElementById('orderNo').textContent;
+  const orderDate = document.getElementById('orderDate').textContent;
+  const buyerType = document.querySelector('#buyerTypeSeg button.active').dataset.type;
+  const name = document.getElementById('buyerName').value;
+  const phone = document.getElementById('buyerPhone').value;
+  const email = document.getElementById('buyerEmail').value || '';
+
+  let invoiceLine = '';
+  let carrierType = '', carrierValue = '', companyName = '';
+  if (buyerType === '個人'){
+    const carrier = document.querySelector('input[name=carrier]:checked').value;
+    if (carrier === 'mobile'){
+      carrierType = '手機載具條碼';
+      carrierValue = document.getElementById('mobileCarrier').value;
+      invoiceLine = `手機載具條碼：${carrierValue}`;
+    } else if (carrier === 'duplicate'){
+      carrierType = '二聯式發票';
+      carrierValue = '(不使用載具)';
+      invoiceLine = '二聯式發票（不使用載具）';
+    } else {
+      carrierType = '捐贈發票';
+      carrierValue = document.getElementById('donateCode').value || '919';
+      invoiceLine = `捐贈發票，愛心碼：${carrierValue}`;
+    }
+  } else {
+    carrierType = '統一編號';
+    carrierValue = document.getElementById('taxId').value;
+    companyName = document.getElementById('companyName').value;
+    invoiceLine = `統一編號：${carrierValue}　發票抬頭：${companyName}`;
+  }
+
+  let itemLines = '';
+  let total = 0;
+  const itemsSnapshot = cart.map(item => ({...item}));
+  itemsSnapshot.forEach((item, idx) => {
+    const s = item.price * item.qty;
+    total += s;
+    itemLines += `${idx+1}. ${item.name}　數量：${item.qty}　單價：${fmt(item.price)}　小計：${fmt(s)}\n`;
+  });
+  const untaxed = Math.round(total / 1.05);
+  const tax = total - untaxed;
+
+  const orderData = {
+    orderNo, orderDate, buyerType, name, phone, email,
+    carrierType, carrierValue, companyName,
+    items: itemsSnapshot, untaxed, tax, total
+  };
+
+  const summary =
+`訂單編號：${orderNo}　日期：${orderDate}
+
+【買受人資料】
+類別：${buyerType}
+姓名／聯絡人：${name}
+電話：${phone}
+${invoiceLine}
+
+【商品明細】
+${itemLines}
+未稅金額：${fmt(untaxed)}
+稅額(5%)：${fmt(tax)}
+應付總額：${fmt(total)}`;
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = '送出中...';
+
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+    body: JSON.stringify(orderData)
+  })
+  .then(() => {
+    document.getElementById('resultIcon').className = 'icon-circle ok';
+    document.getElementById('resultIcon').textContent = '✓';
+    document.getElementById('resultTitle').textContent = '訂單已送出';
+    document.getElementById('resultSub').textContent = '請至前台出示此畫面，工作人員會為您核對';
+    document.getElementById('summaryText').textContent = summary;
+    document.getElementById('overlay').classList.remove('hidden');
+  })
+  .catch(() => {
+    document.getElementById('resultIcon').className = 'icon-circle err';
+    document.getElementById('resultIcon').textContent = '!';
+    document.getElementById('resultTitle').textContent = '送出失敗';
+    document.getElementById('resultSub').textContent = '可能是網路不穩，請至前台出示此畫面讓工作人員手動登記，或按關閉後重試';
+    document.getElementById('summaryText').textContent = summary;
+    document.getElementById('overlay').classList.remove('hidden');
+  })
+  .finally(() => {
+    submitBtn.disabled = false;
+    submitBtn.textContent = '送出訂單';
+  });
+});
+
+document.getElementById('closeBtn').addEventListener('click', () => {
+  document.getElementById('overlay').classList.add('hidden');
+  resetFormForNextOrder();
+});
+
+const passwordOverlay = document.getElementById('passwordOverlay');
+const adminOverlay = document.getElementById('adminOverlay');
+const adminPasswordInput = document.getElementById('adminPasswordInput');
+
+document.getElementById('adminBtn').addEventListener('click', () => {
+  if (adminUnlocked){
+    openAdminPanel();
+  } else {
+    adminPasswordInput.value = '';
+    passwordOverlay.classList.remove('hidden');
+    setTimeout(() => adminPasswordInput.focus(), 100);
+  }
+});
+
+document.getElementById('passwordCancelBtn').addEventListener('click', () => {
+  passwordOverlay.classList.add('hidden');
+});
+
+document.getElementById('passwordConfirmBtn').addEventListener('click', () => {
+  if (adminPasswordInput.value === ADMIN_PASSWORD){
+    adminUnlocked = true;
+    passwordOverlay.classList.add('hidden');
+    openAdminPanel();
+  } else {
+    alert('密碼錯誤');
+  }
+});
+
+adminPasswordInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('passwordConfirmBtn').click();
+});
+
+function openAdminPanel(){
+  renderAdminList();
+  adminOverlay.classList.remove('hidden');
+}
+
+function renderAdminList(){
+  const list = document.getElementById('adminList');
+  list.innerHTML = '';
+  if (catalog.length === 0){
+    list.innerHTML = '<div class="catalog-empty">目前沒有上架商品</div>';
+    return;
+  }
+  catalog.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'admin-row';
+    row.innerHTML = `
+      <span class="a-name">${escapeHtml(p.name)}</span>
+      <span class="a-price">${fmt(p.price)}</span>
+      <button type="button" class="a-del" title="下架">×</button>
+    `;
+    row.querySelector('.a-del').addEventListener('click', () => {
+      if (!confirm(`確定要下架「${p.name}」嗎？`)) return;
+      removeProduct(p);
+    });
+    list.appendChild(row);
+  });
+}
+
+function removeProduct(product){
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+    body: JSON.stringify({action: 'removeProduct', id: product.id})
+  })
+  .finally(() => {
+    catalog = catalog.filter(p => p !== product);
+    cart = cart.filter(c => c.catalogId !== product.id);
+    renderAdminList();
+    renderCatalog();
+    renderCart();
+  });
+}
+
+document.getElementById('addProductSubmitBtn').addEventListener('click', () => {
+  const nameInput = document.getElementById('newProductName');
+  const priceInput = document.getElementById('newProductPrice');
+  const name = nameInput.value.trim();
+  const price = parseFloat(priceInput.value);
+
+  if (!name || !price || price <= 0){
+    alert('請填寫商品名稱與正確的單價');
+    return;
+  }
+
+  const tempId = 'temp_' + Date.now();
+  catalog.push({id: tempId, name, price});
+  renderAdminList();
+  renderCatalog();
+  nameInput.value = '';
+  priceInput.value = '';
+
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+    body: JSON.stringify({action: 'addProduct', name, price})
+  });
+});
+
+document.getElementById('adminDoneBtn').addEventListener('click', () => {
+  adminOverlay.classList.add('hidden');
+});
+</script>
+
+</body>
+</html>
