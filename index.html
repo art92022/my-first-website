@@ -296,7 +296,7 @@
     let html = "";
     items.forEach((item, idx) => {
       html += `
-        <div class="prod-row" id="row_${item.rowNum}">
+        <div class="prod-row">
           <div class="cell-sort">
             <span onclick="submitMove(${item.rowNum}, 'up')">▲</span>
             <span onclick="submitMove(${item.rowNum}, 'down')">▼</span>
@@ -318,38 +318,17 @@
     container.innerHTML = html;
   }
 
-  // 3. 🚀【極速排序優化】採用 DOM 樂觀更新，手指點擊瞬間立刻位移，不等待背景 GAS 伺服器
+  // 3. 排序前台異動 ⇅
   function submitMove(rowNum, direction) {
     const emp = document.getElementById('empName').value.trim();
-    const currentRow = document.getElementById(`row_${rowNum}`);
-    if (!currentRow) return;
-
-    if (direction === 'up') {
-      const prevRow = currentRow.previousElementSibling;
-      if (prevRow && prevRow.classList.contains('prod-row')) {
-        currentRow.parentNode.insertBefore(currentRow, prevRow); // 瞬間移到上面
-      } else {
-        return; // 已經在最頂端
-      }
-    } else if (direction === 'down') {
-      const nextRow = currentRow.nextElementSibling;
-      if (nextRow && nextRow.classList.contains('prod-row')) {
-        currentRow.parentNode.insertBefore(nextRow, currentRow); // 瞬間移到下面
-      } else {
-        return; // 已經在最底端
-      }
-    }
-
-    // 畫面已經動了，背景默默傳給 Google 試算表儲存，完全不卡員工的手
+    document.getElementById('inventoryList').innerHTML = "<p style='text-align:center; font-size:13px; color:var(--muted);'>全新排序覆蓋寫入中...</p>";
+    
     google.script.run.withSuccessHandler(function(res) {
-      // 後台默默更新快照即可，不重新渲染整頁以免干擾操作
-      google.script.run.withSuccessHandler(function(newData) {
-        currentItemsSnapshot = newData;
-      }).getInventoryData();
+      fetchInventory();
     }).moveProductOrder(emp, rowNum, direction);
   }
 
-  // 4. 原地直接改價格/庫存（點擊後按鈕提示，但不卡死其他輸入框）
+  // 4. 原地直接改價格/庫存
   function submitQuickUpdate(rowNum, name) {
     const emp = document.getElementById('empName').value.trim();
     const price = document.getElementById(`p_pr_${rowNum}`).value;
@@ -359,9 +338,8 @@
     btn.disabled = true; btn.innerText = "⏳";
     
     google.script.run.withSuccessHandler(function(res) {
-      btn.disabled = false; btn.innerText = "更新";
-      // 默默同步最新數據快照
-      google.script.run.withSuccessHandler(function(newData) { currentItemsSnapshot = newData; }).getInventoryData();
+      alert(`✅ 已成功更新 ${name} 的狀態！`);
+      fetchInventory();
     }).quickUpdateProduct(emp, rowNum, name, Number(price), Number(stock));
   }
 
@@ -369,13 +347,12 @@
   function submitDelete(rowNum, name) {
     if(!confirm(`確定要將「${name}」從客人的前台畫面直接下架並刪除嗎？`)) return;
     const emp = document.getElementById('empName').value.trim();
-    const currentRow = document.getElementById(`row_${rowNum}`);
+    const btn = document.getElementById(`b_del_${rowNum}`);
     
-    // 🚀 畫面立刻隱藏消失（樂觀下架）
-    if (currentRow) currentRow.style.display = 'none';
+    btn.disabled = true; btn.innerText = "⏳";
     
     google.script.run.withSuccessHandler(function(res) {
-      fetchInventory(); // 後端完成後徹底刷新對齊
+      fetchInventory();
     }).deleteProduct(emp, rowNum, name);
   }
 
@@ -420,6 +397,7 @@
     
     google.script.run.withSuccessHandler(function(res) {
       alert("✅ 商品已順利發布上架！相同品項全名將自動覆蓋。");
+      // 清空該行輸入框
       document.getElementById('valDacFlavor').value = ''; document.getElementById('valDacStock').value = '';
       document.getElementById('valBouFlavor').value = ''; document.getElementById('valBouStock').value = '';
       document.getElementById('valTirFlavor').value = ''; document.getElementById('valTirStock').value = '';
@@ -447,7 +425,6 @@
         unsoldHtml = "<span style='color:var(--muted); font-size:12.5px;'>現場已無殘餘庫存，全部完售！</span>";
       } else {
         res.unsoldInventory.forEach(item => {
-          item.name = item.name || "";
           unsoldHtml += `<span class="stock-badge">📦 ${item.name}：<b>${item.stock}</b> 個</span>`;
         });
       }
@@ -469,14 +446,6 @@
       document.getElementById('resRevenue').innerText = `$ ${res.filteredRevenue.toLocaleString()}`;
       btn.disabled = false; btn.innerText = "開始抓取歷史大數據";
     }).calculateAdvancedSales(timeRange, cat);
-  }
-
-  // 彈窗點擊外部陰影處自動關閉
-  window.onclick = function(event) {
-    const modal = document.getElementById('settleModal');
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
   }
 
   function closeSettleModal() {
