@@ -52,6 +52,12 @@
     background:var(--paper-card); border:1px solid var(--line); border-radius:10px;
     padding:18px; margin-bottom:16px; box-shadow:0 1px 0 rgba(0,0,0,0.02);
   }
+  .sheet section:nth-of-type(1) .sec-label::before {
+    content: "🧁 ";
+  }
+  .sheet section:nth-of-type(2) .sec-label::before {
+    content: "🛒 ";
+  }
   .sec-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
   .sec-label{display:flex; align-items:center; gap:8px; font-weight:800; font-size:14.5px; color:var(--leaf-dark);}
   .sec-label .tag{
@@ -228,7 +234,6 @@
 
   <div class="order-no">訂單編號 <span id="orderNo"></span> ・ <span id="orderDate"></span></div>
 
-  <!-- Buyer info -->
   <section>
     <div class="sec-head"><div class="sec-label"><span class="tag">01</span>買受人資料</div></div>
 
@@ -290,7 +295,6 @@
     </div>
   </section>
 
-  <!-- Items -->
   <section>
     <div class="sec-head">
       <div class="sec-label"><span class="tag">02</span>選擇商品</div>
@@ -321,7 +325,6 @@
   <div class="note-text">送出後資料會直接傳送給工作人員，請至前台等候核對取貨</div>
 </div>
 
-<!-- Result modal -->
 <div class="overlay hidden" id="overlay">
   <div class="modal">
     <div class="icon-circle ok" id="resultIcon">✓</div>
@@ -334,7 +337,6 @@
   </div>
 </div>
 
-<!-- Admin password modal -->
 <div class="overlay hidden" id="passwordOverlay">
   <div class="modal">
     <h2>員工專用</h2>
@@ -349,7 +351,6 @@
   </div>
 </div>
 
-<!-- Admin manage products modal -->
 <div class="overlay hidden" id="adminOverlay">
   <div class="modal">
     <h2>商品管理</h2>
@@ -364,14 +365,14 @@
       <button class="ghost-btn" id="adminDoneBtn" style="flex:1;">完成</button>
     </div>
   </div>
-
+</div>
 
 <script>
 // Google Apps Script Web App 網址
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3mSHjqW7SZvsP4uNT_J-HoFRgT4VXZmEhP8_gANktGd_Mj9BbE-TvYwrtS9DLPW6I/exec';
 const ADMIN_PASSWORD = '1225';
 
-// 萬一連不上 Google 試算表時的備用商品（避免頁面完全沒東西可賣）
+// 萬一連不上 Google 試算表時的備用商品
 const FALLBACK_CATALOG = [
   {id: 1, name: '純手工布丁', price: 90},
   {id: 2, name: '提拉米蘇', price: 110}
@@ -654,7 +655,7 @@ submitBtn.addEventListener('click', () => {
     carrierType = '統一編號';
     carrierValue = document.getElementById('taxId').value;
     companyName = document.getElementById('companyName').value;
-    invoiceLine = `統一編號：${carrierValue}　發票抬頭：${companyName}`;
+    invoiceLine = `統一編號：${carrierValue} 發票抬頭：${companyName}`;
   }
 
   let itemLines = '';
@@ -663,7 +664,7 @@ submitBtn.addEventListener('click', () => {
   itemsSnapshot.forEach((item, idx) => {
     const s = item.price * item.qty;
     total += s;
-    itemLines += `${idx+1}. ${item.name}　數量：${item.qty}　單價：${fmt(item.price)}　小計：${fmt(s)}\n`;
+    itemLines += `${idx+1}. ${item.name} 數量：${item.qty} 單價：${fmt(item.price)} 小計：${fmt(s)}\n`;
   });
   const untaxed = Math.round(total / 1.05);
   const tax = total - untaxed;
@@ -675,7 +676,7 @@ submitBtn.addEventListener('click', () => {
   };
 
   const summary =
-`訂單編號：${orderNo}　日期：${orderDate}
+`訂單編號：${orderNo} 日期：${orderDate}
 
 【買受人資料】
 類別：${buyerType}
@@ -694,23 +695,31 @@ ${itemLines}
 
   fetch(GOOGLE_SCRIPT_URL, {
     method: 'POST',
-    mode: 'no-cors',
-    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(orderData)
   })
-  .then(() => {
-    document.getElementById('resultIcon').className = 'icon-circle ok';
-    document.getElementById('resultIcon').textContent = '✓';
-    document.getElementById('resultTitle').textContent = '訂單已送出';
-    document.getElementById('resultSub').textContent = '請至前台出示此畫面，工作人員會為您核對';
-    document.getElementById('summaryText').textContent = summary;
-    document.getElementById('overlay').classList.remove('hidden');
+  .then(res => {
+    if (!res.ok) throw new Error('網路回應錯誤，請檢查部署網址');
+    return res.json();
   })
-  .catch(() => {
+  .then(resData => {
+    if (resData.status === 'success') {
+      document.getElementById('resultIcon').className = 'icon-circle ok';
+      document.getElementById('resultIcon').textContent = '✓';
+      document.getElementById('resultTitle').textContent = '訂單已送出';
+      document.getElementById('resultSub').textContent = '請至前台出示此畫面，工作人員會為您核對';
+      document.getElementById('summaryText').textContent = summary;
+      document.getElementById('overlay').classList.remove('hidden');
+    } else {
+      throw new Error(resData.message || '後端儲存失敗');
+    }
+  })
+  .catch((err) => {
+    console.error('送出失敗:', err);
     document.getElementById('resultIcon').className = 'icon-circle err';
     document.getElementById('resultIcon').textContent = '!';
     document.getElementById('resultTitle').textContent = '送出失敗';
-    document.getElementById('resultSub').textContent = '可能是網路不穩，請至前台出示此畫面讓工作人員手動登記，或按關閉後重試';
+    document.getElementById('resultSub').textContent = '錯誤訊息：' + err.message + '。請確認後端 Apps Script 是否已重新儲存並發布新版本！';
     document.getElementById('summaryText').textContent = summary;
     document.getElementById('overlay').classList.remove('hidden');
   })
@@ -788,8 +797,7 @@ function renderAdminList(){
 function removeProduct(product){
   fetch(GOOGLE_SCRIPT_URL, {
     method: 'POST',
-    mode: 'no-cors',
-    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({action: 'removeProduct', id: product.id})
   })
   .finally(() => {
@@ -821,8 +829,7 @@ document.getElementById('addProductSubmitBtn').addEventListener('click', () => {
 
   fetch(GOOGLE_SCRIPT_URL, {
     method: 'POST',
-    mode: 'no-cors',
-    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({action: 'addProduct', name, price})
   });
 });
