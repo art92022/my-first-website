@@ -206,7 +206,7 @@
   }
   .admin-row:last-child{border-bottom:none;}
   .admin-row .a-name{flex:1; font-weight:700;}
-  .admin-row .a-price(color:var(--stamp-dark); font-weight:700; margin-right:6px;}
+  .admin-row .a-price{color:var(--stamp-dark); font-weight:700; margin-right:6px;}
   .admin-row .a-del{
     background:none; border:none; color:var(--stamp); font-size:17px; cursor:pointer; padding:0 2px;
   }
@@ -399,7 +399,7 @@ function loadCatalog(){
   let settled = false;
 
   window[callbackName] = (data) => {
-    settled = true;
+    setted = true;
     delete window[callbackName];
     script.remove();
     catalog = (data && data.products && data.products.length > 0) ? data.products : FALLBACK_CATALOG;
@@ -699,7 +699,7 @@ ${itemLines}
   submitBtn.disabled = true;
   submitBtn.textContent = '送出中...';
 
-  // 🌟 核心修正：改用寬容通訊解析模式，只要網路連線狀態正常（HTTP 200），一律放行顯示成功勾勾！
+  // 🌟 通訊核心處理：移除了 mode: 'no-cors'，以便網頁與後端標準 ContentService JSON 回傳完美對接，直接點亮綠色勾勾
   fetch(GOOGLE_SCRIPT_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -707,9 +707,9 @@ ${itemLines}
   })
   .then(res => {
     if (!res.ok) throw new Error('網路回應錯誤');
-    return res.text(); // 改用 text() 接收後端 HtmlService 回傳的資料，避開 json() 解析崩潰
+    return res.json();
   })
-  .then(() => {
+  .then((resData) => {
     document.getElementById('resultIcon').className = 'icon-circle ok';
     document.getElementById('resultIcon').textContent = '✓';
     document.getElementById('resultTitle').textContent = '訂單已送出';
