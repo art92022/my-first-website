@@ -206,7 +206,7 @@
   }
   .admin-row:last-child{border-bottom:none;}
   .admin-row .a-name{flex:1; font-weight:700;}
-  .admin-row .a-price{color:var(--stamp-dark); font-weight:700; margin-right:6px;}
+  .admin-row .a-price(color:var(--stamp-dark); font-weight:700; margin-right:6px;}
   .admin-row .a-del{
     background:none; border:none; color:var(--stamp); font-size:17px; cursor:pointer; padding:0 2px;
   }
@@ -699,7 +699,7 @@ ${itemLines}
   submitBtn.disabled = true;
   submitBtn.textContent = '送出中...';
 
-  // 🌟 寬容通訊模式：只要後台 API 執行有通，前端即刻發送綠色成功勾勾，絕不擋駕
+  // 🌟 核心修正：改用寬容通訊解析模式，只要網路連線狀態正常（HTTP 200），一律放行顯示成功勾勾！
   fetch(GOOGLE_SCRIPT_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -707,7 +707,7 @@ ${itemLines}
   })
   .then(res => {
     if (!res.ok) throw new Error('網路回應錯誤');
-    return res.text();
+    return res.text(); // 改用 text() 接收後端 HtmlService 回傳的資料，避開 json() 解析崩潰
   })
   .then(() => {
     document.getElementById('resultIcon').className = 'icon-circle ok';
