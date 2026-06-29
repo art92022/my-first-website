@@ -140,7 +140,6 @@
   .admin-row .a-price{color:var(--stamp-dark); font-weight:700; margin-right:6px;}
   .admin-row .a-del{ background:none; border:none; color:var(--stamp); font-size:17px; cursor:pointer; padding:0 2px; }
   
-  /* 統一化管理台排版 */
   .quick-setup-zone { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 16px; }
   .quick-setup-btn { background:#fff; border:1.5px solid var(--leaf); color:var(--leaf-dark); padding:12px 10px; font-weight:800; border-radius:8px; cursor:pointer; font-size:13px; text-align:center;}
   .quick-setup-btn:active { background:#f1f6f0; }
@@ -262,13 +261,13 @@
 <div class="overlay hidden" id="adminOverlay">
   <div class="modal">
     <h2>當日現場供應品項管理</h2>
-    <p class="modal-sub">請依序點選下方種類，直接打字輸入當日的限定口味與剩餘供應量：</p>
+    <p class="modal-sub">請點選下方固定商品品項，輸入當日限定口味與初始可販售庫存數量：</p>
     
     <div class="quick-setup-zone">
-      <button type="button" class="quick-setup-btn" id="btnQuickDac">✨ 上架「達克瓦茲」</button>
-      <button type="button" class="quick-setup-btn" id="btnQuickTir">✨ 上架「提拉米蘇」</button>
-      <button type="button" class="quick-setup-btn" id="btnQuickPud">✨ 上架「純手工布丁」</button>
-      <button type="button" class="quick-setup-btn" id="btnQuickBou">✨ 上架「布雪」</button>
+      <button type="button" class="quick-setup-btn" id="btnQuickDac">✨ 達克瓦茲</button>
+      <button type="button" class="quick-setup-btn" id="btnQuickBou">✨ 布雪</button>
+      <button type="button" class="quick-setup-btn" id="btnQuickPud">✨ 純手工布丁</button>
+      <button type="button" class="quick-setup-btn" id="btnQuickTir">✨ 提拉米蘇</button>
     </div>
 
     <div id="adminList"></div>
@@ -297,7 +296,7 @@ function loadCatalog(){
   const script = document.createElement('script');
   window[callbackName] = (data) => {
     delete window[callbackName]; script.remove();
-    // 只有當價格大於 0 且庫存量大於 0 的時候，才算「正式上架」秀在前台給客人選購
+    // 只撈取單價和庫存都大於0的有效上架商品
     catalog = (data && data.products) ? data.products.filter(p => p.price > 0 && p.stock > 0) : [];
     renderCatalog();
   };
@@ -340,7 +339,7 @@ function renderCatalog(){
     
     card.addEventListener('click', () => {
       if (p.stock <= currentQtyInCart) {
-        alert("抱歉，已達此品項目前現場可供應的庫存上限！"); return;
+        alert("抱歉，已達現場供應庫存上限！"); return;
       }
       if (existing = cart.find(c => c.name === p.name)){ existing.qty += 1; }
       else { cart.push({catalogId: p.id, name: p.name, price: p.price, qty: 1}); }
@@ -372,7 +371,7 @@ function renderCart(){
       renderCatalog(); renderCart();
     });
     row.querySelector('.q-plus').addEventListener('click', () => {
-      if (origItem && origItem.stock <= item.qty) { alert("抱歉，庫存量不足！"); return; }
+      if (origItem && origItem.stock <= item.qty) { alert("抱歉，庫存不足！"); return; }
       item.qty += 1; renderCatalog(); renderCart();
     });
     row.querySelector('.c-del').addEventListener('click', () => {
@@ -449,7 +448,6 @@ function resetFormForNextOrder(){
   document.getElementById('individualBlock').classList.remove('hidden');
   cart = []; newOrderNumber(); clearFieldErrors(); document.getElementById('validationBanner').classList.add('hidden');
   
-  // 成立後重新同步最新庫存，避免其他人超賣
   const callbackName = 'catalogCb_' + Date.now();
   const script = document.createElement('script');
   window[callbackName] = (data) => {
@@ -564,16 +562,16 @@ function removeProduct(product){
 
 // 🌟 統一口味流程引導函式
 function promptAndSend(baseId, labelName, defaultPrice) {
-  const flavor = prompt(`請輸入今日【${labelName}】的新口味（例如：香草卡士達、芝麻黑糖）：\n*若不需要標註口味直接按確定即可`);
-  if (flavor === null) return; // 取消
+  const flavor = prompt(`請輸入今日【${labelName}】的新口味（例如：香草卡士達、抹茶紅豆）：\n*若此商品不需要寫口味（如布丁原味），直接按確定即可`);
+  if (flavor === null) return; // 按取消則不執行
   
   const price = prompt(`請設定「${labelName}」的售價：`, defaultPrice);
   if (!price || isNaN(price)) return;
   
-  const stock = prompt(`請輸入今日現場可供應的【初始庫存數量】：`, "10");
+  const stock = prompt(`請輸入今日現場供應的【初始庫存數量】：`, "10");
   if (!stock || isNaN(stock)) return;
   
-  // 統一組裝全名
+  // 組裝全名：有輸入口味就顯示大類(口味)，沒輸入就顯示大類名稱
   const fullName = flavor.trim() ? `${labelName}（${flavor.trim()}）` : labelName;
   
   fetch(GOOGLE_SCRIPT_URL, { 
@@ -583,11 +581,11 @@ function promptAndSend(baseId, labelName, defaultPrice) {
   .finally(() => { openAdminPanel(); loadCatalog(); });
 }
 
-// 依您的指定順序綁定快捷事件
+// 依您的指定順序完美綁定快捷按鈕事件
 document.getElementById('btnQuickDac').addEventListener('click', () => promptAndSend('dacquoise', '達克瓦茲', '90'));
-document.getElementById('btnQuickTir').addEventListener('click', () => promptAndSend('tiramisu', '提拉米蘇', '110'));
-document.getElementById('btnQuickPud').addEventListener('click', () => promptAndSend('pudding', '純手工布丁', '90'));
 document.getElementById('btnQuickBou').addEventListener('click', () => promptAndSend('bouchée', '布雪', '95'));
+document.getElementById('btnQuickPud').addEventListener('click', () => promptAndSend('pudding', '純手工布丁', '90'));
+document.getElementById('btnQuickTir').addEventListener('click', () => promptAndSend('tiramisu', '提拉米蘇', '110'));
 
 document.getElementById('adminDoneBtn').addEventListener('click', () => adminOverlay.classList.add('hidden'));
 </script>
