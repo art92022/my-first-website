@@ -140,9 +140,18 @@
   .admin-row .a-price{color:var(--stamp-dark); font-weight:700; margin-right:6px;}
   .admin-row .a-del{ background:none; border:none; color:var(--stamp); font-size:17px; cursor:pointer; padding:0 2px; }
   
-  .quick-setup-zone { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 16px; }
-  .quick-setup-btn { background:#fff; border:1.5px solid var(--leaf); color:var(--leaf-dark); padding:12px 10px; font-weight:800; border-radius:8px; cursor:pointer; font-size:13px; text-align:center;}
-  .quick-setup-btn:active { background:#f1f6f0; }
+  /* 手繪直線表單欄位樣式 */
+  .linear-form-zone { display: flex; flex-direction: column; gap: 10px; background: #fff; padding: 14px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 16px; }
+  .linear-row { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; color: #4a4438; }
+  .linear-row input[type="radio"] { width: 17px; height: 17px; accent-color: var(--leaf); margin: 0; cursor: pointer; }
+  .linear-row label { display: flex; align-items: center; gap: 4px; min-width: 80px; cursor: pointer; }
+  .linear-inputs { display: flex; gap: 6px; flex: 1; }
+  .linear-inputs input { padding: 6px 8px; font-size: 13.5px; border: 1px solid var(--line); border-radius: 5px; min-width: 0; }
+  .input-flavor { flex: 1.5; }
+  .input-stock { flex: 1; }
+  .input-price { flex: 1; }
+  .admin-submit-btn { background: var(--leaf); color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 4px; font-size: 14px; }
+  .admin-submit-btn:active { background: var(--leaf-dark); }
 </style>
 </head>
 <body>
@@ -259,19 +268,56 @@
 </div>
 
 <div class="overlay hidden" id="adminOverlay">
-  <div class="modal">
+  <div class="modal" style="max-width: 680px;">
     <h2>當日現場供應品項管理</h2>
-    <p class="modal-sub">請點選下方固定商品品項，輸入當日限定口味與初始可販售庫存數量：</p>
+    <p class="modal-sub" style="margin-bottom: 10px;">請選取左側固定品相，輸入右側欄位，相同商品全名送出將直接更新覆蓋：</p>
     
-    <div class="quick-setup-zone">
-      <button type="button" class="quick-setup-btn" id="btnQuickDac">✨ 達克瓦茲</button>
-      <button type="button" class="quick-setup-btn" id="btnQuickBou">✨ 布雪</button>
-      <button type="button" class="quick-setup-btn" id="btnQuickPud">✨ 純手工布丁</button>
-      <button type="button" class="quick-setup-btn" id="btnQuickTir">✨ 提拉米蘇</button>
+    <div class="linear-form-zone">
+      <div class="linear-row">
+        <input type="radio" name="baseCategory" id="radDac" value="dacquoise" data-label="達克瓦茲" checked>
+        <label for="radDac">達克瓦茲＿</label>
+        <div class="linear-inputs">
+          <input type="text" class="input-flavor" id="valDacFlavor" placeholder="輸入口味 (例: 開心果)">
+          <input type="number" class="input-stock" id="valDacStock" placeholder="庫存量" min="0">
+          <input type="number" class="input-price" id="valDacPrice" placeholder="價格" min="0" value="90">
+        </div>
+      </div>
+      
+      <div class="linear-row">
+        <input type="radio" name="baseCategory" id="radBou" value="bouchée" data-label="布雪">
+        <label for="radBou">布雪＿</label>
+        <div class="linear-inputs">
+          <input type="text" class="input-flavor" id="valBouFlavor" placeholder="口味">
+          <input type="number" class="input-stock" id="valBouStock" placeholder="庫存量" min="0">
+          <input type="number" class="input-price" id="valBouPrice" placeholder="價格" min="0" value="95">
+        </div>
+      </div>
+      
+      <div class="linear-row">
+        <input type="radio" name="baseCategory" id="radTir" value="tiramisu" data-label="提拉米蘇">
+        <label for="radTir">提拉米蘇＿</label>
+        <div class="linear-inputs">
+          <input type="text" class="input-flavor" id="valTirFlavor" placeholder="口味">
+          <input type="number" class="input-stock" id="valTirStock" placeholder="庫存量" min="0">
+          <input type="number" class="input-price" id="valTirPrice" placeholder="價格" min="0" value="110">
+        </div>
+      </div>
+
+      <div class="linear-row">
+        <input type="radio" name="baseCategory" id="radPud" value="pudding" data-label="純手工布丁">
+        <label for="radPud">純手工布丁＿</label>
+        <div class="linear-inputs">
+          <input type="text" class="input-flavor" id="valPudFlavor" placeholder="口味">
+          <input type="number" class="input-stock" id="valPudStock" placeholder="庫存量" min="0">
+          <input type="number" class="input-price" id="valPudPrice" placeholder="價格" min="0" value="90">
+        </div>
+      </div>
+
+      <button type="button" class="admin-submit-btn" id="btnLinearSubmit">確認上架 / 覆蓋更新至雲端</button>
     </div>
 
     <div id="adminList"></div>
-    <div class="modal-actions" style="margin-top:20px;"><button class="close-btn" id="adminDoneBtn" style="flex:1;">完成並關閉</button></div>
+    <div class="modal-actions" style="margin-top:16px;"><button class="close-btn" id="adminDoneBtn" style="flex:1;">完成並關閉</button></div>
   </div>
 </div>
 
@@ -291,12 +337,13 @@ const cartBody = document.getElementById('cartBody');
 function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
 function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
+// 客人每次進來或重新整理，皆強制抓取最新即時資料
 function loadCatalog(){
   const callbackName = 'catalogCb_' + Date.now();
   const script = document.createElement('script');
   window[callbackName] = (data) => {
     delete window[callbackName]; script.remove();
-    // 只撈取單價和庫存都大於0的有效上架商品
+    // 只有庫存量與定價皆大於0的有效商品，才顯示給客人看
     catalog = (data && data.products) ? data.products.filter(p => p.price > 0 && p.stock > 0) : [];
     renderCatalog();
   };
@@ -339,7 +386,7 @@ function renderCatalog(){
     
     card.addEventListener('click', () => {
       if (p.stock <= currentQtyInCart) {
-        alert("抱歉，已達現場供應庫存上限！"); return;
+        alert("抱歉，已達此商品供應上限！"); return;
       }
       if (existing = cart.find(c => c.name === p.name)){ existing.qty += 1; }
       else { cart.push({catalogId: p.id, name: p.name, price: p.price, qty: 1}); }
@@ -371,7 +418,7 @@ function renderCart(){
       renderCatalog(); renderCart();
     });
     row.querySelector('.q-plus').addEventListener('click', () => {
-      if (origItem && origItem.stock <= item.qty) { alert("抱歉，庫存不足！"); return; }
+      if (origItem && origItem.stock <= item.qty) { alert("抱歉，現場供應庫存不足！"); return; }
       item.qty += 1; renderCatalog(); renderCart();
     });
     row.querySelector('.c-del').addEventListener('click', () => {
@@ -448,6 +495,7 @@ function resetFormForNextOrder(){
   document.getElementById('individualBlock').classList.remove('hidden');
   cart = []; newOrderNumber(); clearFieldErrors(); document.getElementById('validationBanner').classList.add('hidden');
   
+  // 訂單完成後重新同步最新現場庫存
   const callbackName = 'catalogCb_' + Date.now();
   const script = document.createElement('script');
   window[callbackName] = (data) => {
@@ -475,10 +523,10 @@ submitBtn.addEventListener('click', () => {
   if (buyerType === '個人'){
     const carrier = document.querySelector('input[name=carrier]:checked').value;
     if (carrier === 'mobile'){ carrierType = '手機載具條碼'; carrierValue = document.getElementById('mobileCarrier').value; invoiceLine = `手機載具條碼：${carrierValue}`; }
-    else if (carrier === 'duplicate'){ carrierType = '二聯式發票'; carrierValue = '(不使用載具)'; invoiceLine = '二聯式發票（不使用載具）'; }
+    else if (carrier === 'duplicate'){ carrierType = '二聯式發票'; carrierValue = '(not used)'; invoiceLine = '二聯式發票'; }
     else { carrierType = '捐贈發票'; carrierValue = document.getElementById('donateCode').value || '919'; invoiceLine = `捐贈發票，愛心碼：${carrierValue}`; }
   } else {
-    carrierType = '統一編號'; carrierValue = document.getElementById('taxId').value; companyName = document.getElementById('companyName').value; invoiceLine = `統一編號：${carrierValue} 發票抬頭：${companyName}`;
+    carrierType = '統一編號'; carrierValue = document.getElementById('taxId').value; companyName = document.getElementById('companyName').value; invoiceLine = `統一編號：${carrierValue} 抬頭：${companyName}`;
   }
 
   let itemLines = ''; total = 0;
@@ -491,7 +539,7 @@ submitBtn.addEventListener('click', () => {
   const untaxed = Math.round(total / 1.05); const tax = total - untaxed;
 
   const orderData = { orderNo, orderDate, buyerType, name, phone, email, carrierType, carrierValue, companyName, items: itemsSnapshot, untaxed, tax, total };
-  const summary = `訂單編號：${orderNo} 日期：${orderDate}\n\n【買受人資料】\n類別：${buyerType}\n姓名／聯絡人：${name}\n電話：${phone}\n${invoiceLine}\n\n【商品明細】\n${itemLines}未稅金額：${fmt(untaxed)}\n稅額(5%)：${fmt(tax)}\n應付總額：${fmt(total)}`;
+  const summary = `訂單編號：${orderNo} 日期：${orderDate}\n\n【買受人資料】\n類別：${buyerType}\n姓名：${name}\n電話：${phone}\n${invoiceLine}\n\n【商品明細】\n${itemLines}未稅金額：${fmt(untaxed)}\n稅額(5%)：${fmt(tax)}\n應付總額：${fmt(total)}`;
 
   submitBtn.disabled = true; submitBtn.textContent = '送出中...';
 
@@ -560,32 +608,57 @@ function removeProduct(product){
   .finally(() => { openAdminPanel(); loadCatalog(); });
 }
 
-// 🌟 統一口味流程引導函式
-function promptAndSend(baseId, labelName, defaultPrice) {
-  const flavor = prompt(`請輸入今日【${labelName}】的新口味（例如：香草卡士達、抹茶紅豆）：\n*若此商品不需要寫口味（如布丁原味），直接按確定即可`);
-  if (flavor === null) return; // 按取消則不執行
+// 🌟 手繪直線欄位：統一提交覆蓋更新處理
+document.getElementById('btnLinearSubmit').addEventListener('click', () => {
+  const selectedRadio = document.querySelector('input[name="baseCategory"]:checked');
+  if (!selectedRadio) { alert("請先選取要操作的品相！"); return; }
   
-  const price = prompt(`請設定「${labelName}」的售價：`, defaultPrice);
-  if (!price || isNaN(price)) return;
+  const baseId = selectedRadio.value;
+  const baseLabel = selectedRadio.dataset.label;
   
-  const stock = prompt(`請輸入今日現場供應的【初始庫存數量】：`, "10");
-  if (!stock || isNaN(stock)) return;
+  let flavorStr = "";
+  let stockVal = 0;
+  let priceVal = 0;
   
-  // 組裝全名：有輸入口味就顯示大類(口味)，沒輸入就顯示大類名稱
-  const fullName = flavor.trim() ? `${labelName}（${flavor.trim()}）` : labelName;
+  if (baseId === 'dacquoise') {
+    flavorStr = document.getElementById('valDacFlavor').value.trim();
+    stockVal = parseInt(document.getElementById('valDacStock').value);
+    priceVal = parseFloat(document.getElementById('valDacPrice').value);
+  } else if (baseId === 'bouchée') {
+    flavorStr = document.getElementById('valBouFlavor').value.trim();
+    stockVal = parseInt(document.getElementById('valBouStock').value);
+    priceVal = parseFloat(document.getElementById('valBouPrice').value);
+  } else if (baseId === 'tiramisu') {
+    flavorStr = document.getElementById('valTirFlavor').value.trim();
+    stockVal = parseInt(document.getElementById('valTirStock').value);
+    priceVal = parseFloat(document.getElementById('valTirPrice').value);
+  } else if (baseId === 'pudding') {
+    flavorStr = document.getElementById('valPudFlavor').value.trim();
+    stockVal = parseInt(document.getElementById('valPudStock').value);
+    priceVal = parseFloat(document.getElementById('valPudPrice').value);
+  }
   
-  fetch(GOOGLE_SCRIPT_URL, { 
-    method: 'POST', 
-    body: JSON.stringify({action: 'addProduct', baseId: baseId, name: fullName, price: parseFloat(price), stock: parseInt(stock)}) 
+  if (isNaN(priceVal) || priceVal <= 0 || isNaN(stockVal) || stockVal < 0) {
+    alert("請確實填寫正確的庫存量與售價！"); return;
+  }
+  
+  // 🌟 核心規則：完全採用您的命名語法格式「品相＿口味」
+  const fullName = flavorStr ? `${baseLabel}＿${flavorStr}` : baseLabel;
+  
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({action: 'addProduct', baseId: baseId, name: fullName, price: priceVal, stock: stockVal})
   })
-  .finally(() => { openAdminPanel(); loadCatalog(); });
-}
-
-// 依您的指定順序完美綁定快捷按鈕事件
-document.getElementById('btnQuickDac').addEventListener('click', () => promptAndSend('dacquoise', '達克瓦茲', '90'));
-document.getElementById('btnQuickBou').addEventListener('click', () => promptAndSend('bouchée', '布雪', '95'));
-document.getElementById('btnQuickPud').addEventListener('click', () => promptAndSend('pudding', '純手工布丁', '90'));
-document.getElementById('btnQuickTir').addEventListener('click', () => promptAndSend('tiramisu', '提拉米蘇', '110'));
+  .finally(() => {
+    // 清空輸入欄位
+    if (baseId === 'dacquoise') document.getElementById('valDacFlavor').value = '';
+    if (baseId === 'bouchée') document.getElementById('valBouFlavor').value = '';
+    if (baseId === 'tiramisu') document.getElementById('valTirFlavor').value = '';
+    if (baseId === 'pudding') document.getElementById('valPudFlavor').value = '';
+    
+    openAdminPanel(); loadCatalog();
+  });
+});
 
 document.getElementById('adminDoneBtn').addEventListener('click', () => adminOverlay.classList.add('hidden'));
 </script>
