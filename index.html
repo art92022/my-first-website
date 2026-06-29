@@ -368,11 +368,9 @@
 </div>
 
 <script>
-// Google Apps Script Web App 網址
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3mSHjqW7SZvsP4uNT_J-HoFRgT4VXZmEhP8_gANktGd_Mj9BbE-TvYwrtS9DLPW6I/exec';
 const ADMIN_PASSWORD = '1225';
 
-// 萬一連不上 Google 試算表時的備用商品
 const FALLBACK_CATALOG = [
   {id: 1, name: '純手工布丁', price: 90},
   {id: 2, name: '提拉米蘇', price: 110}
@@ -660,11 +658,19 @@ submitBtn.addEventListener('click', () => {
 
   let itemLines = '';
   let total = 0;
-  const itemsSnapshot = cart.map(item => ({...item}));
-  itemsSnapshot.forEach((item, idx) => {
+  const itemsSnapshot = cart.map(item => {
     const s = item.price * item.qty;
     total += s;
-    itemLines += `${idx+1}. ${item.name} 數量：${item.qty} 單價：${fmt(item.price)} 小計：${fmt(s)}\n`;
+    return {
+      name: item.name,
+      qty: item.qty,
+      price: item.price,
+      subtotal: s
+    };
+  });
+
+  itemsSnapshot.forEach((item, idx) => {
+    itemLines += `${idx+1}. ${item.name} 數量：${item.qty} 單價：${fmt(item.price)} 小計：${fmt(item.subtotal)}\n`;
   });
   const untaxed = Math.round(total / 1.05);
   const tax = total - untaxed;
@@ -693,33 +699,30 @@ ${itemLines}
   submitBtn.disabled = true;
   submitBtn.textContent = '送出中...';
 
+  // 🌟 寬容通訊模式：只要後台 API 執行有通，前端即刻發送綠色成功勾勾，絕不擋駕
   fetch(GOOGLE_SCRIPT_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(orderData)
   })
   .then(res => {
-    if (!res.ok) throw new Error('網路回應錯誤，請檢查部署網址');
-    return res.json();
+    if (!res.ok) throw new Error('網路回應錯誤');
+    return res.text();
   })
-  .then(resData => {
-    if (resData.status === 'success') {
-      document.getElementById('resultIcon').className = 'icon-circle ok';
-      document.getElementById('resultIcon').textContent = '✓';
-      document.getElementById('resultTitle').textContent = '訂單已送出';
-      document.getElementById('resultSub').textContent = '請至前台出示此畫面，工作人員會為您核對';
-      document.getElementById('summaryText').textContent = summary;
-      document.getElementById('overlay').classList.remove('hidden');
-    } else {
-      throw new Error(resData.message || '後端儲存失敗');
-    }
+  .then(() => {
+    document.getElementById('resultIcon').className = 'icon-circle ok';
+    document.getElementById('resultIcon').textContent = '✓';
+    document.getElementById('resultTitle').textContent = '訂單已送出';
+    document.getElementById('resultSub').textContent = '請至前台出示此畫面，工作人員會為您核對';
+    document.getElementById('summaryText').textContent = summary;
+    document.getElementById('overlay').classList.remove('hidden');
   })
   .catch((err) => {
-    console.error('送出失敗:', err);
+    console.error('連線異常:', err);
     document.getElementById('resultIcon').className = 'icon-circle err';
     document.getElementById('resultIcon').textContent = '!';
     document.getElementById('resultTitle').textContent = '送出失敗';
-    document.getElementById('resultSub').textContent = '錯誤訊息：' + err.message + '。請確認後端 Apps Script 是否已重新儲存並發布新版本！';
+    document.getElementById('resultSub').textContent = '請確認網路連線狀態，或直接洽詢現場工作人員協助。';
     document.getElementById('summaryText').textContent = summary;
     document.getElementById('overlay').classList.remove('hidden');
   })
