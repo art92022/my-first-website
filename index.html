@@ -168,7 +168,7 @@
   <div class="order-no">訂單編號 <span id="orderNo"></span> ・ <span id="orderDate"></span></div>
 
   <section>
-    <div class="sec-head"><div class="sec-label"><span class="tag">01</span>買受人資料</div></div>
+    <div class="sec-head"><div class="sec-label"><span class="tag">01</span>購買人資料</div></div>
     <div class="field">
       <label>發票類別</label>
       <div class="seg" id="buyerTypeSeg">
@@ -539,7 +539,7 @@ submitBtn.addEventListener('click', () => {
   const untaxed = Math.round(total / 1.05); const tax = total - untaxed;
 
   const orderData = { orderNo, orderDate, buyerType, name, phone, email, carrierType, carrierValue, companyName, items: itemsSnapshot, untaxed, tax, total };
-  const summary = `訂單編號：${orderNo} 日期：${orderDate}\n\n【買受人資料】\n類別：${buyerType}\n姓名：${name}\n電話：${phone}\n${invoiceLine}\n\n【商品明細】\n${itemLines}未稅金額：${fmt(untaxed)}\n稅額(5%)：${fmt(tax)}\n應付總額：${fmt(total)}`;
+  const summary = `訂單編號：${orderNo} 日期：${orderDate}\n\n【購買人資料】\n類別：${buyerType}\n姓名：${name}\n電話：${phone}\n${invoiceLine}\n\n【商品明細】\n${itemLines}未稅金額：${fmt(untaxed)}\n稅額(5%)：${fmt(tax)}\n應付總額：${fmt(total)}`;
 
   submitBtn.disabled = true; submitBtn.textContent = '送出中...';
 
