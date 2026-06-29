@@ -3,203 +3,210 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Bonheur Cookie 現場營運管理系統</title>
+<title>Bonheur Cookie 現場供應管理系統</title>
 <style>
   :root {
     --ink: #1c2b22;
-    --paper: #f6f3ea;
+    --paper: #fcfaf2;
     --line: #cdbfa0;
-    --stamp: #b5482e;
-    --stamp-dark: #8f3520;
-    --leaf: #3c5b43;
-    --leaf-dark: #2a4030;
-    --paper-card: #fffdf8;
-    --muted: #7a7060;
+    --accent: #3c5b43;
+    --accent-dim: #ebdcb9;
+    --gold: #b2945b;
+    --danger: #b5482e;
+    --card-bg: #ffffff;
+    --text-muted: #727a74;
   }
   
-  /* ✨ 移除手機瀏覽器雙擊延遲，全面優化流暢度 */
+  /* ✨ 移除手機雙擊延遲，優化點擊體感 */
   * { box-sizing: border-box; touch-action: manipulation; }
   
   body {
-    margin: 0; background: var(--paper);
-    background-image: radial-gradient(circle at 1px 1px, rgba(28,43,34,0.06) 1px, transparent 0);
-    background-size: 18px 18px; font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    color: var(--ink); padding: 24px 14px 80px;
+    margin: 0; padding: 16px 12px 60px;
+    background-color: var(--paper);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
   }
-  
-  .sheet { max-width: 640px; margin: 0 auto; }
-  
-  header {
-    display: flex; align-items: flex-start; justify-content: space-between;
-    border-bottom: 3px double var(--line); padding-bottom: 14px; margin-bottom: 18px;
-  }
-  .title-block h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: 1px; font-weight: 900; color: var(--leaf-dark); }
-  .title-block p { margin: 0; font-size: 12px; color: var(--muted); }
-  
-  section { background: var(--paper-card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
-  .sec-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .sec-label { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14.5px; color: var(--leaf-dark); }
-  
-  .field { margin-bottom: 12px; }
-  .field label { display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 5px; color: #4a4438; }
-  
-  input[type=text], input[type=number], input[type=password], select {
-    width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: 7px;
-    font-size: 14.5px; background: #fff; color: var(--ink); outline: none;
-  }
-  input:focus, select:focus { border-color: var(--leaf); }
 
+  .container { max-width: 580px; margin: 0 auto; }
+  
+  h2, h3 { margin: 0 0 12px 0; font-weight: 600; color: var(--accent); }
+  h2 { font-size: 18px; text-align: center; letter-spacing: 1px; margin-bottom: 16px; }
+  h3 { font-size: 15px; border-left: 4px solid var(--gold); padding-left: 8px; margin-top: 8px; }
+
+  /* 登入區塊卡片 */
+  .login-box, .section-card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.03);
+  }
+  
+  .input-group { margin-bottom: 12px; }
+  .input-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: var(--ink); }
+  
+  input[type="text"], input[type="number"], select {
+    width: 100%; padding: 12px; font-size: 15px;
+    border: 1px solid var(--line); border-radius: 8px;
+    background: #fff; color: var(--ink); outline: none;
+    transition: border 0.2s;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+
+  /* 按鈕通用樣式 */
   .btn {
-    width: 100%; padding: 14px; font-size: 15px; font-weight: 800; letter-spacing: 0.5px;
-    border: none; border-radius: 8px; cursor: pointer; transition: background 0.15s;
+    width: 100%; padding: 12px; font-size: 15px; font-weight: bold;
+    border: none; border-radius: 8px; cursor: pointer;
+    transition: all 0.2s; text-align: center;
   }
-  .btn-primary { background: var(--leaf); color: white; }
-  .btn-accent { background: #b2945b; color: white; margin-bottom: 16px; font-size: 15.5px; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-accent { background: var(--gold); color: white; margin-top: 8px; }
+  .btn-danger { background: var(--danger); color: white; }
   
-  /* ⏳ 按鈕反灰防重複連擊讀取狀態 */
-  .btn:disabled, .btn-mini:disabled {
-    background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed;
+  /* ⏳ 按鈕反灰防連擊讀取狀態 */
+  .btn:disabled {
+    background: #cbd5e1 !important;
+    color: #64748b !important;
+    cursor: not-allowed;
+    transform: none !important;
   }
 
-  /* 原地修改與排序列表樣式 */
-  .prod-table { width: 100%; display: flex; flex-direction: column; gap: 8px; }
-  .prod-row {
-    display: flex; align-items: center; background: #fff; padding: 10px 8px;
-    border: 1px solid var(--line); border-radius: 8px; gap: 6px;
+  /* 現有商品清單卡片設計 */
+  .prod-item {
+    display: table; width: 100%;
+    padding: 10px 0; border-bottom: 1px dashed var(--line);
   }
-  .cell-sort { display: flex; flex-direction: column; font-size: 12px; font-weight: bold; color: #b2945b; text-align: center; cursor: pointer; user-select: none; padding: 0 4px; }
-  .cell-name { flex: 2; font-size: 13.5px; font-weight: 700; word-break: break-all; }
-  .cell-input { flex: 1; min-width: 65px; }
-  .cell-input input { padding: 6px; font-size: 13px; text-align: center; }
-  .cell-actions { display: flex; gap: 4px; }
-  
-  .btn-mini { padding: 7px 9px; font-size: 12px; font-weight: 700; border: none; border-radius: 5px; cursor: pointer; }
+  .prod-item:last-child { border-bottom: none; }
+  .cell { display: table-cell; vertical-align: middle; padding: 4px; }
+  .cell-sort { width: 35px; text-align: center; font-size: 18px; color: var(--gold); cursor: pointer; user-select: none; }
+  .cell-name { font-size: 14px; font-weight: 500; }
+  .cell-input { width: 75px; }
+  .cell-input input { padding: 6px; font-size: 14px; text-align: center; }
+  .cell-actions { width: 85px; text-align: right; }
+  .btn-mini {
+    padding: 6px 8px; font-size: 12px; border-radius: 4px; border: none;
+    margin-left: 2px; font-weight: bold;
+  }
   .btn-mini-upd { background: #e2ecc8; color: #2d4a22; }
   .btn-mini-del { background: #f8dad6; color: #7c2419; }
 
-  /* 直線單選表單樣式 */
-  .linear-form-zone { display: flex; flex-direction: column; gap: 10px; background: #fff; padding: 14px; border: 1px solid var(--line); border-radius: 8px; }
-  .linear-row { display: flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 700; }
-  .linear-row input[type="radio"] { width: 18px; height: 18px; accent-color: var(--leaf); margin: 0; }
-  .linear-row label { min-width: 82px; cursor: pointer; }
-  .linear-inputs { display: flex; gap: 4px; flex: 1; }
-  .linear-inputs input { padding: 7px 6px; font-size: 13px; border: 1px solid var(--line); border-radius: 5px; min-width: 0; }
-  .input-flavor { flex: 1.6; }
-  .input-stock { flex: 1; }
-  .input-price { flex: 1; }
+  /* 直線單選大類鈕 */
+  .radio-tile-group { display: block; margin-bottom: 12px; }
+  .radio-container {
+    display: block; position: relative; padding: 12px 12px 12px 40px;
+    margin-bottom: 8px; background: #fff; border: 1px solid var(--line);
+    border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 500;
+  }
+  .radio-container input { position: absolute; opacity: 0; cursor: pointer; }
+  .checkmark {
+    position: absolute; top: 12px; left: 12px; height: 20px; width: 20px;
+    background-color: #eee; border-radius: 50%; border: 1px solid var(--line);
+  }
+  .radio-container:hover input ~ .checkmark { background-color: #ccc; }
+  .radio-container input:checked ~ .checkmark { background-color: var(--accent); border-color: var(--accent); }
+  .checkmark:after { content: ""; position: absolute; display: none; }
+  .radio-container input:checked ~ .checkmark:after { display: block; }
+  .radio-container .checkmark:after {
+    top: 6px; left: 6px; width: 6px; height: 6px; border-radius: 50%; background: white;
+  }
 
-  /* 🏁 結算對帳分析彈窗 */
+  /* 🏁 結算對帳大面板 */
   .modal-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(28,43,34,0.6);
-    z-index: 1000; overflow-y: auto; padding: 20px 12px;
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto; padding: 20px 10px;
   }
   .modal-content {
-    background: var(--paper-card); border-radius: 14px; border: 1px solid var(--line);
-    padding: 20px 16px; max-width: 520px; margin: 0 auto; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    background: white; border-radius: 14px; padding: 18px; max-width: 500px; margin: 0 auto;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
   }
-  .modal-close { float: right; font-size: 24px; cursor: pointer; color: var(--muted); font-weight: bold; line-height: 1; }
-  .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ece5d3; font-size: 14px; }
-  .stat-val { font-weight: bold; color: var(--stamp-dark); }
-  .stock-badge { background: #fff; border: 1px solid var(--line); padding: 5px 8px; border-radius: 5px; font-size: 12.5px; margin: 3px; display: inline-block; }
+  .modal-close { float: right; font-size: 22px; cursor: pointer; color: var(--text-muted); font-weight: bold; }
+  .stat-grid { display: block; margin: 12px 0; }
+  .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+  .stat-val { font-weight: bold; color: var(--danger); }
+  .stock-badge { background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-size: 13px; margin: 3px; display: inline-block; }
 </style>
 </head>
 <body>
 
-<div class="sheet">
-  <header>
-    <div class="title-block">
-      <h1>Bonheur Cookie 現場營運後台</h1>
-      <p>現場供應狀態變更、前台即時排序與下班大數據結算中心</p>
+<div class="container">
+  <h2>🍪 Bonheur Cookie 現場營運主控台</h2>
+  
+  <div class="login-box" id="loginBox">
+    <h3>🔑 員工安全登入驗證</h3>
+    <div class="input-group">
+      <label>操作員工大名</label>
+      <input type="text" id="empName" placeholder="例如：葉子" value="">
     </div>
-  </header>
-
-  <section id="loginBox">
-    <div class="sec-head"><div class="sec-label">🔑 員工身分驗證</div></div>
-    <div class="field">
-      <label>操作員工姓名 <span style="color:var(--stamp)">*</span></label>
-      <input type="text" id="empName" placeholder="請填寫姓名 (例：葉子)">
+    <div class="input-group">
+      <label>內部密碼</label>
+      <input type="number" id="empPwd" placeholder="請輸入4位數密碼" pattern="\d*">
     </div>
-    <div class="field">
-      <label>內部密碼 <span style="color:var(--stamp)">*</span></label>
-      <input type="password" id="empPwd" placeholder="請輸入4位數解鎖密碼" inputmode="numeric">
-    </div>
-    <button class="btn btn-primary" id="loginBtn" onclick="verifyLogin()">同步解鎖管理台</button>
-  </section>
+    <button class="btn btn-primary" id="loginBtn" onclick="verifyLogin()">驗證登入並同步雲端庫存</button>
+  </div>
 
   <div id="mainDashboard" style="display:none;">
     
-    <button class="btn btn-accent" id="settleMainBtn" onclick="openSettleModal()">🏁 今日營業額結算與銷售大數據分析</button>
+    <button class="btn btn-accent" id="settleMainBtn" style="font-size:16px; margin-bottom:16px;" onclick="openSettleModal()">
+      🏁 今日營業額結算與銷售大數據分析
+    </button>
 
-    <section>
-      <div class="sec-head">
-        <div class="sec-label">📋 目前前台已上架商品明細</div>
-      </div>
-      <p style="font-size:11.5px; color:var(--muted); margin:-6px 0 12px 0;">點擊 ▲▼ 可即時調整前台客人的選購順序，輸入框內可原地直修單價與庫存量。</p>
-      <div class="prod-table" id="inventoryList">連線載入中...</div>
-    </section>
+    <div class="section-card">
+      <h3>📋 目前前台已上架商品（原地直接改 ⇅）</h3>
+      <p style="font-size:12px; color:var(--text-muted); margin:0 0 10px 0;">點擊左側 ⇅ 按鈕可直接調整前台排序，輸入框可直接改單價/庫存。</p>
+      <div id="inventoryList">載入雲端資料中，請稍候...</div>
+    </div>
 
-    <section>
-      <div class="sec-head">
-        <div class="sec-label">🆕 當日現場供應品項管理</div>
-      </div>
-      <p style="font-size:11.5px; color:var(--muted); margin:-6px 0 12px 0;">選取左側固定大類會自動帶入預設售價。若為特殊點心請勾選最後一項自訂。</p>
+    <div class="section-card">
+      <h3>🆕 當日現場供應品項管理（直線表單快速上架）</h3>
       
-      <div class="linear-form-zone">
-        <div class="linear-row">
-          <input type="radio" name="prodCat" id="radDac" value="達克瓦茲" checked onclick="autoFill(90, false)">
-          <label for="radDac">達克瓦茲＿</label>
-          <div class="linear-inputs">
-            <input type="text" class="input-flavor" id="valDacFlavor" placeholder="口味">
-            <input type="number" class="input-stock" id="valDacStock" placeholder="庫存" inputmode="numeric">
-            <input type="number" class="input-price" id="valDacPrice" value="90" inputmode="numeric">
-          </div>
-        </div>
-
-        <div class="linear-row">
-          <input type="radio" name="prodCat" id="radBou" value="布雪" onclick="autoFill(95, false)">
-          <label for="radBou">布雪＿</label>
-          <div class="linear-inputs">
-            <input type="text" class="input-flavor" id="valBouFlavor" placeholder="口味">
-            <input type="number" class="input-stock" id="valBouStock" placeholder="庫存" inputmode="numeric">
-            <input type="number" class="input-price" id="valBouPrice" value="95" inputmode="numeric">
-          </div>
-        </div>
-
-        <div class="linear-row">
-          <input type="radio" name="prodCat" id="radTir" value="提拉米蘇" onclick="autoFill(110, false)">
-          <label for="radTir">提拉米蘇＿</label>
-          <div class="linear-inputs">
-            <input type="text" class="input-flavor" id="valTirFlavor" placeholder="口味">
-            <input type="number" class="input-stock" id="valTirStock" placeholder="庫存" inputmode="numeric">
-            <input type="number" class="input-price" id="valTirPrice" value="110" inputmode="numeric">
-          </div>
-        </div>
-
-        <div class="linear-row">
-          <input type="radio" name="prodCat" id="radPud" value="純手工布丁" onclick="autoFill(90, false)">
-          <label for="radPud">純手工布丁＿</label>
-          <div class="linear-inputs">
-            <input type="text" class="input-flavor" id="valPudFlavor" placeholder="口味">
-            <input type="number" class="input-stock" id="valPudStock" placeholder="庫存" inputmode="numeric">
-            <input type="number" class="input-price" id="valPudPrice" value="90" inputmode="numeric">
-          </div>
-        </div>
-
-        <div class="linear-row">
-          <input type="radio" name="prodCat" id="radCustom" value="自訂類別" onclick="autoFill('', true)">
-          <label for="radCustom">
-            <input type="text" id="valCustomCat" placeholder="手寫新品類" style="padding:4px; font-size:12px; width:80px;" disabled>＿
-          </label>
-          <div class="linear-inputs">
-            <input type="text" class="input-flavor" id="valCustomFlavor" placeholder="口味/明細">
-            <input type="number" class="input-stock" id="valCustomStock" placeholder="庫存" inputmode="numeric">
-            <input type="number" class="input-price" id="valCustomPrice" placeholder="價格" inputmode="numeric">
-          </div>
-        </div>
-
-        <button type="button" class="btn btn-primary" id="submitAddBtn" style="margin-top:6px;" onclick="submitProduct()">確認上架 / 覆蓋更新至雲端</button>
+      <div class="radio-tile-group">
+        <label class="radio-container">達克瓦茲
+          <input type="radio" name="prodCat" value="達克瓦茲" checked onclick="autoFillPrice(90)">
+          <span class="checkmark"></span>
+        </label>
+        <label class="radio-container">布雪
+          <input type="radio" name="prodCat" value="布雪" onclick="autoFillPrice(95)">
+          <span class="checkmark"></span>
+        </label>
+        <label class="radio-container">提拉米蘇
+          <input type="radio" name="prodCat" value="提拉米蘇" onclick="autoFillPrice(110)">
+          <span class="checkmark"></span>
+        </label>
+        <label class="radio-container">純手工布丁
+          <input type="radio" name="prodCat" value="純手工布丁" onclick="autoFillPrice(90)">
+          <span class="checkmark"></span>
+        </label>
+        <label class="radio-container">✨ 現場突發自訂商品空白欄位
+          <input type="radio" name="prodCat" value="自訂類別" id="catCustom" onclick="autoFillPrice('')">
+          <span class="checkmark"></span>
+        </label>
       </div>
-    </section>
+
+      <div class="input-group" id="customCatNameGroup" style="display:none;">
+        <label style="color:var(--danger)">請手寫自訂商品大類名稱</label>
+        <input type="text" id="customCatName" placeholder="例如：可麗露、奶油餅">
+      </div>
+
+      <div class="input-group">
+        <label id="flavorLabel">商品口味 / 全名細項</label>
+        <input type="text" id="prodFlavor" placeholder="例如：開心果、小點心綜合包">
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <div class="input-group" style="flex:1;">
+          <label>設定單價</label>
+          <input type="number" id="prodPrice" value="90" pattern="\d*">
+        </div>
+        <div class="input-group" style="flex:1;">
+          <label>設定今日庫存</label>
+          <input type="number" id="prodStock" placeholder="箱數/個數" pattern="\d*">
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="submitAddBtn" onclick="submitNewProduct()">確認上架 / 覆蓋更新至雲端</button>
+    </div>
 
   </div>
 </div>
@@ -207,81 +214,97 @@
 <div class="modal-overlay" id="settleModal">
   <div class="modal-content">
     <span class="modal-close" onclick="closeSettleModal()">&times;</span>
-    <h3 style="color:var(--stamp-dark);">🏁 營運交班結算與銷售統計中心</h3>
+    <h3 style="border-left-color:var(--danger); color:var(--danger);">🏁 營運結算與多維度大數據分析中心</h3>
     
-    <div style="background:#fdf3f1; border:1px solid var(--line); padding:12px; border-radius:8px; margin-bottom:14px;">
-      <div class="stat-row"><span style="font-weight:700;">💰 今日營業總額 (當日實收)：</span><span class="stat-val" id="todayRev">計算中...</span></div>
-      <div class="stat-row"><span style="font-weight:700;">🧾 今日現場成立總單數：</span><span class="stat-val" style="color:var(--leaf)" id="todayCount">計算中...</span></div>
+    <div style="background:#fff5f5; padding:10px; border-radius:8px; margin-bottom:12px; border:1px solid #f8dad6;">
+      <div class="stat-row"><span style="font-weight:bold;">💰 今日營業總額 (當日實收)：</span><span class="stat-val" id="todayRev">計算中...</span></div>
+      <div class="stat-row"><span style="font-weight:bold;">🧾 今日成立總單數：</span><span class="stat-val" style="color:var(--accent)" id="todayCount">計算中...</span></div>
     </div>
 
-    <h4 style="margin:0 0 6px 0; font-size:13px; color:#4a4438;">📦 今日未售完品項與庫存殘量（下班現場盤點）：</h4>
-    <div id="unsoldArea" style="margin-bottom:14px; background:#fff; border:1px solid var(--line); padding:8px; border-radius:6px; min-height:40px;">載入中...</div>
+    <h4 style="margin:10px 0 5px 0; font-size:13px;">🥐 今日未售完品項與庫存殘量（下班盤點用）：</h4>
+    <div id="unsoldArea" style="margin-bottom:14px;">載入中...</div>
 
-    <hr style="border:0; border-top:2px double var(--line); margin:14px 0;">
+    <hr style="border:0; border-top:1px solid var(--line); margin:12px 0;">
 
-    <h4 style="margin:0 0 8px 0; font-size:13.5px; color:var(--leaf-dark);">📊 經營分析：品項銷售數據交叉撈取</h4>
+    <h4 style="margin:0 0 8px 0; font-size:14px; color:var(--gold);">📊 經營者專用品項交叉銷售查詢統計</h4>
     
     <div style="display:flex; gap:6px; margin-bottom:8px;">
-      <select id="analysisTime">
+      <select id="analysisTime" style="padding:6px; font-size:13px;">
         <option value="today">時間：今天</option>
-        <option value="week">時間：本週累計</option>
-        <option value="month">時間：本月累計</option>
-        <option value="year">時間：今年度累計</option>
+        <option value="week">時間：本週</option>
+        <option value="month">時間：本月</option>
+        <option value="year">時間：今年度</option>
       </select>
-      <select id="analysisCat">
-        <option value="all">品項：全部商品加總</option>
-        <option value="達克瓦茲">品項：達克瓦茲系列</option>
-        <option value="布雪">品項：布雪系列</option>
-        <option value="提拉米蘇">品項：提拉米蘇系列</option>
-        <option value="純手工布丁">品項：純手工布丁系列</option>
-        <option value="custom">品項：現場突發自訂新品</option>
+      <select id="analysisCat" style="padding:6px; font-size:13px;">
+        <option value="all">品項：全部商品總和</option>
+        <option value="達克瓦茲">品項：達克瓦茲</option>
+        <option value="布雪">品項：布雪</option>
+        <option value="提拉米蘇">品項：提拉米蘇</option>
+        <option value="純手工布丁">品項：純手工布丁</option>
+        <option value="custom">品項：突發現場自訂新品</option>
       </select>
     </div>
-    <button class="btn btn-primary" id="analysisBtn" style="padding:10px; font-size:13.5px;" onclick="runCrossAnalysis()">開始抓取歷史大數據</button>
+    <button class="btn btn-primary" id="analysisBtn" style="padding:8px; font-size:13px;" onclick="runCrossAnalysis()">執行交叉數據撈取</button>
 
-    <div style="background:#f1f6f0; border:1px solid #d1e7dd; padding:12px; border-radius:8px; margin-top:10px;">
-      <div class="stat-row"><span>📈 範圍內指定品項銷售總量：</span><span id="resQty" style="font-weight:bold; color:var(--leaf-dark);">0 個</span></div>
-      <div class="stat-row"><span>💵 範圍內指定品項總營業額：</span><span id="resRevenue" style="font-weight:bold; color:var(--leaf-dark);">$0</span></div>
+    <div style="background:#f0f7f4; padding:10px; border-radius:8px; margin-top:10px; border:1px solid #d1e7dd;">
+      <div class="stat-row"><span>📊 篩選範圍內累計銷售量：</span><span id="resQty" style="font-weight:bold; color:var(--accent);">0 個</span></div>
+      <div class="stat-row"><span>💵 篩選範圍內銷售總金額：</span><span id="resRevenue" style="font-weight:bold; color:var(--accent);">$0</span></div>
     </div>
   </div>
 </div>
 
 <script>
-  let currentItemsSnapshot = [];
+  // 自動監聽自訂空白鈕切換顯示
+  document.querySelectorAll('input[name="prodCat"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      const customGroup = document.getElementById('customCatNameGroup');
+      if (this.value === '自訂類別') {
+        customGroup.style.display = 'block';
+        document.getElementById('flavorLabel').innerText = "商品口味細項名稱";
+      } else {
+        customGroup.style.display = 'none';
+        document.getElementById('flavorLabel').innerText = "商品口味 / 全名細項";
+      }
+    });
+  });
 
-  function autoFill(price, isCustom) {
-    document.getElementById('valCustomCat').disabled = !isCustom;
-    if(!isCustom) {
-      document.getElementById('valCustomCat').value = '';
+  function autoFillPrice(price) {
+    if(price !== '') {
+      document.getElementById('prodPrice').value = price;
+    } else {
+      document.getElementById('prodPrice').value = '';
     }
   }
 
-  // 1. 安全登入與大名綁定
+  // 1. 安全身分驗證
   function verifyLogin() {
     const name = document.getElementById('empName').value.trim();
     const pwd = document.getElementById('empPwd').value.trim();
     const btn = document.getElementById('loginBtn');
     
     if(!name || pwd !== "1225") {
-      alert("⚠️ 請輸入正確的員工大名與4位內部安全密碼！"); return;
+      alert("⚠️ 請輸入正確的操作員工姓名與 4 位驗證密碼！");
+      return;
     }
     
+    // ⏳ 反灰鎖定
     btn.disabled = true;
-    btn.innerText = "正在連線並強制同步雲端最新狀態...";
+    btn.innerText = "連線驗證中，正同步雲端資料...";
     
     fetchInventory();
   }
 
-  // 2. 載入商品清單
+  // 2. 獲取並渲染現有商品清單
   function fetchInventory() {
     google.script.run.withSuccessHandler(function(data) {
       document.getElementById('loginBox').style.display = "none";
       document.getElementById('mainDashboard').style.display = "block";
       
-      document.getElementById('loginBtn').disabled = false;
-      document.getElementById('loginBtn').innerText = "同步解鎖管理台";
+      // 恢復按鈕
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = false;
+      btn.innerText = "驗證登入並同步雲端庫存";
       
-      currentItemsSnapshot = data;
       renderInventory(data);
     }).getInventoryData();
   }
@@ -289,28 +312,28 @@
   function renderInventory(items) {
     const container = document.getElementById('inventoryList');
     if(!items || items.length === 0) {
-      container.innerHTML = "<p style='color:var(--muted); text-align:center; font-size:13px;'>目前雲端上無任何正在販售的商品</p>";
+      container.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>目前雲端無上架中商品</p>";
       return;
     }
     
     let html = "";
-    items.forEach((item, idx) => {
+    items.forEach(item => {
       html += `
-        <div class="prod-row">
-          <div class="cell-sort">
-            <span onclick="submitMove(${item.rowNum}, 'up')">▲</span>
-            <span onclick="submitMove(${item.rowNum}, 'down')">▼</span>
+        <div class="prod-item">
+          <div class="cell cell-sort">
+            <span onclick="moveOrder(${item.rowNum}, 'up', '${item.name}')">▲</span><br>
+            <span onclick="moveOrder(${item.rowNum}, 'down', '${item.name}')">▼</span>
           </div>
-          <div class="cell-name">${item.name}</div>
-          <div class="cell-input">
-            <input type="number" id="p_pr_${item.rowNum}" value="${item.price}" inputmode="numeric">
+          <div class="cell cell-name">${item.name}</div>
+          <div class="cell cell-input">
+            <input type="number" id="p_pr_${item.rowNum}" value="${item.price}" placeholder="價">
           </div>
-          <div class="cell-input">
-            <input type="number" id="p_st_${item.rowNum}" value="${item.stock}" inputmode="numeric">
+          <div class="cell cell-input">
+            <input type="number" id="p_st_${item.rowNum}" value="${item.stock}" placeholder="庫">
           </div>
-          <div class="cell-actions">
-            <button class="btn-mini btn-mini-upd" id="b_upd_${item.rowNum}" onclick="submitQuickUpdate(${item.rowNum}, '${item.name}')">更新</button>
-            <button class="btn-mini btn-mini-del" id="b_del_${item.rowNum}" onclick="submitDelete(${item.rowNum}, '${item.name}')">下架</button>
+          <div class="cell cell-actions">
+            <button class="btn-mini btn-mini-upd" id="b_upd_${item.rowNum}" onclick="quickUpdate(${item.rowNum}, '${item.name}')">更新</button>
+            <button class="btn-mini btn-mini-del" id="b_del_${item.rowNum}" onclick="quickDelete(${item.rowNum}, '${item.name}')">下架</button>
           </div>
         </div>
       `;
@@ -318,119 +341,101 @@
     container.innerHTML = html;
   }
 
-  // 3. 排序前台異動 ⇅
-  function submitMove(rowNum, direction) {
+  // 3. 排序移動
+  function moveOrder(rowNum, direction, name) {
     const emp = document.getElementById('empName').value.trim();
-    document.getElementById('inventoryList').innerHTML = "<p style='text-align:center; font-size:13px; color:var(--muted);'>全新排序覆蓋寫入中...</p>";
-    
+    // 鎖定全體動作
+    document.getElementById('inventoryList').innerHTML = "<p style='text-align:center;'>正在儲存全新順序並重新對齊前台...</p>";
     google.script.run.withSuccessHandler(function(res) {
       fetchInventory();
     }).moveProductOrder(emp, rowNum, direction);
   }
 
-  // 4. 原地直接改價格/庫存
-  function submitQuickUpdate(rowNum, name) {
+  // 4. 原地直接快速修改
+  function quickUpdate(rowNum, name) {
     const emp = document.getElementById('empName').value.trim();
     const price = document.getElementById(`p_pr_${rowNum}`).value;
     const stock = document.getElementById(`p_st_${rowNum}`).value;
     const btn = document.getElementById(`b_upd_${rowNum}`);
     
-    btn.disabled = true; btn.innerText = "⏳";
+    btn.disabled = true;
+    btn.innerText = "請稍候...";
     
     google.script.run.withSuccessHandler(function(res) {
-      alert(`✅ 已成功更新 ${name} 的狀態！`);
+      alert(`✅ ${name} 已成功原地變更為：單價 $${price} / 庫存 ${stock} 個`);
       fetchInventory();
-    }).quickUpdateProduct(emp, rowNum, name, Number(price), Number(stock));
+    }).quickUpdateProduct(emp, rowNum, name, price, stock);
   }
 
-  // 5. 點 X 下架商品
-  function submitDelete(rowNum, name) {
-    if(!confirm(`確定要將「${name}」從客人的前台畫面直接下架並刪除嗎？`)) return;
+  // 5. 點 X 下架
+  function quickDelete(rowNum, name) {
+    if(!confirm(`確認要將商品【${name}】直接從前台與庫存清單中下架刪除嗎？`)) return;
     const emp = document.getElementById('empName').value.trim();
     const btn = document.getElementById(`b_del_${rowNum}`);
     
-    btn.disabled = true; btn.innerText = "⏳";
+    btn.disabled = true;
+    btn.innerText = "下架中...";
     
     google.script.run.withSuccessHandler(function(res) {
       fetchInventory();
     }).deleteProduct(emp, rowNum, name);
   }
 
-  // 6. 下方直線欄位：新增商品上架
-  function submitProduct() {
+  // 6. 直線表單：新增上架
+  function submitNewProduct() {
     const emp = document.getElementById('empName').value.trim();
-    let cat = document.querySelector('input[name="prodCat"]:checked').value;
-    let flavor = ""; let stock = 0; let price = 0;
+    let cat = document.querySelector('any[name="prodCat"]:checked')?.value || document.querySelector('input[name="prodCat"]:checked').value;
+    let flavor = document.getElementById('prodFlavor').value.trim();
+    const price = document.getElementById('prodPrice').value.trim();
+    const stock = document.getElementById('prodStock').value.trim();
+    const btn = document.getElementById('submitAddBtn');
     
     if(cat === "自訂類別") {
-      cat = document.getElementById('valCustomCat').value.trim();
-      flavor = document.getElementById('valCustomFlavor').value.trim();
-      stock = document.getElementById('valCustomStock').value;
-      price = document.getElementById('valCustomPrice').value;
-      if(!cat) { alert("請填寫手寫新品大類的名稱！"); return; }
-    } else {
-      if(cat === "達克瓦茲") {
-        flavor = document.getElementById('valDacFlavor').value.trim();
-        stock = document.getElementById('valDacStock').value;
-        price = document.getElementById('valDacPrice').value;
-      } else if(cat === "布雪") {
-        flavor = document.getElementById('valBouFlavor').value.trim();
-        stock = document.getElementById('valBouStock').value;
-        price = document.getElementById('valBouPrice').value;
-      } else if(cat === "提拉米蘇") {
-        flavor = document.getElementById('valTirFlavor').value.trim();
-        stock = document.getElementById('valTirStock').value;
-        price = document.getElementById('valTirPrice').value;
-      } else if(cat === "純手工布丁") {
-        flavor = document.getElementById('valPudFlavor').value.trim();
-        stock = document.getElementById('valPudStock').value;
-        price = document.getElementById('valPudPrice').value;
-      }
+      cat = document.getElementById('customCatName').value.trim();
+      if(!cat) { alert("請填寫您自訂的手寫大類名稱！"); return; }
+    }
+    if(!flavor || !price || !stock) {
+      alert("請完整填寫口味細項、售價以及庫存數量！");
+      return;
     }
     
-    if(!flavor || !stock || !price || isNaN(stock) || isNaN(price)) {
-      alert("請確實輸入口味、庫存量與售價金額！"); return;
-    }
-    
-    const btn = document.getElementById('submitAddBtn');
-    btn.disabled = true; btn.innerText = "連線處理中...";
+    btn.disabled = true;
+    btn.innerText = "連線寫入雲端中，請稍候...";
     
     google.script.run.withSuccessHandler(function(res) {
-      alert("✅ 商品已順利發布上架！相同品項全名將自動覆蓋。");
-      // 清空該行輸入框
-      document.getElementById('valDacFlavor').value = ''; document.getElementById('valDacStock').value = '';
-      document.getElementById('valBouFlavor').value = ''; document.getElementById('valBouStock').value = '';
-      document.getElementById('valTirFlavor').value = ''; document.getElementById('valTirStock').value = '';
-      document.getElementById('valPudFlavor').value = ''; document.getElementById('valPudStock').value = '';
-      document.getElementById('valCustomCat').value = ''; document.getElementById('valCustomFlavor').value = '';
-      document.getElementById('valCustomStock').value = ''; document.getElementById('valCustomPrice').value = '';
-      
-      btn.disabled = false; btn.innerText = "確認上架 / 覆蓋更新至雲端";
+      alert("✅ 現場供應品項已成功指派並同步至前台頁面！");
+      document.getElementById('prodFlavor').value = "";
+      document.getElementById('prodStock').value = "";
+      btn.disabled = false;
+      btn.innerText = "確認上架 / 覆蓋更新至雲端";
       fetchInventory();
-    }).updateOrAddProduct(emp, cat, flavor, Number(price), Number(stock));
+    }).updateOrAddProduct(emp, cat, flavor, price, stock);
   }
 
-  // 7. 🏁 營運結算面板控制
+  // 7. 🏁 營運對帳與大數據交叉分析查詢
   function openSettleModal() {
     document.getElementById('settleModal').style.display = "block";
     const mainBtn = document.getElementById('settleMainBtn');
-    mainBtn.disabled = true; mainBtn.innerText = "安全連線調取中...";
+    mainBtn.disabled = true;
+    mainBtn.innerText = "即時安全調取資料庫中...";
     
+    // 預設撈取今天大盤以及未售完庫存
     google.script.run.withSuccessHandler(function(res) {
-      document.getElementById('todayRev').innerText = typeof res.totalRevenue === 'number' ? `$ ${res.totalRevenue.toLocaleString()}` : res.totalRevenue;
-      document.getElementById('todayCount').innerText = typeof res.totalOrderCount === 'number' ? `${res.totalOrderCount} 筆` : res.totalOrderCount;
+      document.getElementById('todayRev').innerText = typeof res.totalRevenue === 'number' ? `$ ${res.totalRevenue}` : res.totalRevenue;
+      document.getElementById('todayCount').innerText = typeof res.totalOrderCount === 'number' ? `${res.totalOrderCount} 筆訂單` : res.totalOrderCount;
       
       let unsoldHtml = "";
       if(res.unsoldInventory.length === 0) {
-        unsoldHtml = "<span style='color:var(--muted); font-size:12.5px;'>現場已無殘餘庫存，全部完售！</span>";
+        unsoldHtml = "<span style='color:var(--text-muted); font-size:13px;'>今日現場商品已全部完售！</span>";
       } else {
-        res.unsoldInventory.forEach(item => {
-          unsoldHtml += `<span class="stock-badge">📦 ${item.name}：<b>${item.stock}</b> 個</span>`;
+        res.unsoldInventory.forEach(inv => {
+          unsoldHtml += `<span class="stock-badge">📦 ${inv.name}：<b>${inv.stock}</b> 個</span>`;
         });
       }
       document.getElementById('unsoldArea').innerHTML = unsoldHtml;
       
-      mainBtn.disabled = false; mainBtn.innerText = "🏁 今日營業額結算與銷售大數據分析";
+      mainBtn.disabled = false;
+      mainBtn.innerText = "🏁 今日營業額結算與銷售大數據分析";
     }).calculateAdvancedSales("today", "all");
   }
 
@@ -439,12 +444,14 @@
     const cat = document.getElementById('analysisCat').value;
     const btn = document.getElementById('analysisBtn');
     
-    btn.disabled = true; btn.innerText = "跨分頁加總處理中...";
+    btn.disabled = true;
+    btn.innerText = "跨分頁大數據運算中...";
     
     google.script.run.withSuccessHandler(function(res) {
-      document.getElementById('resQty').innerText = `${res.filteredQty.toLocaleString()} 個`;
-      document.getElementById('resRevenue').innerText = `$ ${res.filteredRevenue.toLocaleString()}`;
-      btn.disabled = false; btn.innerText = "開始抓取歷史大數據";
+      document.getElementById('resQty').innerText = `${res.filteredQty} 個`;
+      document.getElementById('resRevenue').innerText = `$ ${res.filteredRevenue}`;
+      btn.disabled = false;
+      btn.innerText = "執行交叉數據撈取";
     }).calculateAdvancedSales(timeRange, cat);
   }
 
