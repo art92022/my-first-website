@@ -140,7 +140,6 @@
   .admin-row .a-price{color:var(--stamp-dark); font-weight:700; margin-right:6px;}
   .admin-row .a-del{ background:none; border:none; color:var(--stamp); font-size:17px; cursor:pointer; padding:0 2px; }
   
-  /* 手繪直線表單欄位樣式 */
   .linear-form-zone { display: flex; flex-direction: column; gap: 10px; background: #fff; padding: 14px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 16px; }
   .linear-row { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; color: #4a4438; }
   .linear-row input[type="radio"] { width: 17px; height: 17px; accent-color: var(--leaf); margin: 0; cursor: pointer; }
@@ -151,7 +150,6 @@
   .input-stock { flex: 1; }
   .input-price { flex: 1; }
   .admin-submit-btn { background: var(--leaf); color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 4px; font-size: 14px; }
-  .admin-submit-btn:active { background: var(--leaf-dark); }
 </style>
 </head>
 <body>
@@ -168,7 +166,7 @@
   <div class="order-no">訂單編號 <span id="orderNo"></span> ・ <span id="orderDate"></span></div>
 
   <section>
-    <div class="sec-head"><div class="sec-label"><span class="tag">01</span>購買人資料</div></div>
+    <div class="sec-head"><div class="sec-label"><span class="tag">01</span>買受人資料</div></div>
     <div class="field">
       <label>發票類別</label>
       <div class="seg" id="buyerTypeSeg">
@@ -258,11 +256,18 @@
 <div class="overlay hidden" id="passwordOverlay">
   <div class="modal">
     <h2>員工身份驗證</h2>
-    <p class="modal-sub">設定當日供應品項與即時庫存，請輸入密碼</p>
-    <div class="field"><input type="password" id="adminPasswordInput" placeholder="請輸入密碼" inputmode="numeric"></div>
-    <div class="modal-actions">
+    <p class="modal-sub">設定當日供應品項與即時庫存，系統將會追蹤記錄操作人與當前時間</p>
+    <div class="field" style="margin-bottom: 14px;">
+      <label>員工姓名 <span class="hint">(必填，供系統日誌反查)</span></label>
+      <input type="text" id="adminEmpNameInput" placeholder="請輸入您的姓名 (例: 小南)">
+    </div>
+    <div class="field">
+      <label>安全驗證密碼</label>
+      <input type="password" id="adminPasswordInput" placeholder="請輸入內部密碼" inputmode="numeric">
+    </div>
+    <div class="modal-actions" style="margin-top: 18px;">
       <button class="ghost-btn" id="passwordCancelBtn">取消</button>
-      <button class="close-btn" id="passwordConfirmBtn">確認</button>
+      <button class="close-btn" id="passwordConfirmBtn">確認登入</button>
     </div>
   </div>
 </div>
@@ -270,14 +275,14 @@
 <div class="overlay hidden" id="adminOverlay">
   <div class="modal" style="max-width: 680px;">
     <h2>當日現場供應品項管理</h2>
-    <p class="modal-sub" style="margin-bottom: 10px;">請選取左側固定品相，輸入右側欄位，相同商品全名送出將直接更新覆蓋：</p>
+    <p class="modal-sub" style="margin-bottom: 10px;" id="adminWelcomeTitle">操作人員：</p>
     
     <div class="linear-form-zone">
       <div class="linear-row">
         <input type="radio" name="baseCategory" id="radDac" value="dacquoise" data-label="達克瓦茲" checked>
         <label for="radDac">達克瓦茲＿</label>
         <div class="linear-inputs">
-          <input type="text" class="input-flavor" id="valDacFlavor" placeholder="輸入口味 (例: 開心果)">
+          <input type="text" class="input-flavor" id="valDacFlavor" placeholder="口味">
           <input type="number" class="input-stock" id="valDacStock" placeholder="庫存量" min="0">
           <input type="number" class="input-price" id="valDacPrice" placeholder="價格" min="0" value="90">
         </div>
@@ -328,6 +333,7 @@ const ADMIN_PASSWORD = '1225';
 let catalog = [];
 let cart = [];
 let adminUnlocked = false;
+let currentOperator = ""; // 儲存當前操作員工姓名
 
 const catalogGrid = document.getElementById('catalogGrid');
 const catalogLoading = document.getElementById('catalogLoading');
@@ -337,13 +343,11 @@ const cartBody = document.getElementById('cartBody');
 function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
 function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-// 客人每次進來或重新整理，皆強制抓取最新即時資料
 function loadCatalog(){
   const callbackName = 'catalogCb_' + Date.now();
   const script = document.createElement('script');
   window[callbackName] = (data) => {
     delete window[callbackName]; script.remove();
-    // 只有庫存量與定價皆大於0的有效商品，才顯示給客人看
     catalog = (data && data.products) ? data.products.filter(p => p.price > 0 && p.stock > 0) : [];
     renderCatalog();
   };
@@ -386,7 +390,7 @@ function renderCatalog(){
     
     card.addEventListener('click', () => {
       if (p.stock <= currentQtyInCart) {
-        alert("抱歉，已達此商品供應上限！"); return;
+        alert("抱歉，已達現場供應庫存上限！"); return;
       }
       if (existing = cart.find(c => c.name === p.name)){ existing.qty += 1; }
       else { cart.push({catalogId: p.id, name: p.name, price: p.price, qty: 1}); }
@@ -418,7 +422,7 @@ function renderCart(){
       renderCatalog(); renderCart();
     });
     row.querySelector('.q-plus').addEventListener('click', () => {
-      if (origItem && origItem.stock <= item.qty) { alert("抱歉，現場供應庫存不足！"); return; }
+      if (origItem && origItem.stock <= item.qty) { alert("抱歉，庫存不足！"); return; }
       item.qty += 1; renderCatalog(); renderCart();
     });
     row.querySelector('.c-del').addEventListener('click', () => {
@@ -495,7 +499,6 @@ function resetFormForNextOrder(){
   document.getElementById('individualBlock').classList.remove('hidden');
   cart = []; newOrderNumber(); clearFieldErrors(); document.getElementById('validationBanner').classList.add('hidden');
   
-  // 訂單完成後重新同步最新現場庫存
   const callbackName = 'catalogCb_' + Date.now();
   const script = document.createElement('script');
   window[callbackName] = (data) => {
@@ -539,7 +542,7 @@ submitBtn.addEventListener('click', () => {
   const untaxed = Math.round(total / 1.05); const tax = total - untaxed;
 
   const orderData = { orderNo, orderDate, buyerType, name, phone, email, carrierType, carrierValue, companyName, items: itemsSnapshot, untaxed, tax, total };
-  const summary = `訂單編號：${orderNo} 日期：${orderDate}\n\n【購買人資料】\n類別：${buyerType}\n姓名：${name}\n電話：${phone}\n${invoiceLine}\n\n【商品明細】\n${itemLines}未稅金額：${fmt(untaxed)}\n稅額(5%)：${fmt(tax)}\n應付總額：${fmt(total)}`;
+  const summary = `訂單編號：${orderNo} 日期：${orderDate}\n\n【買受人資料】\n類別：${buyerType}\n姓名：${name}\n電話：${phone}\n${invoiceLine}\n\n【商品明細】\n${itemLines}未稅金額：${fmt(untaxed)}\n稅額(5%)：${fmt(tax)}\n應付總額：${fmt(total)}`;
 
   submitBtn.disabled = true; submitBtn.textContent = '送出中...';
 
@@ -567,17 +570,33 @@ document.getElementById('closeBtn').addEventListener('click', () => { document.g
 const passwordOverlay = document.getElementById('passwordOverlay');
 const adminOverlay = document.getElementById('adminOverlay');
 const adminPasswordInput = document.getElementById('adminPasswordInput');
+const adminEmpNameInput = document.getElementById('adminEmpNameInput');
 
 document.getElementById('adminBtn').addEventListener('click', () => {
-  if (adminUnlocked){ openAdminPanel(); } else { adminPasswordInput.value = ''; passwordOverlay.classList.remove('hidden'); setTimeout(() => adminPasswordInput.focus(), 100); }
+  if (adminUnlocked){ openAdminPanel(); } 
+  else { adminPasswordInput.value = ''; adminEmpNameInput.value = ''; passwordOverlay.classList.remove('hidden'); setTimeout(() => adminEmpNameInput.focus(), 100); }
 });
 document.getElementById('passwordCancelBtn').addEventListener('click', () => passwordOverlay.classList.add('hidden'));
+
+// ✨ 登入驗證（包含員工大名鎖定）
 document.getElementById('passwordConfirmBtn').addEventListener('click', () => {
-  if (adminPasswordInput.value === ADMIN_PASSWORD){ adminUnlocked = true; passwordOverlay.classList.add('hidden'); openAdminPanel(); } else { alert('密碼錯誤'); }
+  const empName = adminEmpNameInput.value.trim();
+  if(!empName) { alert("請務必填寫您的【員工姓名】以供系統記錄日誌反查！"); return; }
+  
+  if (adminPasswordInput.value === ADMIN_PASSWORD){ 
+    adminUnlocked = true; 
+    currentOperator = empName; // 鎖定當前操作人
+    passwordOverlay.classList.add('hidden'); 
+    openAdminPanel(); 
+  } else { 
+    alert('密碼錯誤'); 
+  }
 });
 adminPasswordInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('passwordConfirmBtn').click(); });
 
 function openAdminPanel(){
+  document.getElementById('adminWelcomeTitle').innerHTML = `操作人員大名：<strong style="color:var(--stamp); font-size:14px;">${escapeHtml(currentOperator)}</strong> (所有上下架與更新動作皆會自動附加此簽章與系統時間)`;
+  
   const callbackName = 'catalogCb_' + Date.now();
   const script = document.createElement('script');
   window[callbackName] = (data) => {
@@ -598,17 +617,25 @@ function renderAdminList(){
   activeProducts.forEach(p => {
     const row = document.createElement('div'); row.className = 'admin-row';
     row.innerHTML = `<span class="a-name">${escapeHtml(p.name)}</span><span class="a-price">${fmt(p.price)} (剩 ${p.stock} 件)</span><button type="button" class="a-del" title="下架">×</button>`;
-    row.querySelector('.a-del').addEventListener('click', () => { if (!confirm(`確定要下架「${p.name}」嗎？`)) return; removeProduct(p); });
+    
+    row.querySelector('.a-del').addEventListener('click', () => { 
+      if (!confirm(`確定要下架「${p.name}」嗎？\n系統日誌將會同步註記由 ${currentOperator} 下架。`)) return; 
+      removeProduct(p); 
+    });
     list.appendChild(row);
   });
 }
 
+// ✨ 下架時一併傳遞 operator
 function removeProduct(product){
-  fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({action: 'removeProduct', id: product.id}) })
+  fetch(GOOGLE_SCRIPT_URL, { 
+    method: 'POST', 
+    body: JSON.stringify({action: 'removeProduct', id: product.id, operator: currentOperator}) 
+  })
   .finally(() => { openAdminPanel(); loadCatalog(); });
 }
 
-// 🌟 手繪直線欄位：統一提交覆蓋更新處理
+// ✨ 上架覆蓋時一併傳遞 operator
 document.getElementById('btnLinearSubmit').addEventListener('click', () => {
   const selectedRadio = document.querySelector('input[name="baseCategory"]:checked');
   if (!selectedRadio) { alert("請先選取要操作的品相！"); return; }
@@ -616,9 +643,7 @@ document.getElementById('btnLinearSubmit').addEventListener('click', () => {
   const baseId = selectedRadio.value;
   const baseLabel = selectedRadio.dataset.label;
   
-  let flavorStr = "";
-  let stockVal = 0;
-  let priceVal = 0;
+  let flavorStr = ""; let stockVal = 0; let priceVal = 0;
   
   if (baseId === 'dacquoise') {
     flavorStr = document.getElementById('valDacFlavor').value.trim();
@@ -642,15 +667,20 @@ document.getElementById('btnLinearSubmit').addEventListener('click', () => {
     alert("請確實填寫正確的庫存量與售價！"); return;
   }
   
-  // 🌟 核心規則：完全採用您的命名語法格式「品相＿口味」
   const fullName = flavorStr ? `${baseLabel}＿${flavorStr}` : baseLabel;
   
   fetch(GOOGLE_SCRIPT_URL, {
     method: 'POST',
-    body: JSON.stringify({action: 'addProduct', baseId: baseId, name: fullName, price: priceVal, stock: stockVal})
+    body: JSON.stringify({
+      action: 'addProduct', 
+      baseId: baseId, 
+      name: fullName, 
+      price: priceVal, 
+      stock: stockVal,
+      operator: currentOperator // ✨ 傳遞操作員工名字
+    })
   })
   .finally(() => {
-    // 清空輸入欄位
     if (baseId === 'dacquoise') document.getElementById('valDacFlavor').value = '';
     if (baseId === 'bouchée') document.getElementById('valBouFlavor').value = '';
     if (baseId === 'tiramisu') document.getElementById('valTirFlavor').value = '';
