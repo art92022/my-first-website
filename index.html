@@ -215,27 +215,7 @@
       <span>現場品項即時同步中...</span>
     </div>
     
-    <div id="catalogContainer" class="hidden">
-      <div id="zoneDacquoise" class="category-zone hidden">
-        <div class="category-title">🧁 達克瓦茲系列</div>
-        <div class="catalog-grid" id="gridDacquoise"></div>
-      </div>
-
-      <div id="zoneBouchee" class="category-zone hidden">
-        <div class="category-title">🥯 奶油餅系列 (布雪)</div>
-        <div class="catalog-grid" id="gridBouchee"></div>
-      </div>
-
-      <div id="zoneDessert" class="category-zone hidden">
-        <div class="category-title">🍮 經典法日小點心</div>
-        <div class="catalog-grid" id="gridDessert"></div>
-      </div>
-
-      <div id="zoneAddon" class="category-zone hidden">
-        <div class="category-title">✨ 現場加價購專區</div>
-        <div class="catalog-grid" id="gridAddon"></div>
-      </div>
-    </div>
+    <div id="catalogContainer" class="hidden"></div>
 
     <div class="catalog-empty hidden" id="catalogEmpty">目前現場沒有已上架的商品，請洽工作人員</div>
     
@@ -267,6 +247,7 @@
 </div>
 
 <script>
+// ⚠️ 請確保這段 URL 是你最新發布的 GAS 網址！
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3mSHjqW7SZvsP4uNT_J-HoFRgT4VXZmEhP8_gANktGd_Mj9BbE-TvYwrtS9DLPW6I/exec';
 
 let catalog = [];
@@ -304,67 +285,81 @@ function renderCatalog(){
   
   catalogEmpty.classList.add('hidden'); 
   catalogContainer.classList.remove('hidden');
+  catalogContainer.innerHTML = ''; // 清空原本內容
   
-  const grids = {
-    dacquoise: document.getElementById('gridDacquoise'),
-    bouchee: document.getElementById('gridBouchee'),
-    dessert: document.getElementById('gridDessert'),
-    addon: document.getElementById('gridAddon')
-  };
-  Object.values(grids).forEach(g => g.innerHTML = '');
-  const counts = { dacquoise: 0, bouchee: 0, dessert: 0, addon: 0 };
-
+  // 核心邏輯：依照後端傳來的 zone (大類) 進行分組
+  const groupedCatalog = {};
   catalog.forEach(p => {
-    const inCart = cart.find(c => c.name === p.name);
-    const currentQtyInCart = inCart ? inCart.qty : 0;
-    
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'product-card' + (inCart ? ' in-cart' : '');
-    
-    let stockText = `剩餘庫存：${p.stock} 件`;
-    let isLowStock = false;
-    if (p.stock <= 0) {
-      stockText = "❌ 已售罄 (補貨中)";
-      card.disabled = true;
-    } else if (p.stock <= 10) {
-      stockText = `🔥 僅剩最後 ${p.stock} 件！`;
-      isLowStock = true;
+    const zone = p.zone || "未分類商品";
+    if (!groupedCatalog[zone]) {
+      groupedCatalog[zone] = [];
     }
-
-    card.innerHTML = `
-      <span class="p-name">${escapeHtml(p.name)}</span>
-      <span class="p-price">${fmt(p.price)}</span>
-      <span class="p-stock ${isLowStock ? 'low-stock' : ''}">${stockText}</span>
-      ${inCart ? `<span class="p-badge">已選 ${inCart.qty}</span>` : ''}
-    `;
-    
-    card.addEventListener('click', () => {
-      if (p.stock <= currentQtyInCart) {
-        alert("抱歉，已達現場供應庫存上限！"); return;
-      }
-      if (existing = cart.find(c => c.name === p.name)){ existing.qty += 1; }
-      else { cart.push({catalogId: p.id, name: p.name, price: p.price, qty: 1}); }
-      renderCatalog(); renderCart();
-    });
-
-    // 💡 100% 聽從後端傳過來的包含 Emoji 完整字眼進行精準分區
-    var z = p.zone || "";
-    if (z.indexOf("達克瓦茲") !== -1) {
-      grids.dacquoise.appendChild(card); counts.dacquoise++;
-    } else if (z.indexOf("奶油餅") !== -1 || z.indexOf("布雪") !== -1) {
-      grids.bouchee.appendChild(card); counts.bouchee++;
-    } else if (z.indexOf("加價購") !== -1) {
-      grids.addon.appendChild(card); counts.addon++;
-    } else {
-      grids.dessert.appendChild(card); counts.dessert++;
-    }
+    groupedCatalog[zone].push(p);
   });
 
-  document.getElementById('zoneDacquoise').classList.toggle('hidden', counts.dacquoise === 0);
-  document.getElementById('zoneBouchee').classList.toggle('hidden', counts.bouchee === 0);
-  document.getElementById('zoneDessert').classList.toggle('hidden', counts.dessert === 0);
-  document.getElementById('zoneAddon').classList.toggle('hidden', counts.addon === 0);
+  // 動態生成每一個大類的區塊
+  for (const [zone, items] of Object.entries(groupedCatalog)) {
+    const zoneDiv = document.createElement('div');
+    zoneDiv.className = 'category-zone';
+    
+    // 根據關鍵字給予可愛的小 icon
+    let icon = "✨";
+    if (zone.includes("達克")) icon = "🧁";
+    else if (zone.includes("點心") || zone.includes("瑪德蓮") || zone.includes("費南雪")) icon = "🍮";
+    else if (zone.includes("加價") || zone.includes("禮盒")) icon = "🛒";
+    
+    // 建立大類標題
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'category-title';
+    titleDiv.innerHTML = `${icon} ${escapeHtml(zone)}`;
+    zoneDiv.appendChild(titleDiv);
+
+    // 建立商品網格
+    const gridDiv = document.createElement('div');
+    gridDiv.className = 'catalog-grid';
+
+    // 塞入商品卡片
+    items.forEach(p => {
+      const inCart = cart.find(c => c.name === p.name);
+      const currentQtyInCart = inCart ? inCart.qty : 0;
+      
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'product-card' + (inCart ? ' in-cart' : '');
+      
+      let stockText = `剩餘庫存：${p.stock} 件`;
+      let isLowStock = false;
+      if (p.stock <= 0) {
+        stockText = "❌ 已售罄 (補貨中)";
+        card.disabled = true;
+      } else if (p.stock <= 10) {
+        stockText = `🔥 僅剩最後 ${p.stock} 件！`;
+        isLowStock = true;
+      }
+
+      card.innerHTML = `
+        <span class="p-name">${escapeHtml(p.name)}</span>
+        <span class="p-price">${fmt(p.price)}</span>
+        <span class="p-stock ${isLowStock ? 'low-stock' : ''}">${stockText}</span>
+        ${inCart ? `<span class="p-badge">已選 ${inCart.qty}</span>` : ''}
+      `;
+      
+      card.addEventListener('click', () => {
+        if (p.stock <= currentQtyInCart) {
+          alert("抱歉，已達現場供應庫存上限！"); return;
+        }
+        let existing = cart.find(c => c.name === p.name);
+        if (existing){ existing.qty += 1; }
+        else { cart.push({catalogId: p.id, name: p.name, price: p.price, qty: 1}); }
+        renderCatalog(); renderCart();
+      });
+
+      gridDiv.appendChild(card);
+    });
+
+    zoneDiv.appendChild(gridDiv);
+    catalogContainer.appendChild(zoneDiv);
+  }
 }
 
 function renderCart(){
@@ -490,7 +485,7 @@ submitBtn.addEventListener('click', () => {
     carrierType = '統一編號'; carrierValue = document.getElementById('taxId').value; companyName = document.getElementById('companyName').value; invoiceLine = `統一編號：${carrierValue} 抬頭：${companyName}`;
   }
 
-  let itemLines = ''; total = 0;
+  let itemLines = ''; let total = 0;
   const itemsSnapshot = cart.map(item => {
     const s = item.price * item.qty; total += s;
     return { name: item.name, qty: item.qty, price: item.price, subtotal: s };
