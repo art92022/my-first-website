@@ -44,15 +44,11 @@
   .sec-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
   .sec-label{display:flex; align-items:center; gap:8px; font-weight:800; font-size:14.5px; color:var(--leaf-dark);}
   .sec-label .tag{background:var(--leaf); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; font-weight:700;}
-  .admin-btn{
-    background:#fff; border:1px solid var(--line); color:var(--muted);
-    font-size:11px; font-weight:700; padding:6px 10px; border-radius:7px; cursor:pointer;
-  }
 
   .field{margin-bottom:12px;}
   .field label{display:block; font-size:12.5px; font-weight:700; margin-bottom:5px; color:#4a4438;}
   .field .hint{font-weight:400; font-size:11px; color:var(--muted); margin-left:4px;}
-  input[type=text], input[type=number], input[type=email], input[type=tel], input[type=password]{
+  input[type=text], input[type=number], input[type=email], input[type=tel]{
     width:100%; padding:10px 11px; border:1px solid var(--line); border-radius:7px; font-size:15px; color:var(--ink);
   }
   input:focus{outline:2px solid var(--leaf); outline-offset:1px;}
@@ -70,6 +66,11 @@
   .radio-row .sub-input input{padding:7px 9px; font-size:13.5px;}
   .hidden{display:none !important;}
 
+  /* 讀取加載動畫 */
+  .catalog-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 30px 0; font-size: 13.5px; color: var(--muted); font-weight: 700; }
+  .spinner { width: 32px; height: 32px; border: 3px solid rgba(60,91,67,0.15); border-top-color: var(--leaf); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
   .catalog-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px; }
   .product-card{
     border:1.5px solid var(--line); border-radius:10px; background:#fff; padding:12px 10px;
@@ -85,7 +86,7 @@
   .product-card .p-badge{
     display:inline-block; margin-top:6px; font-size:11px; font-weight:700; background:var(--leaf); color:#fff; padding:1px 7px; border-radius:10px;
   }
-  .catalog-loading, .catalog-empty{ font-size:13px; color:var(--muted); text-align:center; padding:18px 0; }
+  .catalog-empty{ font-size:13px; color:var(--muted); text-align:center; padding:24px 0; line-height: 1.6; }
 
   .cart{margin-top:14px; border-top:1px dashed var(--line); padding-top:12px;}
   .cart-title{font-size:12px; font-weight:700; color:var(--muted); margin-bottom:8px;}
@@ -130,27 +131,8 @@
   .modal-actions{display:flex; gap:10px; margin-top:14px;}
   .modal-actions button{ flex:1; padding:12px; border-radius:8px; font-weight:700; font-size:14px; cursor:pointer; border:none; }
   .close-btn{background:var(--leaf); color:#fff;}
-  .ghost-btn{background:#fff; border:1px solid var(--line) !important; color:var(--ink);}
   .icon-circle{ width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:10px; }
   .icon-circle.ok{background:#eef4ec; color:var(--leaf-dark);}
-  .icon-circle.err{background:#fdeeea; color:var(--stamp-dark);}
-
-  .admin-row{ display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #ece5d3; font-size:13.5px; }
-  .admin-row .a-name{flex:1; font-weight:700;}
-  .admin-row .a-price{color:var(--stamp-dark); font-weight:700; margin-right:6px;}
-  .admin-row .a-del{ background:none; border:none; color:var(--stamp); font-size:17px; cursor:pointer; padding:0 2px;}
-  
-  .linear-form-zone { display: flex; flex-direction: column; gap: 10px; background: #fff; padding: 14px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 16px; }
-  .linear-row { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; color: #4a4438; }
-  .linear-row input[type="radio"] { width: 17px; height: 17px; accent-color: var(--leaf); margin: 0; cursor: pointer; }
-  .linear-row label { display: flex; align-items: center; gap: 4px; min-width: 80px; cursor: pointer; }
-  .linear-inputs { display: flex; gap: 6px; flex: 1; }
-  .linear-inputs input { padding: 6px 8px; font-size: 13.5px; border: 1px solid var(--line); border-radius: 5px; min-width: 0; }
-  .input-flavor { flex: 1.5; }
-  .input-stock { flex: 1; }
-  .input-price { flex: 1; }
-  .admin-submit-btn { background: var(--leaf); color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 4px; font-size: 14px; }
-  .admin-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -222,9 +204,13 @@
   <section>
     <div class="sec-head">
       <div class="sec-label"><span class="tag">02</span>選擇商品</div>
-      <button type="button" class="admin-btn" id="adminBtn">🔒 員工商品與庫存管理</button>
     </div>
-    <div class="catalog-loading" id="catalogLoading">商品載入中...</div>
+    
+    <div class="catalog-loading" id="catalogLoading">
+      <div class="spinner"></div>
+      <span>現場品項即時同步中...</span>
+    </div>
+    
     <div class="catalog-grid hidden" id="catalogGrid"></div>
     <div class="catalog-empty hidden" id="catalogEmpty">目前現場沒有已上架的商品，請洽工作人員</div>
     <div class="cart">
@@ -254,87 +240,11 @@
   </div>
 </div>
 
-<div class="overlay hidden" id="passwordOverlay">
-  <div class="modal">
-    <h2>員工身份驗證</h2>
-    <p class="modal-sub">設定當日供應品項與即時庫存，系統將會追蹤記錄操作人與當前時間</p>
-    <div class="field" style="margin-bottom: 14px;">
-      <label>員工姓名 <span class="hint">(必填，供系統日誌反查)</span></label>
-      <input type="text" id="adminEmpNameInput" placeholder="請輸入您的姓名 (例: 葉子)">
-    </div>
-    <div class="field">
-      <label>安全驗證密碼</label>
-      <input type="password" id="adminPasswordInput" placeholder="請輸入內部密碼" inputmode="numeric">
-    </div>
-    <div class="modal-actions" style="margin-top: 18px;">
-      <button class="ghost-btn" id="passwordCancelBtn">取消</button>
-      <button class="close-btn" id="passwordConfirmBtn">確認登入</button>
-    </div>
-  </div>
-</div>
-
-<div class="overlay hidden" id="adminOverlay">
-  <div class="modal" style="max-width: 680px;">
-    <h2>當日現場供應品項管理</h2>
-    <p class="modal-sub" style="margin-bottom: 10px;" id="adminWelcomeTitle">操作人員：</p>
-    
-    <div class="linear-form-zone">
-      <div class="linear-row">
-        <input type="radio" name="baseCategory" id="radDac" value="dacquoise" data-label="達克瓦茲" checked>
-        <label for="radDac">達克瓦茲＿</label>
-        <div class="linear-inputs">
-          <input type="text" class="input-flavor" id="valDacFlavor" placeholder="口味">
-          <input type="number" class="input-stock" id="valDacStock" placeholder="庫存量" min="0">
-          <input type="number" class="input-price" id="valDacPrice" placeholder="價格" min="0" value="90">
-        </div>
-      </div>
-      
-      <div class="linear-row">
-        <input type="radio" name="baseCategory" id="radBou" value="bouchée" data-label="布雪">
-        <label for="radBou">布雪＿</label>
-        <div class="linear-inputs">
-          <input type="text" class="input-flavor" id="valBouFlavor" placeholder="口味">
-          <input type="number" class="input-stock" id="valBouStock" placeholder="庫存量" min="0">
-          <input type="number" class="input-price" id="valBouPrice" placeholder="價格" min="0" value="95">
-        </div>
-      </div>
-      
-      <div class="linear-row">
-        <input type="radio" name="baseCategory" id="radTir" value="tiramisu" data-label="提拉米蘇">
-        <label for="radTir">提拉米蘇＿</label>
-        <div class="linear-inputs">
-          <input type="text" class="input-flavor" id="valTirFlavor" placeholder="口味">
-          <input type="number" class="input-stock" id="valTirStock" placeholder="庫存量" min="0">
-          <input type="number" class="input-price" id="valTirPrice" placeholder="價格" min="0" value="110">
-        </div>
-      </div>
-
-      <div class="linear-row">
-        <input type="radio" name="baseCategory" id="radPud" value="pudding" data-label="純手工布丁">
-        <label for="radPud">純手工布丁＿</label>
-        <div class="linear-inputs">
-          <input type="text" class="input-flavor" id="valPudFlavor" placeholder="口味">
-          <input type="number" class="input-stock" id="valPudStock" placeholder="庫存量" min="0">
-          <input type="number" class="input-price" id="valPudPrice" placeholder="價格" min="0" value="90">
-        </div>
-      </div>
-
-      <button type="button" class="admin-submit-btn" id="btnLinearSubmit">確認上架 / 覆蓋更新至雲端</button>
-    </div>
-
-    <div id="adminList"></div>
-    <div class="modal-actions" style="margin-top:16px;"><button class="close-btn" id="adminDoneBtn" style="flex:1;">完成並關閉</button></div>
-  </div>
-</div>
-
 <script>
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3mSHjqW7SZvsP4uNT_J-HoFRgT4VXZmEhP8_gANktGd_Mj9BbE-TvYwrtS9DLPW6I/exec';
-const ADMIN_PASSWORD = '1225';
 
 let catalog = [];
 let cart = [];
-let adminUnlocked = false;
-let currentOperator = "";
 
 const catalogGrid = document.getElementById('catalogGrid');
 const catalogLoading = document.getElementById('catalogLoading');
@@ -345,14 +255,19 @@ function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
 function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
 function loadCatalog(){
+  catalogLoading.classList.remove('hidden');
+  catalogGrid.classList.add('hidden');
+  catalogEmpty.classList.add('hidden');
+
   const callbackName = 'catalogCb_' + Date.now();
   const script = document.createElement('script');
   window[callbackName] = (data) => {
     delete window[callbackName]; script.remove();
-    catalog = (data && data.products) ? data.products.filter(p => p.price > 0 && p.stock > 0) : [];
+    catalog = (data && data.products) ? data.products : [];
     renderCatalog();
   };
-  script.src = GOOGLE_SCRIPT_URL + '?action=getCatalog&callback=' + callbackName;
+  // 加上 _cacheBust 強制摧毀任何快取，只要試算表一改，網頁點開 100% 抓到最新庫存
+  script.src = GOOGLE_SCRIPT_URL + '?action=getCatalog&callback=' + callbackName + '&_cacheBust=' + Date.now();
   document.body.appendChild(script);
 }
 
@@ -558,153 +473,6 @@ submitBtn.addEventListener('click', () => {
 });
 
 document.getElementById('closeBtn').addEventListener('click', () => { document.getElementById('overlay').classList.add('hidden'); resetFormForNextOrder(); });
-
-const passwordOverlay = document.getElementById('passwordOverlay');
-const adminOverlay = document.getElementById('adminOverlay');
-const adminPasswordInput = document.getElementById('adminPasswordInput');
-const adminEmpNameInput = document.getElementById('adminEmpNameInput');
-
-document.getElementById('adminBtn').addEventListener('click', () => {
-  if (adminUnlocked){ openAdminPanel(); } 
-  else { adminPasswordInput.value = ''; adminEmpNameInput.value = ''; passwordOverlay.classList.remove('hidden'); setTimeout(() => adminEmpNameInput.focus(), 100); }
-});
-document.getElementById('passwordCancelBtn').addEventListener('click', () => passwordOverlay.classList.add('hidden'));
-
-document.getElementById('passwordConfirmBtn').addEventListener('click', () => {
-  const empName = adminEmpNameInput.value.trim();
-  if(!empName) { alert("請務必填寫您的【員工姓名】以供系統記錄日誌反查！"); return; }
-  
-  if (adminPasswordInput.value === ADMIN_PASSWORD){ 
-    adminUnlocked = true; 
-    currentOperator = empName; 
-    passwordOverlay.classList.add('hidden'); 
-    openAdminPanel(); 
-  } else { 
-    alert('密碼錯誤'); 
-  }
-});
-adminPasswordInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('passwordConfirmBtn').click(); });
-
-function openAdminPanel(){
-  document.getElementById('adminWelcomeTitle').innerHTML = `操作人員大名：<strong style="color:var(--stamp); font-size:14px;">${escapeHtml(currentOperator)}</strong> (所有上下架與更新動作皆會自動附加此簽章與系統時間)`;
-  
-  const callbackName = 'catalogCb_' + Date.now();
-  const script = document.createElement('script');
-  window[callbackName] = (data) => {
-    delete window[callbackName]; script.remove();
-    catalog = (data && data.products) ? data.products : [];
-    renderAdminList();
-    adminOverlay.classList.remove('hidden');
-  };
-  script.src = GOOGLE_SCRIPT_URL + '?action=getCatalog&callback=' + callbackName;
-  document.body.appendChild(script);
-}
-
-function renderAdminList(){
-  const list = document.getElementById('adminList'); list.innerHTML = '';
-  const activeProducts = catalog.filter(p => p.price > 0 || p.stock > 0);
-  if (activeProducts.length === 0){ list.innerHTML = '<div class="catalog-empty">目前現場無任何上架品項</div>'; return; }
-  
-  activeProducts.forEach(p => {
-    const row = document.createElement('div'); row.className = 'admin-row';
-    row.innerHTML = `<span class="a-name">${escapeHtml(p.name)}</span><span class="a-price">${fmt(p.price)} (剩 ${p.stock} 件)</span><button type="button" class="a-del" title="下架">×</button>`;
-    
-    row.querySelector('.a-del').addEventListener('click', () => { 
-      if (!confirm(`確定要下架「${p.name}」嗎？\n系統日誌將會同步註記由 ${currentOperator} 下架。`)) return; 
-      removeProduct(p); 
-    });
-    list.appendChild(row);
-  });
-}
-
-function removeProduct(product){
-  const list = document.getElementById('adminList');
-  if(list) list.style.opacity = '0.5';
-
-  fetch(GOOGLE_SCRIPT_URL, { 
-    method: 'POST', 
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({action: 'removeProduct', id: product.name, operator: currentOperator}) 
-  })
-  .then(res => res.json())
-  .catch(err => console.error("下架失敗:", err))
-  .finally(() => { 
-    if(list) list.style.opacity = '1';
-    openAdminPanel(); 
-    loadCatalog(); 
-  });
-}
-
-document.getElementById('btnLinearSubmit').addEventListener('click', () => {
-  const selectedRadio = document.querySelector('input[name="baseCategory"]:checked');
-  if (!selectedRadio) { alert("請先選取要操作的品相！"); return; }
-  
-  const baseId = selectedRadio.value;
-  const baseLabel = selectedRadio.dataset.label;
-  
-  let flavorStr = ""; let stockVal = 0; let priceVal = 0;
-  
-  if (baseId === 'dacquoise') {
-    flavorStr = document.getElementById('valDacFlavor').value.trim();
-    stockVal = parseInt(document.getElementById('valDacStock').value);
-    priceVal = parseFloat(document.getElementById('valDacPrice').value);
-  } else if (baseId === 'bouchée') {
-    flavorStr = document.getElementById('valBouFlavor').value.trim();
-    stockVal = parseInt(document.getElementById('valBouStock').value);
-    priceVal = parseFloat(document.getElementById('valBouPrice').value);
-  } else if (baseId === 'tiramisu') {
-    flavorStr = document.getElementById('valTirFlavor').value.trim();
-    stockVal = parseInt(document.getElementById('valTirStock').value);
-    priceVal = parseFloat(document.getElementById('valTirPrice').value);
-  } else if (baseId === 'pudding') {
-    flavorStr = document.getElementById('valPudFlavor').value.trim();
-    stockVal = parseInt(document.getElementById('valPudStock').value);
-    priceVal = parseFloat(document.getElementById('valPudPrice').value);
-  }
-  
-  if (isNaN(priceVal) || priceVal <= 0 || isNaN(stockVal) || stockVal < 0) {
-    alert("請確實填寫正確的庫存量與售價！"); return;
-  }
-  
-  const fullName = flavorStr ? `${baseLabel}＿${flavorStr}` : baseLabel;
-  
-  const submitBtn = document.getElementById('btnLinearSubmit');
-  const origText = submitBtn.textContent;
-  submitBtn.disabled = true;
-  submitBtn.textContent = '雲端同步中...';
-  
-  fetch(GOOGLE_SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({
-      action: 'addProduct', 
-      baseId: baseId, 
-      name: fullName, 
-      price: priceVal, 
-      stock: stockVal,
-      operator: currentOperator
-    })
-  })
-  .then(res => res.json())
-  .catch(err => {
-    alert("上架同步發生錯誤，請檢查網路或後端程式！");
-    console.error(err);
-  })
-  .finally(() => {
-    submitBtn.disabled = false;
-    submitBtn.textContent = origText;
-
-    if (baseId === 'dacquoise') document.getElementById('valDacFlavor').value = '';
-    if (baseId === 'bouchée') document.getElementById('valBouFlavor').value = '';
-    if (baseId === 'tiramisu') document.getElementById('valTirFlavor').value = '';
-    if (baseId === 'pudding') document.getElementById('valPudFlavor').value = '';
-    
-    openAdminPanel(); 
-    loadCatalog();
-  });
-});
-
-document.getElementById('adminDoneBtn').addEventListener('click', () => adminOverlay.classList.add('hidden'));
 </script>
 </body>
 </html>
