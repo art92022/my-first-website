@@ -348,7 +348,7 @@ function renderCatalog(){
       renderCatalog(); renderCart();
     });
 
-    // 💡 升級：100% 聽從試算表 E 欄傳來的分區標籤分配，絕對不誤判
+    // 對齊後端傳來的 zone 屬性分流
     if (p.zone === "達克瓦茲") {
       grids.dacquoise.appendChild(card); counts.dacquoise++;
     } else if (p.zone === "奶油餅") {
