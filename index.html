@@ -71,10 +71,14 @@
   .spinner { width: 32px; height: 32px; border: 3px solid rgba(60,91,67,0.15); border-top-color: var(--leaf); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .catalog-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px; }
+  /* 新增：法日法式優雅 UI/UX 分流排版樣式 */
+  .category-zone { margin-bottom: 22px; }
+  .category-title { font-size: 13px; font-weight: 800; color: var(--leaf-dark); letter-spacing: 1px; margin: 12px 0 8px; padding-bottom: 4px; border-bottom: 1px dashed var(--line); display: flex; align-items: center; gap: 4px; }
+  .catalog-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  
   .product-card{
     border:1.5px solid var(--line); border-radius:10px; background:#fff; padding:12px 10px;
-    text-align:left; cursor:pointer; font-family:inherit; transition:border-color 0.15s;
+    text-align:left; cursor:pointer; font-family:inherit; transition:all 0.15s ease;
   }
   .product-card:active{transform:translateY(1px);}
   .product-card.in-cart{border-color:var(--leaf); background:#f1f6f0;}
@@ -211,8 +215,30 @@
       <span>現場品項即時同步中...</span>
     </div>
     
-    <div class="catalog-grid hidden" id="catalogGrid"></div>
+    <div id="catalogContainer" class="hidden">
+      <div id="zoneDacquoise" class="category-zone hidden">
+        <div class="category-title">🧁 達克瓦茲系列</div>
+        <div class="catalog-grid" id="gridDacquoise"></div>
+      </div>
+
+      <div id="zoneBouchee" class="category-zone hidden">
+        <div class="category-title">🥯 奶油餅系列 (布雪)</div>
+        <div class="catalog-grid" id="gridBouchee"></div>
+      </div>
+
+      <div id="zoneDessert" class="category-zone hidden">
+        <div class="category-title">🍮 經典法日小點心</div>
+        <div class="catalog-grid" id="gridDessert"></div>
+      </div>
+
+      <div id="zoneAddon" class="category-zone hidden">
+        <div class="category-title">✨ 現場加價購專區</div>
+        <div class="catalog-grid" id="gridAddon"></div>
+      </div>
+    </div>
+
     <div class="catalog-empty hidden" id="catalogEmpty">目前現場沒有已上架的商品，請洽工作人員</div>
+    
     <div class="cart">
       <div class="cart-title">已選購商品</div>
       <div id="cartBody"></div>
@@ -246,8 +272,8 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3mSHjqW7SZv
 let catalog = [];
 let cart = [];
 
-const catalogGrid = document.getElementById('catalogGrid');
 const catalogLoading = document.getElementById('catalogLoading');
+const catalogContainer = document.getElementById('catalogContainer');
 const catalogEmpty = document.getElementById('catalogEmpty');
 const cartBody = document.getElementById('cartBody');
 
@@ -256,7 +282,7 @@ function escapeHtml(s){ const d = document.createElement('div'); d.textContent =
 
 function loadCatalog(){
   catalogLoading.classList.remove('hidden');
-  catalogGrid.classList.add('hidden');
+  catalogContainer.classList.add('hidden');
   catalogEmpty.classList.add('hidden');
 
   const callbackName = 'catalogCb_' + Date.now();
@@ -266,19 +292,34 @@ function loadCatalog(){
     catalog = (data && data.products) ? data.products : [];
     renderCatalog();
   };
-  // 加上 _cacheBust 強制摧毀任何快取，只要試算表一改，網頁點開 100% 抓到最新庫存
   script.src = GOOGLE_SCRIPT_URL + '?action=getCatalog&callback=' + callbackName + '&_cacheBust=' + Date.now();
   document.body.appendChild(script);
 }
 
 function renderCatalog(){
   catalogLoading.classList.add('hidden');
-  if (catalog.length === 0){
-    catalogEmpty.classList.remove('hidden'); catalogGrid.classList.add('hidden'); return;
-  }
-  catalogEmpty.classList.add('hidden'); catalogGrid.classList.remove('hidden');
-  catalogGrid.innerHTML = '';
   
+  if (catalog.length === 0){
+    catalogEmpty.classList.remove('hidden'); 
+    catalogContainer.classList.add('hidden'); 
+    return;
+  }
+  
+  catalogEmpty.classList.add('hidden'); 
+  catalogContainer.classList.remove('hidden');
+  
+  // 清空原本的 4 個網格
+  const grids = {
+    dacquoise: document.getElementById('gridDacquoise'),
+    bouchee: document.getElementById('gridBouchee'),
+    dessert: document.getElementById('gridDessert'),
+    addon: document.getElementById('gridAddon')
+  };
+  Object.values(grids).forEach(g => g.innerHTML = '');
+
+  // 計數器，用來追蹤每一組有沒有分到商品
+  const counts = { dacquoise: 0, bouchee: 0, dessert: 0, addon: 0 };
+
   catalog.forEach(p => {
     const inCart = cart.find(c => c.name === p.name);
     const currentQtyInCart = inCart ? inCart.qty : 0;
@@ -312,8 +353,31 @@ function renderCatalog(){
       else { cart.push({catalogId: p.id, name: p.name, price: p.price, qty: 1}); }
       renderCatalog(); renderCart();
     });
-    catalogGrid.appendChild(card);
+
+    // 💡 UX核心邏輯：根據品名或價格，自動完美分流至 4 大類別
+    var pName = p.name;
+    if (p.price <= 60) {
+      // 價格低於 60 元（例如小提袋、貼紙、單包配件等）自動歸類到加價購
+      grids.addon.appendChild(card);
+      counts.addon++;
+    } else if (pName.indexOf("達克瓦茲") !== -1) {
+      grids.dacquoise.appendChild(card);
+      counts.dacquoise++;
+    } else if (pName.indexOf("布雪") !== -1 || pName.indexOf("奶油餅") !== -1) {
+      grids.bouchee.appendChild(card);
+      counts.bouchee++;
+    } else {
+      // 提拉米蘇、純手工布丁等常規小點心
+      grids.dessert.appendChild(card);
+      counts.dessert++;
+    }
   });
+
+  // 自動隱藏當天「沒有品項」的區塊，畫面永遠最乾淨
+  document.getElementById('zoneDacquoise').classList.toggle('hidden', counts.dacquoise === 0);
+  document.getElementById('zoneBouchee').classList.toggle('hidden', counts.bouchee === 0);
+  document.getElementById('zoneDessert').classList.toggle('hidden', counts.dessert === 0);
+  document.getElementById('zoneAddon').classList.toggle('hidden', counts.addon === 0);
 }
 
 function renderCart(){
