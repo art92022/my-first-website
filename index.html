@@ -138,7 +138,7 @@
   .admin-row{ display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #ece5d3; font-size:13.5px; }
   .admin-row .a-name{flex:1; font-weight:700;}
   .admin-row .a-price{color:var(--stamp-dark); font-weight:700; margin-right:6px;}
-  .admin-row .a-del{ background:none; border:none; color:var(--stamp); font-size:17px; cursor:pointer; padding:0 2px; }
+  .admin-row .a-del{ background:none; border:none; color:var(--stamp); font-size:17px; cursor:pointer; padding:0 2px;}
   
   .linear-form-zone { display: flex; flex-direction: column; gap: 10px; background: #fff; padding: 14px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 16px; }
   .linear-row { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; color: #4a4438; }
@@ -150,6 +150,7 @@
   .input-stock { flex: 1; }
   .input-price { flex: 1; }
   .admin-submit-btn { background: var(--leaf); color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 4px; font-size: 14px; }
+  .admin-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -498,16 +499,7 @@ function resetFormForNextOrder(){
   document.getElementById('businessBlock').classList.add('hidden');
   document.getElementById('individualBlock').classList.remove('hidden');
   cart = []; newOrderNumber(); clearFieldErrors(); document.getElementById('validationBanner').classList.add('hidden');
-  
-  const callbackName = 'catalogCb_' + Date.now();
-  const script = document.createElement('script');
-  window[callbackName] = (data) => {
-    delete window[callbackName]; script.remove();
-    catalog = (data && data.products) ? data.products.filter(p => p.price > 0 && p.stock > 0) : [];
-    renderCatalog(); renderCart();
-  };
-  script.src = GOOGLE_SCRIPT_URL + '?action=getCatalog&callback=' + callbackName;
-  document.body.appendChild(script);
+  loadCatalog();
 }
 
 const submitBtn = document.getElementById('submitBtn');
@@ -626,11 +618,21 @@ function renderAdminList(){
 }
 
 function removeProduct(product){
+  const list = document.getElementById('adminList');
+  if(list) list.style.opacity = '0.5';
+
   fetch(GOOGLE_SCRIPT_URL, { 
     method: 'POST', 
-    body: JSON.stringify({action: 'removeProduct', id: product.id, operator: currentOperator}) 
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({action: 'removeProduct', id: product.name, operator: currentOperator}) 
   })
-  .finally(() => { openAdminPanel(); loadCatalog(); });
+  .then(res => res.json())
+  .catch(err => console.error("下架失敗:", err))
+  .finally(() => { 
+    if(list) list.style.opacity = '1';
+    openAdminPanel(); 
+    loadCatalog(); 
+  });
 }
 
 document.getElementById('btnLinearSubmit').addEventListener('click', () => {
@@ -666,8 +668,14 @@ document.getElementById('btnLinearSubmit').addEventListener('click', () => {
   
   const fullName = flavorStr ? `${baseLabel}＿${flavorStr}` : baseLabel;
   
+  const submitBtn = document.getElementById('btnLinearSubmit');
+  const origText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = '雲端同步中...';
+  
   fetch(GOOGLE_SCRIPT_URL, {
     method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({
       action: 'addProduct', 
       baseId: baseId, 
@@ -677,13 +685,22 @@ document.getElementById('btnLinearSubmit').addEventListener('click', () => {
       operator: currentOperator
     })
   })
+  .then(res => res.json())
+  .catch(err => {
+    alert("上架同步發生錯誤，請檢查網路或後端程式！");
+    console.error(err);
+  })
   .finally(() => {
+    submitBtn.disabled = false;
+    submitBtn.textContent = origText;
+
     if (baseId === 'dacquoise') document.getElementById('valDacFlavor').value = '';
     if (baseId === 'bouchée') document.getElementById('valBouFlavor').value = '';
     if (baseId === 'tiramisu') document.getElementById('valTirFlavor').value = '';
     if (baseId === 'pudding') document.getElementById('valPudFlavor').value = '';
     
-    openAdminPanel(); loadCatalog();
+    openAdminPanel(); 
+    loadCatalog();
   });
 });
 
