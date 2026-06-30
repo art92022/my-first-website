@@ -66,12 +66,12 @@
   .radio-row .sub-input input{padding:7px 9px; font-size:13.5px;}
   .hidden{display:none !important;}
 
-  /* 讀取加載動畫 */
+  /* 加載轉圈圈 */
   .catalog-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 30px 0; font-size: 13.5px; color: var(--muted); font-weight: 700; }
   .spinner { width: 32px; height: 32px; border: 3px solid rgba(60,91,67,0.15); border-top-color: var(--leaf); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* 優雅分流排版 */
+  /* 視覺分區 */
   .category-zone { margin-bottom: 22px; }
   .category-title { font-size: 13px; font-weight: 800; color: var(--leaf-dark); letter-spacing: 1px; margin: 12px 0 8px; padding-bottom: 4px; border-bottom: 1px dashed var(--line); display: flex; align-items: center; gap: 4px; }
   .catalog-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
@@ -348,12 +348,13 @@ function renderCatalog(){
       renderCatalog(); renderCart();
     });
 
-    // 對齊後端傳來的 zone 屬性分流
-    if (p.zone === "達克瓦茲") {
+    // 💡 100% 聽從後端傳過來的包含 Emoji 完整字眼進行精準分區
+    var z = p.zone || "";
+    if (z.indexOf("達克瓦茲") !== -1) {
       grids.dacquoise.appendChild(card); counts.dacquoise++;
-    } else if (p.zone === "奶油餅") {
+    } else if (z.indexOf("奶油餅") !== -1 || z.indexOf("布雪") !== -1) {
       grids.bouchee.appendChild(card); counts.bouchee++;
-    } else if (p.zone === "加價購") {
+    } else if (z.indexOf("加價購") !== -1) {
       grids.addon.appendChild(card); counts.addon++;
     } else {
       grids.dessert.appendChild(card); counts.dessert++;
