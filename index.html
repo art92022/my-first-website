@@ -71,7 +71,7 @@
   .spinner { width: 32px; height: 32px; border: 3px solid rgba(60,91,67,0.15); border-top-color: var(--leaf); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* 新增：法日法式優雅 UI/UX 分流排版樣式 */
+  /* 優雅分流排版 */
   .category-zone { margin-bottom: 22px; }
   .category-title { font-size: 13px; font-weight: 800; color: var(--leaf-dark); letter-spacing: 1px; margin: 12px 0 8px; padding-bottom: 4px; border-bottom: 1px dashed var(--line); display: flex; align-items: center; gap: 4px; }
   .catalog-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
@@ -298,17 +298,13 @@ function loadCatalog(){
 
 function renderCatalog(){
   catalogLoading.classList.add('hidden');
-  
   if (catalog.length === 0){
-    catalogEmpty.classList.remove('hidden'); 
-    catalogContainer.classList.add('hidden'); 
-    return;
+    catalogEmpty.classList.remove('hidden'); catalogContainer.classList.add('hidden'); return;
   }
   
   catalogEmpty.classList.add('hidden'); 
   catalogContainer.classList.remove('hidden');
   
-  // 清空原本的 4 個網格
   const grids = {
     dacquoise: document.getElementById('gridDacquoise'),
     bouchee: document.getElementById('gridBouchee'),
@@ -316,8 +312,6 @@ function renderCatalog(){
     addon: document.getElementById('gridAddon')
   };
   Object.values(grids).forEach(g => g.innerHTML = '');
-
-  // 計數器，用來追蹤每一組有沒有分到商品
   const counts = { dacquoise: 0, bouchee: 0, dessert: 0, addon: 0 };
 
   catalog.forEach(p => {
@@ -354,26 +348,18 @@ function renderCatalog(){
       renderCatalog(); renderCart();
     });
 
-    // 💡 UX核心邏輯：根據品名或價格，自動完美分流至 4 大類別
-    var pName = p.name;
-    if (p.price <= 60) {
-      // 價格低於 60 元（例如小提袋、貼紙、單包配件等）自動歸類到加價購
-      grids.addon.appendChild(card);
-      counts.addon++;
-    } else if (pName.indexOf("達克瓦茲") !== -1) {
-      grids.dacquoise.appendChild(card);
-      counts.dacquoise++;
-    } else if (pName.indexOf("布雪") !== -1 || pName.indexOf("奶油餅") !== -1) {
-      grids.bouchee.appendChild(card);
-      counts.bouchee++;
+    // 💡 升級：100% 聽從試算表 E 欄傳來的分區標籤分配，絕對不誤判
+    if (p.zone === "達克瓦茲") {
+      grids.dacquoise.appendChild(card); counts.dacquoise++;
+    } else if (p.zone === "奶油餅") {
+      grids.bouchee.appendChild(card); counts.bouchee++;
+    } else if (p.zone === "加價購") {
+      grids.addon.appendChild(card); counts.addon++;
     } else {
-      // 提拉米蘇、純手工布丁等常規小點心
-      grids.dessert.appendChild(card);
-      counts.dessert++;
+      grids.dessert.appendChild(card); counts.dessert++;
     }
   });
 
-  // 自動隱藏當天「沒有品項」的區塊，畫面永遠最乾淨
   document.getElementById('zoneDacquoise').classList.toggle('hidden', counts.dacquoise === 0);
   document.getElementById('zoneBouchee').classList.toggle('hidden', counts.bouchee === 0);
   document.getElementById('zoneDessert').classList.toggle('hidden', counts.dessert === 0);
