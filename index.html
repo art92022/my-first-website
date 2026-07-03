@@ -73,7 +73,7 @@
 
   /* 視覺分區 */
   .category-zone { margin-bottom: 22px; }
-  .category-title { font-size: 13px; font-weight: 800; color: var(--leaf-dark); letter-spacing: 1px; margin: 12px 0 8px; padding-bottom: 4px; border-bottom: 1px dashed var(--line); display: flex; align-items: center; gap: 4px; }
+  .category-title { font-size: 14px; font-weight: 800; color: var(--leaf-dark); letter-spacing: 1px; margin: 12px 0 8px; padding-bottom: 4px; border-bottom: 1px dashed var(--line); display: flex; align-items: center; gap: 4px; }
   .catalog-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   
   .product-card{
@@ -171,7 +171,7 @@
         <input type="tel" id="buyerPhone" placeholder="09xx-xxx-xxx">
       </div>
       <div class="field">
-        <label>Email <span class="hint">(選填)</span></label>
+        <label>Email <span class="hint" style="color:var(--stamp-dark); font-weight:700;">(必填) 要寄發票</span></label>
         <input type="email" id="buyerEmail" placeholder="example@mail.com">
       </div>
     </div>
@@ -247,7 +247,7 @@
 </div>
 
 <script>
-// ⚠️ 請確保這段 URL 是你最新發布的 GAS 網址！
+// ⚠️ 確保這段 URL 是你最新發布的 GAS 網址！
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3mSHjqW7SZvsP4uNT_J-HoFRgT4VXZmEhP8_gANktGd_Mj9BbE-TvYwrtS9DLPW6I/exec';
 
 let catalog = [];
@@ -285,9 +285,8 @@ function renderCatalog(){
   
   catalogEmpty.classList.add('hidden'); 
   catalogContainer.classList.remove('hidden');
-  catalogContainer.innerHTML = ''; // 清空原本內容
+  catalogContainer.innerHTML = ''; 
   
-  // 核心邏輯：依照後端傳來的 zone (大類) 進行分組
   const groupedCatalog = {};
   catalog.forEach(p => {
     const zone = p.zone || "未分類商品";
@@ -297,28 +296,18 @@ function renderCatalog(){
     groupedCatalog[zone].push(p);
   });
 
-  // 動態生成每一個大類的區塊
   for (const [zone, items] of Object.entries(groupedCatalog)) {
     const zoneDiv = document.createElement('div');
     zoneDiv.className = 'category-zone';
     
-    // 根據關鍵字給予可愛的小 icon
-    let icon = "✨";
-    if (zone.includes("達克")) icon = "🧁";
-    else if (zone.includes("點心") || zone.includes("瑪德蓮") || zone.includes("費南雪")) icon = "🍮";
-    else if (zone.includes("加價") || zone.includes("禮盒")) icon = "🛒";
-    
-    // 建立大類標題
     const titleDiv = document.createElement('div');
     titleDiv.className = 'category-title';
-    titleDiv.innerHTML = `${icon} ${escapeHtml(zone)}`;
+    titleDiv.innerHTML = `${escapeHtml(zone)}`;
     zoneDiv.appendChild(titleDiv);
 
-    // 建立商品網格
     const gridDiv = document.createElement('div');
     gridDiv.className = 'catalog-grid';
 
-    // 塞入商品卡片
     items.forEach(p => {
       const inCart = cart.find(c => c.name === p.name);
       const currentQtyInCart = inCart ? inCart.qty : 0;
@@ -430,9 +419,14 @@ function validateForm(){
   const buyerType = document.querySelector('#buyerTypeSeg button.active').dataset.type;
   const nameInput = document.getElementById('buyerName');
   const phoneInput = document.getElementById('buyerPhone');
+  const emailInput = document.getElementById('buyerEmail');
 
   if (!nameInput.value.trim()){ errors.push('請填寫姓名／聯絡人'); markFieldError(nameInput); }
   if (!phoneInput.value.trim()){ errors.push('請填寫聯絡電話'); markFieldError(phoneInput); }
+  
+  // 💡 這裡加上了 Email 必填驗證，沒填會阻擋送出
+  if (!emailInput.value.trim()){ errors.push('請填寫Email (寄發票用)'); markFieldError(emailInput); }
+  
   if (buyerType === '個人'){
     if (document.querySelector('input[name=carrier]:checked').value === 'mobile' && !document.getElementById('mobileCarrier').value.trim()){
       errors.push('請填寫手機載具條碼'); markFieldError(document.getElementById('mobileCarrier'));
@@ -447,7 +441,7 @@ function validateForm(){
 
 function showValidationBanner(errors){
   const banner = document.getElementById('validationBanner');
-  banner.innerHTML = '<b>請完成以下項目再送出：</b>' + errors.map(e => '・' + e).join('<br>');
+  banner.innerHTML = '<b>請完成以下項目再送出：</b><br>' + errors.map(e => '・' + e).join('<br>');
   banner.classList.remove('hidden'); banner.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
@@ -495,7 +489,7 @@ submitBtn.addEventListener('click', () => {
   const untaxed = Math.round(total / 1.05); const tax = total - untaxed;
 
   const orderData = { orderNo, orderDate, buyerType, name, phone, email, carrierType, carrierValue, companyName, items: itemsSnapshot, untaxed, tax, total };
-  const summary = `訂單編號：${orderNo} 日期：${orderDate}\n\n【購買人資料】\n類別：${buyerType}\n姓名：${name}\n電話：${phone}\n${invoiceLine}\n\n【商品明細】\n${itemLines}未稅金額：${fmt(untaxed)}\n稅額(5%)：${fmt(tax)}\n應付總額：${fmt(total)}`;
+  const summary = `訂單編號：${orderNo} 日期：${orderDate}\n\n【購買人資料】\n類別：${buyerType}\n姓名：${name}\n電話：${phone}\nEmail：${email}\n${invoiceLine}\n\n【商品明細】\n${itemLines}未稅金額：${fmt(untaxed)}\n稅額(5%)：${fmt(tax)}\n應付總額：${fmt(total)}`;
 
   submitBtn.disabled = true; submitBtn.textContent = '送出中...';
 
