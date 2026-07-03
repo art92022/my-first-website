@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>面交訂單表</title>
+<title>Bonheur Cookie 面交訂單管理表</title>
 <style>
   :root{
     --ink:#1c2b22;
@@ -78,7 +78,7 @@
   
   .product-card{
     border:1.5px solid var(--line); border-radius:10px; background:#fff; padding:12px 10px;
-    text-align:left; cursor:pointer; font-family:inherit; transition:all 0.15s ease;
+    text-align:left; cursor:pointer; font-family:inherit; transition:all 0.15s ease; position: relative;
   }
   .product-card:active{transform:translateY(1px);}
   .product-card.in-cart{border-color:var(--leaf); background:#f1f6f0;}
@@ -137,6 +137,18 @@
   .close-btn{background:var(--leaf); color:#fff;}
   .icon-circle{ width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:10px; }
   .icon-circle.ok{background:#eef4ec; color:var(--leaf-dark);}
+
+  /* 管理者後台控制區樣式 */
+  .admin-trigger { text-align: center; margin-top: 40px; opacity: 0.2; font-size: 11px; cursor: pointer; transition: opacity 0.2s; }
+  .admin-trigger:hover { opacity: 0.8; }
+  .admin-panel { background: #ebdcb9; border: 2px dashed var(--stamp); border-radius: 10px; padding: 16px; margin-top: 20px; text-align: left; }
+  .admin-panel h3 { margin: 0 0 10px 0; font-size: 14px; color: var(--stamp-dark); display: flex; justify-content: space-between; align-items: center; }
+  .admin-btn-group { display: flex; gap: 10px; margin-bottom: 12px; }
+  .admin-btn { flex: 1; padding: 10px; font-size: 12.5px; font-weight: 800; border-radius: 6px; border: none; cursor: pointer; color: #fff; }
+  .admin-btn.up { background: var(--leaf); }
+  .admin-btn.down { background: var(--stamp); }
+  .admin-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .admin-status-msg { font-size: 12px; color: var(--ink); background: rgba(255,255,255,0.6); padding: 6px 10px; border-radius: 4px; margin: 0; min-height: 28px; }
 </style>
 </head>
 <body>
@@ -234,6 +246,17 @@
   <div class="validation-banner hidden" id="validationBanner"></div>
   <div class="submit-bar"><button class="submit-btn" id="submitBtn">送出訂單</button></div>
   <div class="note-text">送出後資料會直接傳送給工作人員，請至前台等候核對取貨</div>
+
+  <div class="admin-trigger" onclick="toggleAdminPanel()"> ⚙️ 品牌內部管理專區 </div>
+  
+  <div class="admin-panel hidden" id="adminPanel">
+    <h3>Bonheur Cookie 現場前台狀態控制 <span style="font-size:11px; font-weight:normal; color:var(--muted);">僅內部人員操作</span></h3>
+    <div class="admin-btn-group">
+      <button type="button" class="admin-btn up" id="batchUpBtn" onclick="changeCatalogStatus('active')">⬆️ 一鍵全品項上架</button>
+      <button type="button" class="admin-btn down" id="batchDownBtn" onclick="changeCatalogStatus('hidden')">⬇️ 一鍵全品項下架</button>
+    </div>
+    <p class="admin-status-msg" id="adminStatusMsg">等待指令中...</p>
+  </div>
 </div>
 
 <div class="overlay hidden" id="overlay">
@@ -247,7 +270,6 @@
 </div>
 
 <script>
-// ⚠️ 確保這段 URL 是你最新發布的 GAS 網址！
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3mSHjqW7SZvsP4uNT_J-HoFRgT4VXZmEhP8_gANktGd_Mj9BbE-TvYwrtS9DLPW6I/exec';
 
 let catalog = [];
@@ -270,7 +292,8 @@ function loadCatalog(){
   const script = document.createElement('script');
   window[callbackName] = (data) => {
     delete window[callbackName]; script.remove();
-    catalog = (data && data.products) ? data.products : [];
+    // 💡 讀取資料時，自動過濾掉後端設定為下架的商品（如果後端有傳送狀態欄位）
+    catalog = (data && data.products) ? data.products.filter(p => p.status !== 'hidden') : [];
     renderCatalog();
   };
   script.src = GOOGLE_SCRIPT_URL + '?action=getCatalog&callback=' + callbackName + '&_cacheBust=' + Date.now();
@@ -290,9 +313,7 @@ function renderCatalog(){
   const groupedCatalog = {};
   catalog.forEach(p => {
     const zone = p.zone || "未分類商品";
-    if (!groupedCatalog[zone]) {
-      groupedCatalog[zone] = [];
-    }
+    if (!groupedCatalog[zone]) { groupedCatalog[zone] = []; }
     groupedCatalog[zone].push(p);
   });
 
@@ -394,6 +415,57 @@ function recalcTotals(){
 
 loadCatalog();
 
+// 💡 管理面板顯示/隱藏切換
+function toggleAdminPanel() {
+  const panel = document.getElementById('adminPanel');
+  panel.classList.toggle('hidden');
+}
+
+// 💡 一鍵上架 / 一鍵下架的核心前端發送機制
+function changeCatalogStatus(targetStatus) {
+  const msgEl = document.getElementById('adminStatusMsg');
+  const upBtn = document.getElementById('batchUpBtn');
+  const downBtn = document.getElementById('batchDownBtn');
+  
+  const actionText = targetStatus === 'active' ? '批次上架前台' : '批次下架前台';
+  if (!confirm(`確定要將現場所有品項執行「${actionText}」嗎？`)) return;
+
+  // 鎖定按鈕避免重複觸發
+  upBtn.disabled = true;
+  downBtn.disabled = true;
+  msgEl.style.color = 'var(--stamp-dark)';
+  msgEl.textContent = `正在連線 Google Sheets 執行${actionText}...`;
+
+  // 使用 POST 發送管理指令給同一個 GAS 後端
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({
+      action: 'updateCatalogStatus',
+      status: targetStatus
+    })
+  })
+  .then(res => { if (!res.ok) throw new Error('連線異常'); return res.json(); })
+  .then(resData => {
+    if (resData.status === 'success') {
+      msgEl.style.color = 'var(--leaf-dark)';
+      msgEl.textContent = `✅ 成功：所有品項已變更為 ${targetStatus === 'active' ? '顯示中' : '隱藏中'}！`;
+      // 重新讀取最新的商品目錄狀態
+      loadCatalog();
+    } else {
+      throw new Error(resData.message || '變更失敗');
+    }
+  })
+  .catch(err => {
+    msgEl.style.color = 'var(--stamp)';
+    msgEl.textContent = `❌ 錯誤：${err.message}，請確認後端 GAS 是否支援此 action`;
+  })
+  .finally(() => {
+    upBtn.disabled = false;
+    downBtn.disabled = false;
+  });
+}
+
 const segBtns = document.querySelectorAll('#buyerTypeSeg button');
 segBtns.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -423,8 +495,6 @@ function validateForm(){
 
   if (!nameInput.value.trim()){ errors.push('請填寫姓名／聯絡人'); markFieldError(nameInput); }
   if (!phoneInput.value.trim()){ errors.push('請填寫聯絡電話'); markFieldError(phoneInput); }
-  
-  // 💡 這裡加上了 Email 必填驗證，沒填會阻擋送出
   if (!emailInput.value.trim()){ errors.push('請填寫Email (寄發票用)'); markFieldError(emailInput); }
   
   if (buyerType === '個人'){
@@ -488,7 +558,7 @@ submitBtn.addEventListener('click', () => {
   itemsSnapshot.forEach((item, idx) => { itemLines += `${idx+1}. ${item.name} 數量：${item.qty} 單價：${fmt(item.price)} 小計：${fmt(item.subtotal)}\n`; });
   const untaxed = Math.round(total / 1.05); const tax = total - untaxed;
 
-  const orderData = { orderNo, orderDate, buyerType, name, phone, email, carrierType, carrierValue, companyName, items: itemsSnapshot, untaxed, tax, total };
+  const orderData = { action: 'createOrder', orderNo, orderDate, buyerType, name, phone, email, carrierType, carrierValue, companyName, items: itemsSnapshot, untaxed, tax, total };
   const summary = `訂單編號：${orderNo} 日期：${orderDate}\n\n【購買人資料】\n類別：${buyerType}\n姓名：${name}\n電話：${phone}\nEmail：${email}\n${invoiceLine}\n\n【商品明細】\n${itemLines}未稅金額：${fmt(untaxed)}\n稅額(5%)：${fmt(tax)}\n應付總額：${fmt(total)}`;
 
   submitBtn.disabled = true; submitBtn.textContent = '送出中...';
