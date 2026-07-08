@@ -167,7 +167,7 @@
 </head>
 <body>
 
-<!-- 🔒 安全機制遮罩（預設隱藏，由 JS 觸發控制） -->
+<!-- 🔒 安全機制遮罩 -->
 <div class="security-lockout hidden" id="securityLockout">
   <div class="lock-box">
     <div class="lock-icon" id="lockIcon">⚠️</div>
@@ -262,7 +262,6 @@
     <div class="totals">
       <div class="line"><span>未稅金額</span><span id="untaxed">$0</span></div>
       <div class="line"><span>稅額 (5%)</span><span id="taxAmt">$0</span></div>
-      <div class="shadow-grand" dashed style="display:none;"></div>
       <div class="grand"><span>應付總額</span><span class="amt" id="grandTotal">$0</span></div>
     </div>
   </section>
@@ -318,6 +317,15 @@ function verifyAccessSecurity() {
   const lockTitle = document.getElementById('lockTitle');
   const lockMsg = document.getElementById('lockMessage');
   const now = new Date();
+  
+  const urlParams = new URLSearchParams(window.location.search);
+  
+  // 💡 老闆專用秘密後門：如果網址有帶 &test=1，直接跳過所有時間與過期檢查
+  if (urlParams.get('test') === '1') {
+    refreshSession();
+    startIdleChecker();
+    return true;
+  }
 
   // 1️⃣ 第一道防線：週一至週五 12:00 - 13:00 嚴格時間窗口
   const day = now.getDay(); // 0=日, 1=一, ..., 6=六
@@ -332,7 +340,6 @@ function verifyAccessSecurity() {
   }
 
   // 2️⃣ 第二道防線：網址動態參數效期檢查
-  const urlParams = new URLSearchParams(window.location.search);
   const expireParam = urlParams.get('expire'); // 預期為 Unix 時間戳秒數
 
   if (!expireParam) {
@@ -366,6 +373,10 @@ function refreshSession() {
 // 🔒 每秒檢查是否閒置逾時或跨出營業時段
 function startIdleChecker() {
   setInterval(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    // 💡 如果是老闆測試模式，不進行營業時間截止的強制登出
+    if (urlParams.get('test') === '1') return;
+
     const now = new Date();
     const lockoutEl = document.getElementById('securityLockout');
     const lockIcon = document.getElementById('lockIcon');
