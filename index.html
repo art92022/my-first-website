@@ -149,9 +149,32 @@
   .admin-btn.down { background: var(--stamp); }
   .admin-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .admin-status-msg { font-size: 12px; color: var(--ink); background: rgba(255,255,255,0.6); padding: 6px 10px; border-radius: 4px; margin: 0; min-height: 28px; }
+
+  /* 🔒 安全機制：強制覆蓋式全版擋板 */
+  .security-lockout {
+    position: fixed; inset: 0; background: var(--paper); z-index: 9999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px; text-align: center; font-family: inherit;
+  }
+  .security-lockout .lock-box {
+    background: var(--paper-card); border: 2px solid var(--line); border-radius: 16px;
+    padding: 32px 24px; max-width: 400px; box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+  }
+  .security-lockout h2 { color: var(--stamp-dark); font-size: 20px; margin: 0 0 12px; font-weight: 900; }
+  .security-lockout p { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 0; font-weight: 700; }
+  .security-lockout .lock-icon { font-size: 40px; margin-bottom: 14px; }
 </style>
 </head>
 <body>
+
+<!-- 🔒 安全機制遮罩（預設隱藏，由 JS 觸發控制） -->
+<div class="security-lockout hidden" id="securityLockout">
+  <div class="lock-box">
+    <div class="lock-icon" id="lockIcon">⚠️</div>
+    <h2 id="lockTitle">無法開啟點餐頁面</h2>
+    <p id="lockMessage">請重新在現場掃描櫃檯的 QR Code 進點餐</p>
+  </div>
+</div>
 
 <div class="sheet">
   <header>
@@ -239,6 +262,7 @@
     <div class="totals">
       <div class="line"><span>未稅金額</span><span id="untaxed">$0</span></div>
       <div class="line"><span>稅額 (5%)</span><span id="taxAmt">$0</span></div>
+      <div class="shadow-grand" dashed style="display:none;"></div>
       <div class="grand"><span>應付總額</span><span class="amt" id="grandTotal">$0</span></div>
     </div>
   </section>
@@ -275,6 +299,10 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3mSHjqW7SZv
 let catalog = [];
 let cart = [];
 
+// 🔒 安全控制變數
+let sessionExpiryTime = 0;
+const ALIVE_DURATION = 10 * 60 * 1000; // 互動有效期限（10分鐘）
+
 const catalogLoading = document.getElementById('catalogLoading');
 const catalogContainer = document.getElementById('catalogContainer');
 const catalogEmpty = document.getElementById('catalogEmpty');
@@ -283,7 +311,98 @@ const cartBody = document.getElementById('cartBody');
 function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
 function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
+// 🔒 核心防火牆：安全與時間窗口檢查
+function verifyAccessSecurity() {
+  const lockoutEl = document.getElementById('securityLockout');
+  const lockIcon = document.getElementById('lockIcon');
+  const lockTitle = document.getElementById('lockTitle');
+  const lockMsg = document.getElementById('lockMessage');
+  const now = new Date();
+
+  // 1️⃣ 第一道防線：週一至週五 12:00 - 13:00 嚴格時間窗口
+  const day = now.getDay(); // 0=日, 1=一, ..., 6=六
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  
+  if (day === 0 || day === 6 || currentMinutes < 720 || currentMinutes > 780) {
+    lockIcon.textContent = "🕒";
+    lockTitle.textContent = "目前非點餐開放時段";
+    lockMsg.textContent = "本系統僅於「週一至週五 12:00 - 13:00」開放現場點餐。請於指定時間內再行掃碼點餐。";
+    lockoutEl.classList.remove('hidden');
+    return false;
+  }
+
+  // 2️⃣ 第二道防線：網址動態參數效期檢查
+  const urlParams = new URLSearchParams(window.location.search);
+  const expireParam = urlParams.get('expire'); // 預期為 Unix 時間戳秒數
+
+  if (!expireParam) {
+    lockIcon.textContent = "❌";
+    lockTitle.textContent = "無效的點餐網址";
+    lockMsg.textContent = "請重新在現場掃描櫃檯的 QR Code 進點餐";
+    lockoutEl.classList.remove('hidden');
+    return false;
+  }
+
+  const expireTimestampMs = parseInt(expireParam, 10) * 1000;
+  if (now.getTime() > expireTimestampMs) {
+    lockIcon.textContent = "⏳";
+    lockTitle.textContent = "點餐網址已過期";
+    lockMsg.textContent = "本點餐連結已逾時。請重新在現場掃描櫃檯的 QR Code 進點餐";
+    lockoutEl.classList.remove('hidden');
+    return false;
+  }
+
+  // 通過安全防護，初始化前端閒置 10 分鐘計時器
+  refreshSession();
+  startIdleChecker();
+  return true;
+}
+
+// 🔒 刷新使用者操作有效期限
+function refreshSession() {
+  sessionExpiryTime = Date.now() + ALIVE_DURATION;
+}
+
+// 🔒 每秒檢查是否閒置逾時或跨出營業時段
+function startIdleChecker() {
+  setInterval(() => {
+    const now = new Date();
+    const lockoutEl = document.getElementById('securityLockout');
+    const lockIcon = document.getElementById('lockIcon');
+    const lockTitle = document.getElementById('lockTitle');
+    const lockMsg = document.getElementById('lockMessage');
+
+    // 檢查是否跨出 12:00-13:00 營業窗口
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    if (currentMinutes > 780) {
+      lockIcon.textContent = "🕒";
+      lockTitle.textContent = "點餐時間已結束";
+      lockMsg.textContent = "今日面交點餐時段已截止，感謝您的光臨。";
+      lockoutEl.classList.remove('hidden');
+      cart = []; renderCart();
+      return;
+    }
+
+    // 檢查是否網頁閒置超過十分鐘
+    if (Date.now() > sessionExpiryTime) {
+      lockIcon.textContent = "💤";
+      lockTitle.textContent = "系統連線已逾時";
+      lockMsg.textContent = "您已閒置超過 10 分鐘，請重新在現場掃描櫃檯的 QR Code 進點餐";
+      lockoutEl.classList.remove('hidden');
+      cart = []; renderCart(); // 清空購物車防止誤送
+    }
+  }, 1000);
+
+  // 監聽各種使用者操作事件，只要有動作就判定為人在現場，自動續約延長 10 分鐘
+  ['click', 'touchstart', 'input', 'scroll'].forEach(evtType => {
+    document.addEventListener(evtType, refreshSession, { passive: true });
+  });
+}
+
 function loadCatalog(){
+  // 先過安全檢查，沒過就直接攔截不抓後端資料
+  if (!verifyAccessSecurity()) return;
+
   catalogLoading.classList.remove('hidden');
   catalogContainer.classList.add('hidden');
   catalogEmpty.classList.add('hidden');
@@ -292,7 +411,6 @@ function loadCatalog(){
   const script = document.createElement('script');
   window[callbackName] = (data) => {
     delete window[callbackName]; script.remove();
-    // 💡 讀取資料時，自動過濾掉後端設定為下架的商品（如果後端有傳送狀態欄位）
     catalog = (data && data.products) ? data.products.filter(p => p.status !== 'hidden') : [];
     renderCatalog();
   };
@@ -415,13 +533,11 @@ function recalcTotals(){
 
 loadCatalog();
 
-// 💡 管理面板顯示/隱藏切換
 function toggleAdminPanel() {
   const panel = document.getElementById('adminPanel');
   panel.classList.toggle('hidden');
 }
 
-// 💡 一鍵上架 / 一鍵下架的核心前端發送機制
 function changeCatalogStatus(targetStatus) {
   const msgEl = document.getElementById('adminStatusMsg');
   const upBtn = document.getElementById('batchUpBtn');
@@ -430,13 +546,11 @@ function changeCatalogStatus(targetStatus) {
   const actionText = targetStatus === 'active' ? '批次上架前台' : '批次下架前台';
   if (!confirm(`確定要將現場所有品項執行「${actionText}」嗎？`)) return;
 
-  // 鎖定按鈕避免重複觸發
   upBtn.disabled = true;
   downBtn.disabled = true;
   msgEl.style.color = 'var(--stamp-dark)';
   msgEl.textContent = `正在連線 Google Sheets 執行${actionText}...`;
 
-  // 使用 POST 發送管理指令給同一個 GAS 後端
   fetch(GOOGLE_SCRIPT_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -450,7 +564,6 @@ function changeCatalogStatus(targetStatus) {
     if (resData.status === 'success') {
       msgEl.style.color = 'var(--leaf-dark)';
       msgEl.textContent = `✅ 成功：所有品項已變更為 ${targetStatus === 'active' ? '顯示中' : '隱藏中'}！`;
-      // 重新讀取最新的商品目錄狀態
       loadCatalog();
     } else {
       throw new Error(resData.message || '變更失敗');
