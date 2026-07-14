@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bonheur Cookie 預購自取訂單</title>
+<title>Bonheur Cookie 預購自取訂單管理表</title>
 <style>
   :root{
     --ink:#2d2521;
@@ -161,9 +161,6 @@
     .print-total { text-align: right; margin-top: 15px; font-size: 20px; font-weight: bold; }
     .print-footer { margin-top: 40px; border-top: 1px dashed #ccc; padding-top: 10px; font-size: 13px; color: #555; text-align: center;}
   }
-
-  /* 小地圖共用樣式 */
-  .pickup-map-container { background:#fffdfa; border-radius:12px; padding:20px 15px; border:2px solid var(--line); font-family:sans-serif; box-shadow:0 4px 12px rgba(109,82,60,0.05); margin-bottom: 14px; }
 </style>
 </head>
 <body>
@@ -282,54 +279,67 @@
       地址導航：<a href="https://maps.app.goo.gl/JEKqvBWnrWyZni6C8" target="_blank" style="color:var(--stamp-dark); text-decoration:underline; font-weight:900;">點擊前往 Google 地圖</a>
     </p>
 
-    <div class="pickup-map-container">
-      <div style="display:flex; justify-content:space-between; color:#c4c4c4; font-size:13px; font-weight:900; text-align:center;">
-        <div style="display:flex; flex-direction:column; align-items:center; gap:6px; width:25%;">
-           <div style="display:flex; gap:3px;"><div style="width:26px;height:26px;background:#d9d9d9;"></div><div style="width:26px;height:26px;background:#d9d9d9;"></div></div>
-           <span>電梯</span>
-        </div>
-        <div style="display:flex; gap:4px; width:40%; justify-content:center;">
-           <div style="width:18px;height:50px;background:#d9d9d9;"></div>
-           <div style="width:18px;height:50px;background:#d9d9d9;"></div>
-           <div style="width:18px;height:50px;background:#d9d9d9;"></div>
-        </div>
-        <div style="display:flex; flex-direction:column; align-items:center; gap:6px; width:30%;">
-           <div style="display:flex; gap:3px;"><div style="width:18px;height:18px;background:#d9d9d9;"></div><div style="width:18px;height:18px;background:#d9d9d9;"></div><div style="width:18px;height:18px;background:#d9d9d9;"></div><div style="width:18px;height:18px;background:#d9d9d9;"></div></div>
-           <span>電梯</span>
-        </div>
-      </div>
+    <div style="background:#fff; padding:15px; border:1px solid #dfd4be; border-radius:10px; font-family:sans-serif; box-shadow:0 4px 12px rgba(109,82,60,0.05); margin-bottom: 14px;">
+        <div style="display:flex; justify-content:space-between; height:200px; margin-bottom:12px;">
+            <div style="width:28%; display:flex; flex-direction:column; justify-content:space-between;">
+                <div style="height:44%; border:1px solid #b8b8b8; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#b8b8b8; font-weight:900; font-size:16px; letter-spacing:2px;">
+                    <div style="display:flex; gap:4px; margin-bottom:6px;">
+                        <div style="width:22px; height:22px; background:#d4d4d4;"></div>
+                        <div style="width:22px; height:22px; background:#d4d4d4;"></div>
+                    </div>
+                    電梯
+                </div>
+                <div style="height:44%; border:1px solid #b8b8b8; display:flex; align-items:center; justify-content:center; color:#b8b8b8; font-weight:900; font-size:18px; letter-spacing:4px;">
+                    碼頭
+                </div>
+            </div>
+            
+            <div style="width:28%; display:flex; flex-direction:column; justify-content:space-between;">
+                <div style="height:44%; display:flex; justify-content:space-between;">
+                    <div style="width:28%; background:#d4d4d4;"></div>
+                    <div style="width:28%; background:#d4d4d4;"></div>
+                    <div style="width:28%; background:#d4d4d4;"></div>
+                </div>
+                <div style="height:12%; display:flex; align-items:center; justify-content:center; color:#b8b8b8; font-weight:900; font-size:18px; letter-spacing:4px;">
+                    走廊
+                </div>
+                <div style="height:44%; display:flex; justify-content:space-between;">
+                    <div style="width:30%; background:#d4d4d4;"></div>
+                    <div style="width:34%; background:var(--leaf); position:relative; color:#fff; display:flex; align-items:center; justify-content:center; flex-direction:column; font-weight:900; font-size:15px; letter-spacing:4px;">
+                        <div style="position:absolute; top:6px; width:10px; height:10px; background:#e8dcc4; border-radius:50%;"></div>
+                        <span style="writing-mode: vertical-rl; text-orientation: upright; margin-top:14px;">取貨點</span>
+                    </div>
+                    <div style="width:30%; background:#d4d4d4;"></div>
+                </div>
+            </div>
 
-      <div style="text-align:center; color:#c4c4c4; font-weight:900; font-size:14px; margin:10px 0;">走廊</div>
+            <div style="width:40%; border:1px solid #b8b8b8; position:relative;">
+                <div style="position:absolute; top:12px; width:100%; display:flex; flex-direction:column; align-items:center; color:#b8b8b8; font-weight:900; font-size:16px; letter-spacing:2px;">
+                    <div style="display:flex; gap:4px; margin-bottom:6px;">
+                        <div style="width:20px; height:20px; background:#d4d4d4;"></div>
+                        <div style="width:20px; height:20px; background:#d4d4d4;"></div>
+                        <div style="width:20px; height:20px; background:#d4d4d4;"></div>
+                        <div style="width:20px; height:20px; background:#d4d4d4;"></div>
+                    </div>
+                    電梯
+                </div>
+                
+                <div style="position:absolute; bottom:35px; left:0; display:flex; align-items:center; color:#b8b8b8; font-weight:900; font-size:16px; letter-spacing:2px;">
+                    <div style="width:12px; height:35px; background:#d4d4d4; margin-right:6px;"></div>信箱
+                </div>
 
-      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:16px;">
-        <div style="width:30%; height:60px; border:2px solid #e2e2e2; display:flex; align-items:center; justify-content:center; color:#c4c4c4; font-weight:900; font-size:14px;">碼頭</div>
-        
-        <div style="width:35%; display:flex; gap:4px; height:70px;">
-           <div style="flex:1; background:#d9d9d9;"></div>
-           <div style="flex:1.2; background:var(--leaf); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:14px; font-weight:900; letter-spacing:2px; writing-mode: vertical-rl;">
-              <span style="display:inline-block; width:6px; height:6px; background:#fff; border-radius:50%; margin-bottom:6px;"></span>
-              取貨點
-           </div>
-           <div style="flex:1; background:#d9d9d9;"></div>
+                <div style="position:absolute; bottom:45px; right:0; display:flex; align-items:center; color:#b8b8b8; font-weight:900; font-size:16px; letter-spacing:2px;">
+                    警衛<div style="width:16px; height:55px; background:#d4d4d4; margin-left:6px;"></div>
+                </div>
+            </div>
         </div>
-        
-        <div style="width:30%; position:relative; height:70px; color:#c4c4c4; font-size:13px; font-weight:900;">
-           <div style="position:absolute; bottom:6px; left:0; display:flex; align-items:center; gap:4px;">
-             <div style="width:6px;height:22px;background:#d9d9d9;"></div>信箱
-           </div>
-           <div style="position:absolute; bottom:22px; right:0; display:flex; align-items:center; gap:4px;">
-             警衛<div style="width:12px;height:28px;background:#d9d9d9;"></div>
-           </div>
+
+        <div style="background:#d4d4d4; color:#fff; text-align:center; padding:8px; font-weight:900; font-size:18px; letter-spacing:8px; margin-bottom:12px;">馬路</div>
+        <div style="background:#e8dcc4; color:var(--leaf-dark); font-size:13.5px; font-weight:900; text-align:center; padding:12px; border-radius:30px; letter-spacing:1px;">
+            取貨點A8後門：請按電鈴，有專人為您服務，並且提供訂購人手機後三碼。
         </div>
-      </div>
-
-      <div style="background:#d9d9d9; color:#fff; text-align:center; padding:8px; font-weight:900; letter-spacing:3px; margin-bottom:14px; font-size:15px;">馬路</div>
-
-      <div style="background:#e8dcc4; color:var(--leaf-dark); font-size:12.5px; font-weight:800; text-align:center; padding:10px 12px; border-radius:24px; line-height:1.5;">
-        取貨點A8後門：請按電鈴，有專人為您服務，並且提供訂購人手機後三碼。
-      </div>
     </div>
-  </section>
+    </section>
 
   <div class="validation-banner hidden" id="validationBanner"></div>
   <div class="submit-bar"><button class="submit-btn" id="submitBtn">送出預購訂單</button></div>
@@ -347,41 +357,66 @@
     <div style="background:#fdf9f4; border:1px solid var(--line); border-radius:8px; padding:12px; margin-bottom:16px;">
         <p style="margin:0 0 10px; font-weight:800; font-size:14px; color:var(--leaf-dark);">📍 實體取貨位置圖</p>
         <p style="margin:0 0 10px; font-size:13px;"><a href="https://maps.app.goo.gl/JEKqvBWnrWyZni6C8" target="_blank" style="color:var(--stamp-dark); font-weight:700;">點擊開啟 Google 導航</a></p>
-        <div class="pickup-map-container" style="margin-bottom:0; padding:12px 10px; box-shadow:none;">
-            <div style="display:flex; justify-content:space-between; color:#c4c4c4; font-size:11px; font-weight:900; text-align:center;">
-              <div style="display:flex; flex-direction:column; align-items:center; gap:4px; width:25%;">
-                 <div style="display:flex; gap:2px;"><div style="width:20px;height:20px;background:#d9d9d9;"></div><div style="width:20px;height:20px;background:#d9d9d9;"></div></div>
-                 <span>電梯</span>
-              </div>
-              <div style="display:flex; gap:3px; width:40%; justify-content:center;">
-                 <div style="width:14px;height:38px;background:#d9d9d9;"></div><div style="width:14px;height:38px;background:#d9d9d9;"></div><div style="width:14px;height:38px;background:#d9d9d9;"></div>
-              </div>
-              <div style="display:flex; flex-direction:column; align-items:center; gap:4px; width:30%;">
-                 <div style="display:flex; gap:2px;"><div style="width:14px;height:14px;background:#d9d9d9;"></div><div style="width:14px;height:14px;background:#d9d9d9;"></div><div style="width:14px;height:14px;background:#d9d9d9;"></div><div style="width:14px;height:14px;background:#d9d9d9;"></div></div>
-                 <span>電梯</span>
-              </div>
+        
+        <div style="background:#fff; padding:10px; border:1px solid #dfd4be; border-radius:8px; font-family:sans-serif; box-shadow:none; margin-bottom: 0;">
+            <div style="display:flex; justify-content:space-between; height:140px; margin-bottom:8px;">
+                <div style="width:28%; display:flex; flex-direction:column; justify-content:space-between;">
+                    <div style="height:44%; border:1px solid #b8b8b8; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#b8b8b8; font-weight:900; font-size:11px; letter-spacing:1px;">
+                        <div style="display:flex; gap:2px; margin-bottom:4px;">
+                            <div style="width:14px; height:14px; background:#d4d4d4;"></div>
+                            <div style="width:14px; height:14px; background:#d4d4d4;"></div>
+                        </div>
+                        電梯
+                    </div>
+                    <div style="height:44%; border:1px solid #b8b8b8; display:flex; align-items:center; justify-content:center; color:#b8b8b8; font-weight:900; font-size:13px; letter-spacing:2px;">
+                        碼頭
+                    </div>
+                </div>
+                
+                <div style="width:28%; display:flex; flex-direction:column; justify-content:space-between;">
+                    <div style="height:44%; display:flex; justify-content:space-between;">
+                        <div style="width:28%; background:#d4d4d4;"></div>
+                        <div style="width:28%; background:#d4d4d4;"></div>
+                        <div style="width:28%; background:#d4d4d4;"></div>
+                    </div>
+                    <div style="height:12%; display:flex; align-items:center; justify-content:center; color:#b8b8b8; font-weight:900; font-size:12px; letter-spacing:2px;">走廊</div>
+                    <div style="height:44%; display:flex; justify-content:space-between;">
+                        <div style="width:30%; background:#d4d4d4;"></div>
+                        <div style="width:34%; background:var(--leaf); position:relative; color:#fff; display:flex; align-items:center; justify-content:center; flex-direction:column; font-weight:900; font-size:10px; letter-spacing:2px;">
+                            <div style="position:absolute; top:4px; width:6px; height:6px; background:#e8dcc4; border-radius:50%;"></div>
+                            <span style="writing-mode: vertical-rl; text-orientation: upright; margin-top:8px;">取貨點</span>
+                        </div>
+                        <div style="width:30%; background:#d4d4d4;"></div>
+                    </div>
+                </div>
+
+                <div style="width:40%; border:1px solid #b8b8b8; position:relative;">
+                    <div style="position:absolute; top:8px; width:100%; display:flex; flex-direction:column; align-items:center; color:#b8b8b8; font-weight:900; font-size:11px; letter-spacing:1px;">
+                        <div style="display:flex; gap:2px; margin-bottom:4px;">
+                            <div style="width:14px; height:14px; background:#d4d4d4;"></div>
+                            <div style="width:14px; height:14px; background:#d4d4d4;"></div>
+                            <div style="width:14px; height:14px; background:#d4d4d4;"></div>
+                            <div style="width:14px; height:14px; background:#d4d4d4;"></div>
+                        </div>
+                        電梯
+                    </div>
+                    
+                    <div style="position:absolute; bottom:25px; left:0; display:flex; align-items:center; color:#b8b8b8; font-weight:900; font-size:11px; letter-spacing:1px;">
+                        <div style="width:8px; height:25px; background:#d4d4d4; margin-right:4px;"></div>信箱
+                    </div>
+
+                    <div style="position:absolute; bottom:30px; right:0; display:flex; align-items:center; color:#b8b8b8; font-weight:900; font-size:11px; letter-spacing:1px;">
+                        警衛<div style="width:10px; height:35px; background:#d4d4d4; margin-left:4px;"></div>
+                    </div>
+                </div>
             </div>
-            <div style="text-align:center; color:#c4c4c4; font-weight:900; font-size:12px; margin:8px 0;">走廊</div>
-            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;">
-              <div style="width:30%; height:45px; border:2px solid #e2e2e2; display:flex; align-items:center; justify-content:center; color:#c4c4c4; font-weight:900; font-size:12px;">碼頭</div>
-              <div style="width:35%; display:flex; gap:3px; height:50px;">
-                 <div style="flex:1; background:#d9d9d9;"></div>
-                 <div style="flex:1.2; background:var(--leaf); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:11px; font-weight:900; letter-spacing:1px; writing-mode: vertical-rl;">
-                    <span style="display:inline-block; width:4px; height:4px; background:#fff; border-radius:50%; margin-bottom:4px;"></span>取貨點
-                 </div>
-                 <div style="flex:1; background:#d9d9d9;"></div>
-              </div>
-              <div style="width:30%; position:relative; height:50px; color:#c4c4c4; font-size:11px; font-weight:900;">
-                 <div style="position:absolute; bottom:4px; left:0; display:flex; align-items:center; gap:3px;"><div style="width:4px;height:16px;background:#d9d9d9;"></div>信箱</div>
-                 <div style="position:absolute; bottom:16px; right:0; display:flex; align-items:center; gap:3px;">警衛<div style="width:10px;height:20px;background:#d9d9d9;"></div></div>
-              </div>
-            </div>
-            <div style="background:#d9d9d9; color:#fff; text-align:center; padding:6px; font-weight:900; letter-spacing:2px; margin-bottom:10px; font-size:13px;">馬路</div>
-            <div style="background:#e8dcc4; color:var(--leaf-dark); font-size:11.5px; font-weight:800; text-align:center; padding:8px 10px; border-radius:18px; line-height:1.4;">
-              取貨點A8後門：請按電鈴並提供訂購人手機後三碼。
+
+            <div style="background:#d4d4d4; color:#fff; text-align:center; padding:4px; font-weight:900; font-size:13px; letter-spacing:4px; margin-bottom:8px;">馬路</div>
+            <div style="background:#e8dcc4; color:var(--leaf-dark); font-size:11px; font-weight:900; text-align:center; padding:8px; border-radius:20px; line-height:1.2;">
+                取貨點A8後門：請按電鈴，有專人為您服務，並且提供訂購人手機後三碼。
             </div>
         </div>
-    </div>
+        </div>
 
     <div class="modal-actions">
       <button class="close-btn" id="closeBtn">確認關閉</button>
