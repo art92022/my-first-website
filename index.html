@@ -3,23 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bonheur Cookie 面交訂單管理表</title>
+<title>Bonheur Cookie 預購自取訂單管理表</title>
 <style>
   :root{
-    --ink:#1c2b22;
-    --paper:#f6f3ea;
-    --line:#cdbfa0;
+    --ink:#2d2521;
+    --paper:#f3ebd9;
+    --line:#dfd4be;
     --stamp:#b5482e;
     --stamp-dark:#8f3520;
-    --leaf:#3c5b43;
-    --leaf-dark:#2a4030;
-    --paper-card:#fffdf8;
-    --muted:#7a7060;
+    --leaf:#6d523c; /* 經典可可棕 */
+    --leaf-dark:#412a1c; /* 典雅深朱古力 */
+    --paper-card:#fffdfa;
+    --muted:#8b7e6c;
   }
   *{box-sizing:border-box;}
   body{
     margin:0; background:var(--paper);
-    background-image: radial-gradient(circle at 1px 1px, rgba(28,43,34,0.06) 1px, transparent 0);
+    background-image: radial-gradient(circle at 1px 1px, rgba(109,82,60,0.06) 1px, transparent 0);
     background-size: 18px 18px; font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
     color:var(--ink); padding:28px 16px 80px;
   }
@@ -46,7 +46,7 @@
   .sec-label .tag{background:var(--leaf); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; font-weight:700;}
 
   .field{margin-bottom:12px;}
-  .field label{display:block; font-size:12.5px; font-weight:700; margin-bottom:5px; color:#4a4438;}
+  .field label{display:block; font-size:12.5px; font-weight:700; margin-bottom:5px; color:#5a4f43;}
   .field .hint{font-weight:400; font-size:11px; color:var(--muted); margin-left:4px;}
   input[type=text], input[type=number], input[type=email], input[type=tel]{
     width:100%; padding:10px 11px; border:1px solid var(--line); border-radius:7px; font-size:15px; color:var(--ink);
@@ -68,7 +68,7 @@
 
   /* 加載轉圈圈 */
   .catalog-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 30px 0; font-size: 13.5px; color: var(--muted); font-weight: 700; }
-  .spinner { width: 32px; height: 32px; border: 3px solid rgba(60,91,67,0.15); border-top-color: var(--leaf); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .spinner { width: 32px; height: 32px; border: 3px solid rgba(109,82,60,0.15); border-top-color: var(--leaf); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* 視覺分區 */
@@ -81,7 +81,7 @@
     text-align:left; cursor:pointer; font-family:inherit; transition:all 0.15s ease; position: relative;
   }
   .product-card:active{transform:translateY(1px);}
-  .product-card.in-cart{border-color:var(--leaf); background:#f1f6f0;}
+  .product-card.in-cart{border-color:var(--leaf); background:#fdf9f4;}
   .product-card:disabled{opacity:0.5; cursor:not-allowed; background:#eee;}
   .product-card .p-name{display:block; font-weight:700; font-size:14px; margin-bottom:4px;}
   .product-card .p-price{display:block; font-size:13px; color:var(--stamp-dark); font-weight:700;}
@@ -119,14 +119,14 @@
   .submit-bar{position:sticky; bottom:14px; margin-top:8px;}
   .submit-btn{
     width:100%; padding:15px; background:var(--leaf); color:#fff; border:none; border-radius:9px;
-    font-size:16px; font-weight:800; letter-spacing:1px; cursor:pointer; box-shadow:0 4px 14px rgba(42,64,48,0.3);
+    font-size:16px; font-weight:800; letter-spacing:1px; cursor:pointer; box-shadow:0 4px 14px rgba(109,82,60,0.3);
   }
   .submit-btn:disabled{opacity:0.6; cursor:default;}
   .note-text{font-size:11.5px; color:var(--muted); text-align:center; margin-top:10px; line-height:1.6;}
   .validation-banner{ background:#fdeeea; border:1.5px solid var(--stamp); border-radius:9px; padding:11px 13px; margin-bottom:10px; font-size:12.5px; color:var(--stamp-dark); }
   input.field-error{ border-color:var(--stamp) !important; background:#fdf3f1; }
 
-  .overlay{ position:fixed; inset:0; background:rgba(28,43,34,0.55); display:flex; align-items:flex-end; justify-content:center; z-index:50; }
+  .overlay{ position:fixed; inset:0; background:rgba(41,31,22,0.55); display:flex; align-items:flex-end; justify-content:center; z-index:50; }
   .overlay.hidden{display:none;}
   .modal{ background:var(--paper-card); width:100%; max-width:640px; border-radius:16px 16px 0 0; padding:22px 18px 26px; max-height:85vh; overflow-y:auto; }
   .modal h2{margin:0 0 4px; font-size:18px; font-weight:900;}
@@ -136,12 +136,12 @@
   .modal-actions button{ flex:1; padding:12px; border-radius:8px; font-weight:700; font-size:14px; cursor:pointer; border:none; }
   .close-btn{background:var(--leaf); color:#fff;}
   .icon-circle{ width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:10px; }
-  .icon-circle.ok{background:#eef4ec; color:var(--leaf-dark);}
+  .icon-circle.ok{background:#fdf9f4; color:var(--leaf-dark);}
 
   /* 管理者後台控制區樣式 */
   .admin-trigger { text-align: center; margin-top: 40px; opacity: 0.2; font-size: 11px; cursor: pointer; transition: opacity 0.2s; }
   .admin-trigger:hover { opacity: 0.8; }
-  .admin-panel { background: #ebdcb9; border: 2px dashed var(--stamp); border-radius: 10px; padding: 16px; margin-top: 20px; text-align: left; }
+  .admin-panel { background: #ecdcb9; border: 2px dashed var(--stamp); border-radius: 10px; padding: 16px; margin-top: 20px; text-align: left; }
   .admin-panel h3 { margin: 0 0 10px 0; font-size: 14px; color: var(--stamp-dark); display: flex; justify-content: space-between; align-items: center; }
   .admin-btn-group { display: flex; gap: 10px; margin-bottom: 12px; }
   .admin-btn { flex: 1; padding: 10px; font-size: 12.5px; font-weight: 800; border-radius: 6px; border: none; cursor: pointer; color: #fff; }
@@ -149,40 +149,17 @@
   .admin-btn.down { background: var(--stamp); }
   .admin-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .admin-status-msg { font-size: 12px; color: var(--ink); background: rgba(255,255,255,0.6); padding: 6px 10px; border-radius: 4px; margin: 0; min-height: 28px; }
-
-  /* 🔒 安全機制：強制覆蓋式全版擋板 */
-  .security-lockout {
-    position: fixed; inset: 0; background: var(--paper); z-index: 9999;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 24px; text-align: center; font-family: inherit;
-  }
-  .security-lockout .lock-box {
-    background: var(--paper-card); border: 2px solid var(--line); border-radius: 16px;
-    padding: 32px 24px; max-width: 400px; box-shadow: 0 8px 24px rgba(0,0,0,0.05);
-  }
-  .security-lockout h2 { color: var(--stamp-dark); font-size: 20px; margin: 0 0 12px; font-weight: 900; }
-  .security-lockout p { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 0; font-weight: 700; }
-  .security-lockout .lock-icon { font-size: 40px; margin-bottom: 14px; }
 </style>
 </head>
 <body>
 
-<!-- 🔒 安全機制遮罩 -->
-<div class="security-lockout hidden" id="securityLockout">
-  <div class="lock-box">
-    <div class="lock-icon" id="lockIcon">⚠️</div>
-    <h2 id="lockTitle">無法開啟點餐頁面</h2>
-    <p id="lockMessage">請重新在現場掃描櫃檯的 QR Code 進點餐</p>
-  </div>
-</div>
-
 <div class="sheet">
   <header>
     <div class="title-block">
-      <h1>面交訂單表</h1>
-      <p>請選擇商品並填寫資料，送出後請至前台核對取貨</p>
+      <h1>面交預購單</h1>
+      <p>請選擇預購品項並填寫個人資料，送出後請依約定日期前往取貨</p>
     </div>
-    <div class="stamp">面交<br>確認</div>
+    <div class="stamp">預購<br>自取</div>
   </header>
 
   <div class="order-no">訂單編號 <span id="orderNo"></span> ・ <span id="orderDate"></span></div>
@@ -206,7 +183,7 @@
         <input type="tel" id="buyerPhone" placeholder="09xx-xxx-xxx">
       </div>
       <div class="field">
-        <label>Email <span class="hint" style="color:var(--stamp-dark); font-weight:700;">(必填) 會發送電子發票</span></label>
+        <label>Email <span class="hint" style="color:var(--stamp-dark); font-weight:700;">(必填) 會發送電子發票與明細</span></label>
         <input type="email" id="buyerEmail" placeholder="example@mail.com">
       </div>
     </div>
@@ -247,12 +224,12 @@
     
     <div class="catalog-loading" id="catalogLoading">
       <div class="spinner"></div>
-      <span>現場品項即時同步中...</span>
+      <span>商品目錄即時同步中...</span>
     </div>
     
     <div id="catalogContainer" class="hidden"></div>
 
-    <div class="catalog-empty hidden" id="catalogEmpty">目前現場沒有已上架的商品，請洽工作人員</div>
+    <div class="catalog-empty hidden" id="catalogEmpty">目前沒有開放預購的商品，請洽工作人員</div>
     
     <div class="cart">
       <div class="cart-title">已選購商品</div>
@@ -267,8 +244,8 @@
   </section>
 
   <div class="validation-banner hidden" id="validationBanner"></div>
-  <div class="submit-bar"><button class="submit-btn" id="submitBtn">送出訂單</button></div>
-  <div class="note-text">送出後資料會直接傳送給工作人員，請至前台等候核對取貨</div>
+  <div class="submit-bar"><button class="submit-btn" id="submitBtn">送出預購訂單</button></div>
+  <div class="note-text">送出後預購明細會同步傳送至您的電子信箱</div>
 
   <div class="admin-trigger" onclick="toggleAdminPanel()"> ⚙️ 品牌內部管理專區 </div>
   
@@ -285,10 +262,10 @@
 <div class="overlay hidden" id="overlay">
   <div class="modal">
     <div class="icon-circle ok" id="resultIcon">✓</div>
-    <h2 id="resultTitle">訂單已送出</h2>
-    <p class="modal-sub" id="resultSub">請至前台出示此畫面，工作人員會為您核對</p>
+    <h2 id="resultTitle">預購訂單已送出</h2>
+    <p class="modal-sub" id="resultSub">請保存好您的訂單資訊，工作人員將為您準備商品</p>
     <pre id="summaryText"></pre>
-    <div class="modal-actions"><button class="close-btn" id="closeBtn">關閉</button></div>
+    <div class="modal-actions"><button class="close-btn" id="closeBtn">確認</button></div>
   </div>
 </div>
 
@@ -298,10 +275,6 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3mSHjqW7SZv
 let catalog = [];
 let cart = [];
 
-// 🔒 安全控制變數
-let sessionExpiryTime = 0;
-const ALIVE_DURATION = 10 * 60 * 1000; // 互動有效期限（10分鐘）
-
 const catalogLoading = document.getElementById('catalogLoading');
 const catalogContainer = document.getElementById('catalogContainer');
 const catalogEmpty = document.getElementById('catalogEmpty');
@@ -310,110 +283,8 @@ const cartBody = document.getElementById('cartBody');
 function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
 function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-// 🔒 核心防火牆：安全與時間窗口檢查
-function verifyAccessSecurity() {
-  const lockoutEl = document.getElementById('securityLockout');
-  const lockIcon = document.getElementById('lockIcon');
-  const lockTitle = document.getElementById('lockTitle');
-  const lockMsg = document.getElementById('lockMessage');
-  const now = new Date();
-  
-  const urlParams = new URLSearchParams(window.location.search);
-  
-  // 💡 老闆專用秘密後門：如果網址有帶 &test=1，直接跳過所有時間與過期檢查
-  if (urlParams.get('test') === '1') {
-    refreshSession();
-    startIdleChecker();
-    return true;
-  }
-
-  // 1️⃣ 第一道防線：週一至週五 12:00 - 13:00 嚴格時間窗口
-  const day = now.getDay(); // 0=日, 1=一, ..., 6=六
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  
-  if (day === 0 || day === 6 || currentMinutes < 720 || currentMinutes > 780) {
-    lockIcon.textContent = "🕒";
-    lockTitle.textContent = "目前非點餐開放時段";
-    lockMsg.textContent = "本系統僅於「週一至週五 12:00 - 13:00」開放現場點餐。請於指定時間內再行掃碼點餐。";
-    lockoutEl.classList.remove('hidden');
-    return false;
-  }
-
-  // 2️⃣ 第二道防線：網址動態參數效期檢查
-  const expireParam = urlParams.get('expire'); // 預期為 Unix 時間戳秒數
-
-  if (!expireParam) {
-    lockIcon.textContent = "❌";
-    lockTitle.textContent = "無效的點餐網址";
-    lockMsg.textContent = "請重新在現場掃描櫃檯的 QR Code 進點餐";
-    lockoutEl.classList.remove('hidden');
-    return false;
-  }
-
-  const expireTimestampMs = parseInt(expireParam, 10) * 1000;
-  if (now.getTime() > expireTimestampMs) {
-    lockIcon.textContent = "⏳";
-    lockTitle.textContent = "點餐網址已過期";
-    lockMsg.textContent = "本點餐連結已逾時。請重新在現場掃描櫃檯的 QR Code 進點餐";
-    lockoutEl.classList.remove('hidden');
-    return false;
-  }
-
-  // 通過安全防護，初始化前端閒置 10 分鐘計時器
-  refreshSession();
-  startIdleChecker();
-  return true;
-}
-
-// 🔒 刷新使用者操作有效期限
-function refreshSession() {
-  sessionExpiryTime = Date.now() + ALIVE_DURATION;
-}
-
-// 🔒 每秒檢查是否閒置逾時或跨出營業時段
-function startIdleChecker() {
-  setInterval(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    // 💡 如果是老闆測試模式，不進行營業時間截止的強制登出
-    if (urlParams.get('test') === '1') return;
-
-    const now = new Date();
-    const lockoutEl = document.getElementById('securityLockout');
-    const lockIcon = document.getElementById('lockIcon');
-    const lockTitle = document.getElementById('lockTitle');
-    const lockMsg = document.getElementById('lockMessage');
-
-    // 檢查是否跨出 12:00-13:00 營業窗口
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    if (currentMinutes > 780) {
-      lockIcon.textContent = "🕒";
-      lockTitle.textContent = "點餐時間已結束";
-      lockMsg.textContent = "今日面交點餐時段已截止，感謝您的光臨。";
-      lockoutEl.classList.remove('hidden');
-      cart = []; renderCart();
-      return;
-    }
-
-    // 檢查是否網頁閒置超過十分鐘
-    if (Date.now() > sessionExpiryTime) {
-      lockIcon.textContent = "💤";
-      lockTitle.textContent = "系統連線已逾時";
-      lockMsg.textContent = "您已閒置超過 10 分鐘，請重新在現場掃描櫃檯的 QR Code 進點餐";
-      lockoutEl.classList.remove('hidden');
-      cart = []; renderCart(); // 清空購物車防止誤送
-    }
-  }, 1000);
-
-  // 監聽各種使用者操作事件，只要有動作就判定為人在現場，自動續約延長 10 分鐘
-  ['click', 'touchstart', 'input', 'scroll'].forEach(evtType => {
-    document.addEventListener(evtType, refreshSession, { passive: true });
-  });
-}
-
+// 🔓 預購自取模式：任何人、任何時間隨時可以順暢加載商品目錄
 function loadCatalog(){
-  // 先過安全檢查，沒過就直接攔截不抓後端資料
-  if (!verifyAccessSecurity()) return;
-
   catalogLoading.classList.remove('hidden');
   catalogContainer.classList.add('hidden');
   catalogEmpty.classList.add('hidden');
@@ -485,7 +356,7 @@ function renderCatalog(){
       
       card.addEventListener('click', () => {
         if (p.stock <= currentQtyInCart) {
-          alert("抱歉，已達現場供應庫存上限！"); return;
+          alert("抱歉，已達供應庫存上限！"); return;
         }
         let existing = cart.find(c => c.name === p.name);
         if (existing){ existing.qty += 1; }
@@ -696,14 +567,14 @@ submitBtn.addEventListener('click', () => {
   .then((resData) => {
     if (resData.status === 'success') {
       document.getElementById('resultIcon').className = 'icon-circle ok'; document.getElementById('resultIcon').textContent = '✓';
-      document.getElementById('resultTitle').textContent = '訂單已送出'; document.getElementById('resultSub').textContent = '請至前台出示此畫面，工作人員會為您核對';
+      document.getElementById('resultTitle').textContent = '預購訂單已送出'; document.getElementById('resultSub').textContent = '預購成功！明細已發送至您的信箱，請至現場核對取貨';
       document.getElementById('summaryText').textContent = summary; document.getElementById('overlay').classList.remove('hidden');
     } else {
       throw new Error(resData.message || '儲存失敗');
     }
   })
   .catch((err) => { alert("❌ 訂單送出失敗：\n" + err.message); })
-  .finally(() => { submitBtn.disabled = false; submitBtn.textContent = '送出訂單'; });
+  .finally(() => { submitBtn.disabled = false; submitBtn.textContent = '送出預購訂單'; });
 });
 
 document.getElementById('closeBtn').addEventListener('click', () => { document.getElementById('overlay').classList.add('hidden'); resetFormForNextOrder(); });
