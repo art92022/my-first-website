@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bonheur Cookie 預購自取訂單管理表</title>
+<title>Bonheur Cookie 預購自取訂單</title>
 <style>
   :root{
     --ink:#2d2521;
@@ -39,8 +39,9 @@
   .order-no span{font-weight:700; color:var(--ink);}
 
   section{background:var(--paper-card); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:16px;}
-  .sheet section:nth-of-type(1) .sec-label::before { content: "🧁 "; }
+  .sheet section:nth-of-type(1) .sec-label::before { content: "📋 "; }
   .sheet section:nth-of-type(2) .sec-label::before { content: "🛒 "; }
+  .sheet section:nth-of-type(3) .sec-label::before { content: "📍 "; }
   .sec-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
   .sec-label{display:flex; align-items:center; gap:8px; font-weight:800; font-size:14.5px; color:var(--leaf-dark);}
   .sec-label .tag{background:var(--leaf); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; font-weight:700;}
@@ -65,6 +66,12 @@
   .radio-row .sub-input{flex:1; margin-top:0;}
   .radio-row .sub-input input{padding:7px 9px; font-size:13.5px;}
   .hidden{display:none !important;}
+
+  /* 日期選擇器 */
+  .date-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .date-btn { background: #e8dcc4; border: 1.5px solid transparent; padding: 10px 4px; border-radius: 6px; font-weight: 700; color: var(--leaf); cursor: pointer; transition: 0.2s; font-size: 13.5px; }
+  .date-btn:hover { background: #dfccaa; }
+  .date-btn.active { background: var(--leaf); color: #fff; border-color: var(--leaf); box-shadow: 0 3px 8px rgba(109,82,60,0.3); }
 
   /* 加載轉圈圈 */
   .catalog-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 30px 0; font-size: 13.5px; color: var(--muted); font-weight: 700; }
@@ -126,29 +133,37 @@
   .validation-banner{ background:#fdeeea; border:1.5px solid var(--stamp); border-radius:9px; padding:11px 13px; margin-bottom:10px; font-size:12.5px; color:var(--stamp-dark); }
   input.field-error{ border-color:var(--stamp) !important; background:#fdf3f1; }
 
-  .overlay{ position:fixed; inset:0; background:rgba(41,31,22,0.55); display:flex; align-items:flex-end; justify-content:center; z-index:50; }
+  .overlay{ position:fixed; inset:0; background:rgba(41,31,22,0.65); display:flex; align-items:flex-end; justify-content:center; z-index:50; }
   .overlay.hidden{display:none;}
-  .modal{ background:var(--paper-card); width:100%; max-width:640px; border-radius:16px 16px 0 0; padding:22px 18px 26px; max-height:85vh; overflow-y:auto; }
-  .modal h2{margin:0 0 4px; font-size:18px; font-weight:900;}
-  .modal .modal-sub{font-size:12.5px; color:var(--muted); margin:0 0 14px; line-height:1.6;}
-  .modal pre{ white-space:pre-wrap; background:#fff; border:1px solid var(--line); border-radius:8px; padding:14px; font-size:13.5px; line-height:1.7; }
-  .modal-actions{display:flex; gap:10px; margin-top:14px;}
-  .modal-actions button{ flex:1; padding:12px; border-radius:8px; font-weight:700; font-size:14px; cursor:pointer; border:none; }
+  .modal{ background:var(--paper-card); width:100%; max-width:640px; border-radius:16px 16px 0 0; padding:26px 20px 30px; max-height:85vh; overflow-y:auto; }
+  .modal h2{margin:0 0 6px; font-size:20px; font-weight:900; color:var(--leaf-dark);}
+  .modal .modal-sub{font-size:13.5px; color:var(--muted); margin:0 0 6px; line-height:1.6; font-weight:700;}
+  .modal .modal-warning { color: var(--stamp-dark); font-size: 12.5px; font-weight: 700; margin: 0 0 16px; background: #fdf3f1; padding: 8px 12px; border-radius: 6px; }
+  .modal pre{ white-space:pre-wrap; background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px; font-size:13.5px; line-height:1.7; color:var(--ink); font-family:inherit;}
+  .modal-actions{display:flex; gap:10px; margin-top:16px;}
+  .modal-actions button{ flex:1; padding:14px; border-radius:8px; font-weight:800; font-size:14.5px; cursor:pointer; border:none; letter-spacing:1px; }
   .close-btn{background:var(--leaf); color:#fff;}
-  .icon-circle{ width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:10px; }
-  .icon-circle.ok{background:#fdf9f4; color:var(--leaf-dark);}
+  .print-btn{background:#dfd4be; color:var(--leaf-dark);}
+  .icon-circle{ width:54px; height:54px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:12px; }
+  .icon-circle.ok{background:#fdf9f4; color:var(--leaf-dark); border: 2px solid var(--leaf);}
 
-  /* 管理者後台控制區樣式 */
-  .admin-trigger { text-align: center; margin-top: 40px; opacity: 0.2; font-size: 11px; cursor: pointer; transition: opacity 0.2s; }
-  .admin-trigger:hover { opacity: 0.8; }
-  .admin-panel { background: #ecdcb9; border: 2px dashed var(--stamp); border-radius: 10px; padding: 16px; margin-top: 20px; text-align: left; }
-  .admin-panel h3 { margin: 0 0 10px 0; font-size: 14px; color: var(--stamp-dark); display: flex; justify-content: space-between; align-items: center; }
-  .admin-btn-group { display: flex; gap: 10px; margin-bottom: 12px; }
-  .admin-btn { flex: 1; padding: 10px; font-size: 12.5px; font-weight: 800; border-radius: 6px; border: none; cursor: pointer; color: #fff; }
-  .admin-btn.up { background: var(--leaf); }
-  .admin-btn.down { background: var(--stamp); }
-  .admin-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .admin-status-msg { font-size: 12px; color: var(--ink); background: rgba(255,255,255,0.6); padding: 6px 10px; border-radius: 4px; margin: 0; min-height: 28px; }
+  /* 出貨單專用排版 (預設隱藏，僅列印時顯示) */
+  .print-only { display: none; }
+  @media print {
+    body { background: #fff !important; color: #000 !important; padding: 0 !important; margin: 0 !important; }
+    .sheet, .overlay, .security-lockout { display: none !important; }
+    .print-only { display: block !important; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; font-family: "Noto Sans TC", sans-serif; }
+    .print-header { font-size: 24px; font-weight: 900; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 18px; text-align: center; }
+    .print-row { margin-bottom: 8px; font-size: 15px; }
+    .print-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .print-table th, .print-table td { border: 1px solid #000; padding: 10px; text-align: left; font-size: 15px; }
+    .print-table th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
+    .print-total { text-align: right; margin-top: 15px; font-size: 20px; font-weight: bold; }
+    .print-footer { margin-top: 40px; border-top: 1px dashed #ccc; padding-top: 10px; font-size: 13px; color: #555; text-align: center;}
+  }
+
+  /* 小地圖共用樣式 */
+  .pickup-map-container { background:#fffdfa; border-radius:12px; padding:20px 15px; border:2px solid var(--line); font-family:sans-serif; box-shadow:0 4px 12px rgba(109,82,60,0.05); margin-bottom: 14px; }
 </style>
 </head>
 <body>
@@ -165,7 +180,23 @@
   <div class="order-no">訂單編號 <span id="orderNo"></span> ・ <span id="orderDate"></span></div>
 
   <section>
-    <div class="sec-head"><div class="sec-label"><span class="tag">01</span>購買人資料</div></div>
+    <div class="sec-head"><div class="sec-label"><span class="tag">01</span>購買人與取貨資料</div></div>
+    
+    <div class="field" style="margin-bottom:20px; border-bottom:1px dashed var(--line); padding-bottom:18px;">
+      <label>自取日期 <span class="hint" style="color:var(--stamp-dark); font-weight:700;">(必填，不可複選)</span></label>
+      <div class="date-grid" id="pickupDateGrid">
+        <button type="button" class="date-btn" data-date="8/3(一)">8/3(一)</button>
+        <button type="button" class="date-btn" data-date="8/10(一)">8/10(一)</button>
+        <button type="button" class="date-btn" data-date="8/17(一)">8/17(一)</button>
+        <button type="button" class="date-btn" data-date="8/24(一)">8/24(一)</button>
+        <button type="button" class="date-btn" data-date="8/7(五)">8/7(五)</button>
+        <button type="button" class="date-btn" data-date="8/14(五)">8/14(五)</button>
+        <button type="button" class="date-btn" data-date="8/21(五)">8/21(五)</button>
+        <button type="button" class="date-btn" data-date="8/28(五)">8/28(五)</button>
+      </div>
+      <input type="hidden" id="selectedDateInput" value="">
+    </div>
+
     <div class="field">
       <label>發票類別</label>
       <div class="seg" id="buyerTypeSeg">
@@ -183,7 +214,7 @@
         <input type="tel" id="buyerPhone" placeholder="09xx-xxx-xxx">
       </div>
       <div class="field">
-        <label>Email <span class="hint" style="color:var(--stamp-dark); font-weight:700;">(必填) 會發送電子發票與明細</span></label>
+        <label>Email <span class="hint" style="color:var(--stamp-dark); font-weight:700;">(必填) 會寄發訂單資訊</span></label>
         <input type="email" id="buyerEmail" placeholder="example@mail.com">
       </div>
     </div>
@@ -219,7 +250,7 @@
 
   <section>
     <div class="sec-head">
-      <div class="sec-label"><span class="tag">02</span>選擇商品</div>
+      <div class="sec-label"><span class="tag">02</span>選擇預購商品</div>
     </div>
     
     <div class="catalog-loading" id="catalogLoading">
@@ -243,31 +274,123 @@
     </div>
   </section>
 
+  <section style="background:transparent; border:none; padding:0; margin-top:24px;">
+    <div class="sec-head" style="margin-bottom:8px;">
+      <div class="sec-label"><span class="tag">03</span>取貨資訊與地圖</div>
+    </div>
+    <p style="font-size:13.5px; margin:0 0 14px; font-weight:700;">
+      地址導航：<a href="https://maps.app.goo.gl/JEKqvBWnrWyZni6C8" target="_blank" style="color:var(--stamp-dark); text-decoration:underline; font-weight:900;">點擊前往 Google 地圖</a>
+    </p>
+
+    <div class="pickup-map-container">
+      <div style="display:flex; justify-content:space-between; color:#c4c4c4; font-size:13px; font-weight:900; text-align:center;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:6px; width:25%;">
+           <div style="display:flex; gap:3px;"><div style="width:26px;height:26px;background:#d9d9d9;"></div><div style="width:26px;height:26px;background:#d9d9d9;"></div></div>
+           <span>電梯</span>
+        </div>
+        <div style="display:flex; gap:4px; width:40%; justify-content:center;">
+           <div style="width:18px;height:50px;background:#d9d9d9;"></div>
+           <div style="width:18px;height:50px;background:#d9d9d9;"></div>
+           <div style="width:18px;height:50px;background:#d9d9d9;"></div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:6px; width:30%;">
+           <div style="display:flex; gap:3px;"><div style="width:18px;height:18px;background:#d9d9d9;"></div><div style="width:18px;height:18px;background:#d9d9d9;"></div><div style="width:18px;height:18px;background:#d9d9d9;"></div><div style="width:18px;height:18px;background:#d9d9d9;"></div></div>
+           <span>電梯</span>
+        </div>
+      </div>
+
+      <div style="text-align:center; color:#c4c4c4; font-weight:900; font-size:14px; margin:10px 0;">走廊</div>
+
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:16px;">
+        <div style="width:30%; height:60px; border:2px solid #e2e2e2; display:flex; align-items:center; justify-content:center; color:#c4c4c4; font-weight:900; font-size:14px;">碼頭</div>
+        
+        <div style="width:35%; display:flex; gap:4px; height:70px;">
+           <div style="flex:1; background:#d9d9d9;"></div>
+           <div style="flex:1.2; background:var(--leaf); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:14px; font-weight:900; letter-spacing:2px; writing-mode: vertical-rl;">
+              <span style="display:inline-block; width:6px; height:6px; background:#fff; border-radius:50%; margin-bottom:6px;"></span>
+              取貨點
+           </div>
+           <div style="flex:1; background:#d9d9d9;"></div>
+        </div>
+        
+        <div style="width:30%; position:relative; height:70px; color:#c4c4c4; font-size:13px; font-weight:900;">
+           <div style="position:absolute; bottom:6px; left:0; display:flex; align-items:center; gap:4px;">
+             <div style="width:6px;height:22px;background:#d9d9d9;"></div>信箱
+           </div>
+           <div style="position:absolute; bottom:22px; right:0; display:flex; align-items:center; gap:4px;">
+             警衛<div style="width:12px;height:28px;background:#d9d9d9;"></div>
+           </div>
+        </div>
+      </div>
+
+      <div style="background:#d9d9d9; color:#fff; text-align:center; padding:8px; font-weight:900; letter-spacing:3px; margin-bottom:14px; font-size:15px;">馬路</div>
+
+      <div style="background:#e8dcc4; color:var(--leaf-dark); font-size:12.5px; font-weight:800; text-align:center; padding:10px 12px; border-radius:24px; line-height:1.5;">
+        取貨點A8後門：請按電鈴，有專人為您服務，並且提供訂購人手機後三碼。
+      </div>
+    </div>
+  </section>
+
   <div class="validation-banner hidden" id="validationBanner"></div>
   <div class="submit-bar"><button class="submit-btn" id="submitBtn">送出預購訂單</button></div>
-  <div class="note-text">送出後預購明細會同步傳送至您的電子信箱</div>
-
-  <div class="admin-trigger" onclick="toggleAdminPanel()"> ⚙️ 品牌內部管理專區 </div>
-  
-  <div class="admin-panel hidden" id="adminPanel">
-    <h3>Bonheur Cookie 現場前台狀態控制 <span style="font-size:11px; font-weight:normal; color:var(--muted);">僅內部人員操作</span></h3>
-    <div class="admin-btn-group">
-      <button type="button" class="admin-btn up" id="batchUpBtn" onclick="changeCatalogStatus('active')">⬆️ 一鍵全品項上架</button>
-      <button type="button" class="admin-btn down" id="batchDownBtn" onclick="changeCatalogStatus('hidden')">⬇️ 一鍵全品項下架</button>
-    </div>
-    <p class="admin-status-msg" id="adminStatusMsg">等待指令中...</p>
-  </div>
 </div>
 
 <div class="overlay hidden" id="overlay">
   <div class="modal">
     <div class="icon-circle ok" id="resultIcon">✓</div>
     <h2 id="resultTitle">預購訂單已送出</h2>
-    <p class="modal-sub" id="resultSub">請保存好您的訂單資訊，工作人員將為您準備商品</p>
-    <pre id="summaryText"></pre>
-    <div class="modal-actions"><button class="close-btn" id="closeBtn">確認</button></div>
+    <p class="modal-sub" id="resultSub">預購成功！明細已發送至您的信箱，請依約定日期取貨。</p>
+    <p class="modal-warning">※ 提醒您：訂單確認信件有可能會跑到「垃圾信件匣」，請務必留意收信。</p>
+    
+    <pre id="summaryText" style="margin-bottom: 16px;"></pre>
+    
+    <div style="background:#fdf9f4; border:1px solid var(--line); border-radius:8px; padding:12px; margin-bottom:16px;">
+        <p style="margin:0 0 10px; font-weight:800; font-size:14px; color:var(--leaf-dark);">📍 實體取貨位置圖</p>
+        <p style="margin:0 0 10px; font-size:13px;"><a href="https://maps.app.goo.gl/JEKqvBWnrWyZni6C8" target="_blank" style="color:var(--stamp-dark); font-weight:700;">點擊開啟 Google 導航</a></p>
+        <div class="pickup-map-container" style="margin-bottom:0; padding:12px 10px; box-shadow:none;">
+            <div style="display:flex; justify-content:space-between; color:#c4c4c4; font-size:11px; font-weight:900; text-align:center;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:4px; width:25%;">
+                 <div style="display:flex; gap:2px;"><div style="width:20px;height:20px;background:#d9d9d9;"></div><div style="width:20px;height:20px;background:#d9d9d9;"></div></div>
+                 <span>電梯</span>
+              </div>
+              <div style="display:flex; gap:3px; width:40%; justify-content:center;">
+                 <div style="width:14px;height:38px;background:#d9d9d9;"></div><div style="width:14px;height:38px;background:#d9d9d9;"></div><div style="width:14px;height:38px;background:#d9d9d9;"></div>
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:4px; width:30%;">
+                 <div style="display:flex; gap:2px;"><div style="width:14px;height:14px;background:#d9d9d9;"></div><div style="width:14px;height:14px;background:#d9d9d9;"></div><div style="width:14px;height:14px;background:#d9d9d9;"></div><div style="width:14px;height:14px;background:#d9d9d9;"></div></div>
+                 <span>電梯</span>
+              </div>
+            </div>
+            <div style="text-align:center; color:#c4c4c4; font-weight:900; font-size:12px; margin:8px 0;">走廊</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;">
+              <div style="width:30%; height:45px; border:2px solid #e2e2e2; display:flex; align-items:center; justify-content:center; color:#c4c4c4; font-weight:900; font-size:12px;">碼頭</div>
+              <div style="width:35%; display:flex; gap:3px; height:50px;">
+                 <div style="flex:1; background:#d9d9d9;"></div>
+                 <div style="flex:1.2; background:var(--leaf); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:11px; font-weight:900; letter-spacing:1px; writing-mode: vertical-rl;">
+                    <span style="display:inline-block; width:4px; height:4px; background:#fff; border-radius:50%; margin-bottom:4px;"></span>取貨點
+                 </div>
+                 <div style="flex:1; background:#d9d9d9;"></div>
+              </div>
+              <div style="width:30%; position:relative; height:50px; color:#c4c4c4; font-size:11px; font-weight:900;">
+                 <div style="position:absolute; bottom:4px; left:0; display:flex; align-items:center; gap:3px;"><div style="width:4px;height:16px;background:#d9d9d9;"></div>信箱</div>
+                 <div style="position:absolute; bottom:16px; right:0; display:flex; align-items:center; gap:3px;">警衛<div style="width:10px;height:20px;background:#d9d9d9;"></div></div>
+              </div>
+            </div>
+            <div style="background:#d9d9d9; color:#fff; text-align:center; padding:6px; font-weight:900; letter-spacing:2px; margin-bottom:10px; font-size:13px;">馬路</div>
+            <div style="background:#e8dcc4; color:var(--leaf-dark); font-size:11.5px; font-weight:800; text-align:center; padding:8px 10px; border-radius:18px; line-height:1.4;">
+              取貨點A8後門：請按電鈴並提供訂購人手機後三碼。
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="close-btn" id="closeBtn">確認關閉</button>
+      <button class="print-btn" onclick="window.print()">🖨️ 列印/儲存出貨單</button>
+    </div>
   </div>
 </div>
+
+<div class="print-only" id="printArea"></div>
 
 <script>
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3mSHjqW7SZvsP4uNT_J-HoFRgT4VXZmEhP8_gANktGd_Mj9BbE-TvYwrtS9DLPW6I/exec';
@@ -283,7 +406,18 @@ const cartBody = document.getElementById('cartBody');
 function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
 function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-// 🔓 預購自取模式：任何人、任何時間隨時可以順暢加載商品目錄
+// 日期選擇邏輯
+const dateBtns = document.querySelectorAll('.date-btn');
+const dateInput = document.getElementById('selectedDateInput');
+dateBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    dateBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    dateInput.value = btn.dataset.date;
+    btn.classList.remove('field-error');
+  });
+});
+
 function loadCatalog(){
   catalogLoading.classList.remove('hidden');
   catalogContainer.classList.add('hidden');
@@ -337,13 +471,13 @@ function renderCatalog(){
       card.type = 'button';
       card.className = 'product-card' + (inCart ? ' in-cart' : '');
       
-      let stockText = `剩餘庫存：${p.stock} 件`;
+      let stockText = `預購額度：${p.stock}`;
       let isLowStock = false;
       if (p.stock <= 0) {
-        stockText = "❌ 已售罄 (補貨中)";
+        stockText = "❌ 已額滿";
         card.disabled = true;
       } else if (p.stock <= 10) {
-        stockText = `🔥 僅剩最後 ${p.stock} 件！`;
+        stockText = `🔥 僅剩 ${p.stock} 份`;
         isLowStock = true;
       }
 
@@ -356,7 +490,7 @@ function renderCatalog(){
       
       card.addEventListener('click', () => {
         if (p.stock <= currentQtyInCart) {
-          alert("抱歉，已達供應庫存上限！"); return;
+          alert("抱歉，已達預購額度上限！"); return;
         }
         let existing = cart.find(c => c.name === p.name);
         if (existing){ existing.qty += 1; }
@@ -415,52 +549,6 @@ function recalcTotals(){
 
 loadCatalog();
 
-function toggleAdminPanel() {
-  const panel = document.getElementById('adminPanel');
-  panel.classList.toggle('hidden');
-}
-
-function changeCatalogStatus(targetStatus) {
-  const msgEl = document.getElementById('adminStatusMsg');
-  const upBtn = document.getElementById('batchUpBtn');
-  const downBtn = document.getElementById('batchDownBtn');
-  
-  const actionText = targetStatus === 'active' ? '批次上架前台' : '批次下架前台';
-  if (!confirm(`確定要將現場所有品項執行「${actionText}」嗎？`)) return;
-
-  upBtn.disabled = true;
-  downBtn.disabled = true;
-  msgEl.style.color = 'var(--stamp-dark)';
-  msgEl.textContent = `正在連線 Google Sheets 執行${actionText}...`;
-
-  fetch(GOOGLE_SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({
-      action: 'updateCatalogStatus',
-      status: targetStatus
-    })
-  })
-  .then(res => { if (!res.ok) throw new Error('連線異常'); return res.json(); })
-  .then(resData => {
-    if (resData.status === 'success') {
-      msgEl.style.color = 'var(--leaf-dark)';
-      msgEl.textContent = `✅ 成功：所有品項已變更為 ${targetStatus === 'active' ? '顯示中' : '隱藏中'}！`;
-      loadCatalog();
-    } else {
-      throw new Error(resData.message || '變更失敗');
-    }
-  })
-  .catch(err => {
-    msgEl.style.color = 'var(--stamp)';
-    msgEl.textContent = `❌ 錯誤：${err.message}，請確認後端 GAS 是否支援此 action`;
-  })
-  .finally(() => {
-    upBtn.disabled = false;
-    downBtn.disabled = false;
-  });
-}
-
 const segBtns = document.querySelectorAll('#buyerTypeSeg button');
 segBtns.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -473,7 +561,7 @@ segBtns.forEach(btn => {
 
 function newOrderNumber(){
   const now = new Date();
-  document.getElementById('orderNo').textContent = 'M' + now.getFullYear().toString().slice(2) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + String(Math.floor(Math.random()*900)+100);
+  document.getElementById('orderNo').textContent = 'P' + now.getFullYear().toString().slice(2) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + String(Math.floor(Math.random()*900)+100);
   document.getElementById('orderDate').textContent = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
 }
 newOrderNumber();
@@ -483,11 +571,13 @@ function markFieldError(el){ el.classList.add('field-error'); }
 
 function validateForm(){
   clearFieldErrors(); const errors = [];
+  const pickupDate = dateInput.value;
   const buyerType = document.querySelector('#buyerTypeSeg button.active').dataset.type;
   const nameInput = document.getElementById('buyerName');
   const phoneInput = document.getElementById('buyerPhone');
   const emailInput = document.getElementById('buyerEmail');
 
+  if (!pickupDate) { errors.push('請選擇自取日期'); dateBtns.forEach(b => b.classList.add('field-error')); }
   if (!nameInput.value.trim()){ errors.push('請填寫姓名／聯絡人'); markFieldError(nameInput); }
   if (!phoneInput.value.trim()){ errors.push('請填寫聯絡電話'); markFieldError(phoneInput); }
   if (!emailInput.value.trim()){ errors.push('請填寫Email (寄發票用)'); markFieldError(emailInput); }
@@ -518,8 +608,49 @@ function resetFormForNextOrder(){
   document.querySelector('#buyerTypeSeg button[data-type="個人"]').classList.add('active');
   document.getElementById('businessBlock').classList.add('hidden');
   document.getElementById('individualBlock').classList.remove('hidden');
-  cart = []; newOrderNumber(); clearFieldErrors(); document.getElementById('validationBanner').classList.add('hidden');
+  cart = []; dateInput.value = ''; dateBtns.forEach(b => b.classList.remove('active'));
+  newOrderNumber(); clearFieldErrors(); document.getElementById('validationBanner').classList.add('hidden');
   loadCatalog();
+}
+
+// 生成列印出貨單的 HTML 結構
+function generatePrintTemplate(orderData) {
+  const itemsHtml = orderData.items.map(item => `
+    <tr>
+      <td>${escapeHtml(item.name)}</td>
+      <td style="text-align:center;">${item.qty}</td>
+      <td style="text-align:right;">${fmt(item.price)}</td>
+      <td style="text-align:right; font-weight:bold;">${fmt(item.subtotal)}</td>
+    </tr>
+  `).join('');
+
+  return `
+    <div class="print-header">Bonheur Cookie 預購出貨單</div>
+    <div class="print-row"><strong>訂單編號：</strong> ${orderData.orderNo}</div>
+    <div class="print-row"><strong>訂購日期：</strong> ${orderData.orderDate}</div>
+    <div class="print-row" style="font-size:18px; color:#b5482e;"><strong>預約自取日期： ${orderData.pickupDate}</strong></div>
+    <div class="print-row" style="margin-top:12px;"><strong>購買人姓名：</strong> ${escapeHtml(orderData.name)}</div>
+    <div class="print-row"><strong>聯絡電話：</strong> ${escapeHtml(orderData.phone)}</div>
+    <div class="print-row"><strong>Email：</strong> ${escapeHtml(orderData.email)}</div>
+    <div class="print-row"><strong>發票資訊：</strong> ${escapeHtml(orderData.invoiceLine)}</div>
+    
+    <table class="print-table">
+      <thead>
+        <tr>
+          <th>商品名稱</th>
+          <th style="text-align:center; width:60px;">數量</th>
+          <th style="text-align:right; width:80px;">單價</th>
+          <th style="text-align:right; width:100px;">小計</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsHtml}
+      </tbody>
+    </table>
+    
+    <div class="print-total">應收總額：${fmt(orderData.total)}</div>
+    <div class="print-footer">本單據由系統產生，請與商品一併交付客戶留存。</div>
+  `;
 }
 
 const submitBtn = document.getElementById('submitBtn');
@@ -529,6 +660,7 @@ submitBtn.addEventListener('click', () => {
 
   const orderNo = document.getElementById('orderNo').textContent;
   const orderDate = document.getElementById('orderDate').textContent;
+  const pickupDate = dateInput.value;
   const buyerType = document.querySelector('#buyerTypeSeg button.active').dataset.type;
   const name = document.getElementById('buyerName').value;
   const phone = document.getElementById('buyerPhone').value;
@@ -553,10 +685,12 @@ submitBtn.addEventListener('click', () => {
   itemsSnapshot.forEach((item, idx) => { itemLines += `${idx+1}. ${item.name} 數量：${item.qty} 單價：${fmt(item.price)} 小計：${fmt(item.subtotal)}\n`; });
   const untaxed = Math.round(total / 1.05); const tax = total - untaxed;
 
-  const orderData = { action: 'createOrder', orderNo, orderDate, buyerType, name, phone, email, carrierType, carrierValue, companyName, items: itemsSnapshot, untaxed, tax, total };
-  const summary = `訂單編號：${orderNo} 日期：${orderDate}\n\n【購買人資料】\n類別：${buyerType}\n姓名：${name}\n電話：${phone}\nEmail：${email}\n${invoiceLine}\n\n【商品明細】\n${itemLines}未稅金額：${fmt(untaxed)}\n稅額(5%)：${fmt(tax)}\n應付總額：${fmt(total)}`;
+  // 📝 將 pickupDate 與 invoiceLine 加入送往後端的資料包，供後端 Email 使用
+  const orderData = { action: 'createOrder', orderNo, orderDate, pickupDate, buyerType, name, phone, email, carrierType, carrierValue, companyName, invoiceLine, items: itemsSnapshot, untaxed, tax, total };
+  
+  const summary = `【約定自取日期】\n📌 ${pickupDate}\n\n訂單編號：${orderNo}\n\n【購買人資料】\n姓名：${name}\n電話：${phone}\nEmail：${email}\n${invoiceLine}\n\n【商品明細】\n${itemLines}未稅金額：${fmt(untaxed)}\n稅額(5%)：${fmt(tax)}\n應付總額：${fmt(total)}`;
 
-  submitBtn.disabled = true; submitBtn.textContent = '送出中...';
+  submitBtn.disabled = true; submitBtn.textContent = '訂單處理中...';
 
   fetch(GOOGLE_SCRIPT_URL, {
     method: 'POST',
@@ -567,8 +701,13 @@ submitBtn.addEventListener('click', () => {
   .then((resData) => {
     if (resData.status === 'success') {
       document.getElementById('resultIcon').className = 'icon-circle ok'; document.getElementById('resultIcon').textContent = '✓';
-      document.getElementById('resultTitle').textContent = '預購訂單已送出'; document.getElementById('resultSub').textContent = '預購成功！明細已發送至您的信箱，請至現場核對取貨';
-      document.getElementById('summaryText').textContent = summary; document.getElementById('overlay').classList.remove('hidden');
+      document.getElementById('resultTitle').textContent = '預購訂單已送出'; 
+      document.getElementById('summaryText').textContent = summary; 
+      
+      // 將列印排版注入隱藏的出貨單區塊
+      document.getElementById('printArea').innerHTML = generatePrintTemplate(orderData);
+      
+      document.getElementById('overlay').classList.remove('hidden');
     } else {
       throw new Error(resData.message || '儲存失敗');
     }
