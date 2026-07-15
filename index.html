@@ -340,7 +340,6 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz5mRDNd9YU2_
 
 let catalog = [];
 let cart = [];
-// ... (後續程式碼保持不變)
 
 const catalogLoading = document.getElementById('catalogLoading');
 const catalogContainer = document.getElementById('catalogContainer');
@@ -366,15 +365,24 @@ function loadCatalog(){
   catalogContainer.classList.add('hidden');
   catalogEmpty.classList.add('hidden');
 
-  const callbackName = 'catalogCb_' + Date.now();
-  const script = document.createElement('script');
-  window[callbackName] = (data) => {
-    delete window[callbackName]; script.remove();
+  fetch(GOOGLE_SCRIPT_URL + '?action=getCatalog', {
+    method: 'GET',
+    credentials: 'omit'
+  })
+  .then(response => {
+    if (!response.ok) throw new Error('網路回應狀態錯誤');
+    return response.json();
+  })
+  .then(data => {
     catalog = (data && data.products) ? data.products.filter(p => p.status !== 'hidden') : [];
     renderCatalog();
-  };
-  script.src = GOOGLE_SCRIPT_URL + '?action=getCatalog&callback=' + callbackName + '&_cacheBust=' + Date.now();
-  document.body.appendChild(script);
+  })
+  .catch(error => {
+    console.error('讀取商品目錄失敗:', error);
+    catalogLoading.classList.add('hidden');
+    catalogEmpty.textContent = '目前無法載入商品，請重新整理或稍後再試。';
+    catalogEmpty.classList.remove('hidden');
+  });
 }
 
 function renderCatalog(){
@@ -528,6 +536,8 @@ function resetFormForNextOrder(){
 }
 
 document.getElementById('closeBtn').addEventListener('click', () => document.getElementById('overlay').classList.add('hidden'));
+
+loadCatalog();
 </script>
 </body>
 </html>
