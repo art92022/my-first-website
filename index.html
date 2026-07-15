@@ -136,10 +136,9 @@
   .modal h2{margin:0 0 6px; font-size:20px; font-weight:900; color:var(--leaf-dark);}
   .modal .modal-sub{font-size:13.5px; color:var(--muted); margin:0 0 6px; line-height:1.6; font-weight:700;}
   .modal .modal-warning { color: var(--stamp-dark); font-size: 12.5px; font-weight: 700; margin: 0 0 16px; background: #fdf3f1; padding: 8px 12px; border-radius: 6px; }
-  .modal pre{ white-space:pre-wrap; background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px; font-size:13.5px; line-height:1.7; color:var(--ink); font-family:inherit;}
   .modal-actions{display:flex; gap:10px; margin-top:16px;}
   .modal-actions button{ flex:1; padding:14px; border-radius:8px; font-weight:800; font-size:14.5px; cursor:pointer; border:none; letter-spacing:1px; }
-  .close-btn{background:var(--leaf); color:#fff; width:100%;}
+  .close-btn{background:var(--leaf); color:#fff; width:100%; padding:12px; border:none; border-radius:8px; font-weight:700; font-size:15px; margin-top:16px; cursor:pointer;}
   .icon-circle{ width:54px; height:54px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:12px; }
   .icon-circle.ok{background:#fdf9f4; color:var(--leaf-dark); border: 2px solid var(--leaf);}
   
@@ -190,11 +189,11 @@
     </div>
     <div class="row2">
       <div class="field">
-        <label>聯絡電話 <span class="hint">(必填)</span></label>
+        <label>聯絡電話 <span class="hint">必填</span></label>
         <input type="tel" id="buyerPhone" placeholder="09xx-xxx-xxx">
       </div>
       <div class="field">
-        <label>Email <span class="hint" style="color:var(--stamp-dark); font-weight:700;">(必填) 會寄電子發票與訂單資訊</span></label>
+        <label>Email <span class="hint" style="color:var(--stamp-dark); font-weight:700;">必填 會寄電子發票</span></label>
         <input type="email" id="buyerEmail" placeholder="example@gmail.com">
       </div>
     </div>
@@ -329,7 +328,7 @@
     <h2>預購訂單已送出</h2>
     <p class="modal-sub">預購成功！明細已發送至您的信箱，請依約定日期取貨。</p>
     <p class="modal-warning">※ 提醒您：訂單確認信件有可能會跑到「垃圾信件匣」，請務必留意收信。</p>
-    <pre id="summaryText" style="margin-bottom: 16px;"></pre>
+    <div id="summaryText"></div>
     <button class="close-btn" id="closeBtn">確認關閉</button>
   </div>
 </div>
@@ -507,6 +506,14 @@ submitBtn.addEventListener('click', () => {
       document.getElementById('validationBanner').innerHTML = '<b>請完成以下項目再送出：</b><br>' + errors.map(e => '・' + e).join('<br>');
       document.getElementById('validationBanner').classList.remove('hidden'); return;
   }
+
+  // 抓取發票與載具資訊
+  const carrierRadio = document.querySelector('input[name="carrier"]:checked');
+  const carrierType = carrierRadio ? carrierRadio.parentElement.textContent.trim() : '';
+  let carrierValue = '';
+  if (carrierRadio && carrierRadio.value === 'mobile') carrierValue = document.getElementById('mobileCarrier').value;
+  if (carrierRadio && carrierRadio.value === 'donate') carrierValue = document.getElementById('donateCode').value;
+
   const orderData = { 
       action: 'createOrder', 
       orderNo: document.getElementById('orderNo').textContent,
@@ -515,13 +522,46 @@ submitBtn.addEventListener('click', () => {
       name: document.getElementById('buyerName').value,
       phone: document.getElementById('buyerPhone').value,
       email: document.getElementById('buyerEmail').value,
-      items: cart,
+      buyerType: document.querySelector('#buyerTypeSeg .active').dataset.type,
+      carrierType: carrierType,
+      carrierValue: carrierValue,
+      companyName: document.getElementById('companyName').value,
+      items: cart.map(i => { return { name: i.name, qty: i.qty, price: i.price, subtotal: i.price * i.qty }; }),
+      untaxed: document.getElementById('untaxed').textContent,
+      tax: document.getElementById('taxAmt').textContent,
       total: document.getElementById('grandTotal').textContent
   };
+
   submitBtn.disabled = true; submitBtn.textContent = '送出中...';
   fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(orderData) })
   .then(() => {
-      document.getElementById('summaryText').textContent = '預購成功，請查看您的電子信箱！';
+      // 組合自訂的彈出視窗明細
+      const modalHtml = `
+        <div style="text-align:left; font-size:14px; line-height:1.8; margin-top:10px;">
+          <div style="background:#fdf9f4; padding:12px; border-radius:8px; margin-bottom:12px;">
+            <div style="margin-bottom:4px;"><strong>訂單編號：</strong> ${orderData.orderNo}</div>
+            <div style="margin-bottom:4px;"><strong>約定日期：</strong> ${orderData.pickupDate}</div>
+          </div>
+          <div style="background:#fdf9f4; padding:12px; border-radius:8px; margin-bottom:12px;">
+            <strong>【買受人資料】</strong><br>
+            類別：${orderData.buyerType}<br>
+            姓名：${orderData.name}<br>
+            電話：${orderData.phone}<br>
+            發票：${orderData.carrierType} ${orderData.carrierValue}
+          </div>
+          <div style="background:#fdf9f4; padding:12px; border-radius:8px; margin-bottom:12px;">
+            <strong>【商品明細】</strong><br>
+            ${orderData.items.map((c, i) => `${i+1}. ${c.name} 數量：${c.qty} 單價：${fmt(c.price)} 小計：${fmt(c.subtotal)}`).join('<br>')}
+            <hr style="border:0; border-top:1px dashed var(--line); margin:10px 0;">
+            未稅金額：${orderData.untaxed}<br>
+            稅額(5%)：${orderData.tax}<br>
+            <div style="text-align:right; font-size:16px; font-weight:900; margin-top:8px; color:var(--stamp-dark);">
+              應付總額：${orderData.total}
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('summaryText').innerHTML = modalHtml;
       document.getElementById('overlay').classList.remove('hidden');
       resetFormForNextOrder();
   }).finally(() => { submitBtn.disabled = false; submitBtn.textContent = '送出預購訂單'; });
