@@ -143,6 +143,29 @@
   .icon-circle.ok{background:#fdf9f4; color:var(--leaf-dark); border: 2px solid var(--leaf);}
   
   .pickup-map-container { background:#fffdfa; border-radius:12px; padding:20px 15px; border:2px solid var(--line); font-family:sans-serif; box-shadow:0 4px 12px rgba(109,82,60,0.05); margin-bottom: 14px; }
+
+  .menu-image-wrap{ margin-bottom:18px; border-radius:10px; overflow:hidden; border:1.5px solid var(--line); box-shadow:0 3px 10px rgba(109,82,60,0.08); }
+  .menu-image-wrap img{ display:block; width:100%; height:auto; }
+
+  .info-section{background:transparent; border:none; padding:0;}
+  .info-block{background:var(--paper-card); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:14px;}
+  .info-block h3{margin:0 0 10px; font-size:14.5px; font-weight:800; color:var(--leaf-dark); display:flex; align-items:center; gap:6px;}
+  .info-block ul{margin:0; padding-left:18px; font-size:13px; line-height:1.9; color:#4a4237;}
+  .info-block ul li{margin-bottom:2px;}
+  .info-block .warn-line{color:var(--stamp-dark); font-weight:700;}
+  .pay-row{display:flex; gap:16px; font-size:13.5px; font-weight:700; margin-bottom:8px;}
+  .pay-row .no{color:var(--stamp-dark);}
+  .pay-row .yes{color:var(--leaf-dark);}
+  .care-table{width:100%; border-collapse:separate; border-spacing:0 8px; font-size:12.5px;}
+  .care-table thead th{background:var(--leaf-dark); color:#fff; font-weight:800; padding:10px 8px; font-size:12px; text-align:left;}
+  .care-table thead tr th:first-child{border-radius:8px 0 0 8px;}
+  .care-table thead tr th:last-child{border-radius:0 8px 8px 0;}
+  .care-table tbody td{background:#e8dcc4; padding:10px 8px; color:var(--leaf-dark); font-weight:700;}
+  .care-table tbody tr td:first-child{border-radius:8px 0 0 8px; font-weight:800;}
+  .care-table tbody tr td:last-child{border-radius:0 8px 8px 0; text-align:center;}
+  .care-table tbody td.dash{text-align:center; font-weight:400; color:#a89a7f;}
+  .care-group-label{font-size:12.5px; font-weight:700; margin:12px 0 6px; color:#5a4f43;}
+  .care-group-label b{color:var(--stamp-dark);}
 </style>
 </head>
 <body>
@@ -160,7 +183,12 @@
 
   <section>
     <div class="sec-head"><div class="sec-label"><span class="tag">01</span>購買人與取貨資料</div></div>
-    
+
+    <!-- 🔁 每次開新單只要換這一行的網址，就能替換本次菜單圖片 -->
+    <div class="menu-image-wrap">
+      <img id="menuImage" src="https://img.shoplineapp.com/media/image_clips/6a6c50faba01200010303e81/original.jpg?1785483513=&owner_id=5dcd960dd9d3e3005a390332" alt="本次預購菜單">
+    </div>
+
     <div class="field" style="margin-bottom:20px; border-bottom:1px dashed var(--line); padding-bottom:18px;">
       <label>自取日期 <span class="hint" style="color:var(--stamp-dark); font-weight:700;">必填，不可複選</span></label>
       <div class="date-grid" id="pickupDateGrid">
@@ -312,6 +340,73 @@
       <div style="background:#e8dcc4; color:var(--leaf-dark); font-size:13.5px; font-weight:900; text-align:center; padding:12px; border-radius:30px; letter-spacing:1px;">
         取貨點A8後門：請按電鈴，有專人為您服務，並且提供訂購人手機後三碼。
       </div>
+    </div>
+  </section>
+
+  <section class="info-section" style="margin-top:24px;">
+    <div class="sec-head" style="margin-bottom:8px;">
+      <div class="sec-label"><span class="tag">04</span>園區自取訂購須知</div>
+    </div>
+
+    <div class="info-block">
+      <h3>💰 付款方式</h3>
+      <div class="pay-row"><span class="no">❌ 無刷卡</span><span class="yes">⭕ 現場現金付款 / LINE Pay</span></div>
+      <ul>
+        <li>如需開立統編，請於預購表單的發票類別選擇「公司行號」，並完整輸入抬頭與統編。</li>
+        <li class="warn-line">⚠️ 恕不接受事後補打統編，請於送出前再次確認。</li>
+      </ul>
+    </div>
+
+    <div class="info-block">
+      <h3>🚗 取貨方式（園區自取限定）</h3>
+      <ul>
+        <li>取貨時段：週一跟週五 12:00～13:00</li>
+        <li>取貨地點：依表單地圖標示（A8後門）</li>
+        <li>商品皆為純手工製作，請務必於指定午休時段內前往取件。若請同事代領，請務必提供訂購人手機後三碼以便核對。</li>
+        <li>甜點離開冷藏／冷凍後請盡速食用，或妥善放入公司冰箱保存。</li>
+        <li>商品背後皆有成份標示與保存方式，盒內附食用小卡說明。</li>
+      </ul>
+    </div>
+
+    <div class="info-block">
+      <h3>📝 訂購須知</h3>
+      <ul>
+        <li>請務必確認填寫正確的「中文姓名」、「可聯絡的手機電話」與「Email」，以利取貨核對與寄送電子發票。</li>
+        <li>為確保製作與備貨順暢，下單後恕不接受改單或取消。若需增加品項，請直接新增一筆訂單。</li>
+        <li>依消保法規定，「生鮮食品」不適用於第 19 條，無 7 天鑑賞期。</li>
+        <li>圖片僅供參考，實際以收到之商品為主。</li>
+        <li>請於開箱時錄影，如有任何問題請於 LINE 官方帳號提供影片，我們將盡速為您後續處理。</li>
+      </ul>
+    </div>
+
+    <div class="info-block">
+      <h3>❄️ 保存與食用指南</h3>
+      <p style="font-size:12.5px; color:#5a4f43; margin:0 0 12px; line-height:1.7;">所有的甜點皆無添加防腐劑。因公司與家用冰箱冷度不一，以下天數為「理想狀態」，建議收到後盡早食用完畢，並請勿久放於高溫環境。</p>
+
+      <div class="care-group-label">冷凍品項：所有品項無添加防腐劑，請務必保存於 <b>-18°C</b> 以下之冷凍保存。</div>
+      <table class="care-table">
+        <thead><tr><th>品項</th><th>冷凍</th><th>冷藏</th><th>常溫</th><th>享用前退冰</th></tr></thead>
+        <tbody>
+          <tr><td>達克瓦茲</td><td>14天</td><td class="dash">—</td><td class="dash">—</td><td>夏10-20分鐘／冬20-30分鐘</td></tr>
+          <tr><td>奶油餅／甘納許夾心餅</td><td>14天</td><td class="dash">—</td><td class="dash">—</td><td>夏10-20分鐘／冬20-30分鐘</td></tr>
+          <tr><td>冰磚／費南雪</td><td>14天</td><td class="dash">—</td><td class="dash">—</td><td>10分鐘</td></tr>
+          <tr><td>巧克力松露</td><td>14天</td><td class="dash">—</td><td class="dash">—</td><td>30分鐘</td></tr>
+        </tbody>
+      </table>
+
+      <div class="care-group-label">冷藏品項：所有品項無添加防腐劑，請務必保存於 <b>7°C</b> 以下之冷藏環境。</div>
+      <table class="care-table">
+        <tbody>
+          <tr><td>冷藏款 柔雪</td><td class="dash">—</td><td>14天</td><td class="dash">—</td><td class="dash">—</td></tr>
+        </tbody>
+      </table>
+
+      <div class="care-group-label">常溫品項：所有品項無添加防腐劑，建議 <b>28°C</b> 以下之陰涼處或冷藏保存，敬請儘早使用。</div>
+      <table class="care-table">
+        <tbody>
+          <tr><td>常溫款 柔雪</td><td class="dash">—</td><td class="dash">—</td><td>7天</td><td class="dash">—</td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
