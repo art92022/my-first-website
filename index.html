@@ -157,12 +157,12 @@
   .pay-row .no{color:var(--stamp-dark);}
   .pay-row .yes{color:var(--leaf-dark);}
 
-  /* 💡 這裡是你原本寫得非常好的表格樣式 */
-  .care-table{width:100%; border-collapse:separate; border-spacing:0 8px; font-size:12.5px;}
+  /* 強制固定欄寬，保證上下表格完美對齊 */
+  .care-table{width:100%; border-collapse:separate; border-spacing:0 8px; font-size:12.5px; table-layout: fixed;}
   .care-table thead th{background:var(--leaf-dark); color:#fff; font-weight:800; padding:10px 8px; font-size:12px; text-align:left;}
   .care-table thead tr th:first-child{border-radius:8px 0 0 8px;}
   .care-table thead tr th:last-child{border-radius:0 8px 8px 0;}
-  .care-table tbody td{background:#e8dcc4; padding:10px 8px; color:var(--leaf-dark); font-weight:700;}
+  .care-table tbody td{background:#e8dcc4; padding:10px 8px; color:var(--leaf-dark); font-weight:700; word-wrap: break-word;}
   .care-table tbody tr td:first-child{border-radius:8px 0 0 8px; font-weight:800;}
   .care-table tbody tr td:last-child{border-radius:0 8px 8px 0; text-align:center;}
   .care-table tbody td.dash{text-align:center; font-weight:400; color:#a89a7f;}
@@ -382,13 +382,18 @@
       </ul>
     </div>
 
-    <!-- 💡 已還原套用完整 .care-table 樣式，完美對齊版！ -->
     <div class="info-block">
       <h3>❄️ 保存與食用指南</h3>
       <p style="font-size:12.5px; color:#5a4f43; margin:0 0 12px; line-height:1.7;">所有的甜點皆無添加防腐劑。因公司與家用冰箱冷度不一，以下天數為「理想狀態」，建議收到後盡早食用完畢，並請勿久放於高溫環境。</p>
 
       <div class="care-group-label">冷凍品項：所有品項無添加防腐劑，請務必保存於 <b>-18°C</b> 以下之冷凍保存。</div>
       <table class="care-table">
+        <colgroup>
+          <col style="width: 35%;">
+          <col style="width: 15%;">
+          <col style="width: 15%;">
+          <col style="width: 35%;">
+        </colgroup>
         <thead>
           <tr>
             <th>品項</th>
@@ -427,12 +432,18 @@
 
       <div class="care-group-label">冷藏品項：所有品項無添加防腐劑，請務必保存於 <b>7°C</b> 以下之冷藏環境。</div>
       <table class="care-table">
+        <colgroup>
+          <col style="width: 35%;">
+          <col style="width: 15%;">
+          <col style="width: 15%;">
+          <col style="width: 35%;">
+        </colgroup>
         <tbody>
           <tr>
             <td>冷藏款 柔雪</td>
-            <td class="dash" style="width:20%;">—</td>
-            <td style="text-align:center; width:20%;">14 天</td>
-            <td class="dash" style="text-align:center;">—</td>
+            <td class="dash">—</td>
+            <td style="text-align:center;">14 天</td>
+            <td class="dash">—</td>
           </tr>
         </tbody>
       </table>
@@ -452,7 +463,7 @@
 </div>
 
 <script>
-// 💡 網址已經幫你更新成最新的部署版本！
+// 💡 已為你填好最新正確的部署網址
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzygJ3inIo4VhzDKFmJF0QLlJhWG2Jvg9KdPT14ABCw-gXaWYXzBxRxERmF6f0zQyyz/exec';
 
 let catalog = [];
@@ -724,177 +735,4 @@ loadDates();
 loadCatalog();
 </script>
 </body>
-</html><!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bonheur Cookie 預購自取訂單管理表</title>
-<style>
-  :root{
-    --ink:#2d2521;
-    --paper:#f3ebd9;
-    --line:#dfd4be;
-    --stamp:#b5482e;
-    --stamp-dark:#8f3520;
-    --leaf:#6d523c; 
-    --leaf-dark:#412a1c;
-    --paper-card:#fffdfa;
-    --muted:#8b7e6c;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0; background:var(--paper);
-    background-image: radial-gradient(circle at 1px 1px, rgba(109,82,60,0.06) 1px, transparent 0);
-    background-size: 18px 18px; font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
-    color:var(--ink); padding:28px 16px 80px;
-  }
-  .sheet{max-width:640px; margin:0 auto;}
-  header{
-    display:flex; align-items:flex-start; justify-content:space-between;
-    border-bottom:3px double var(--line); padding-bottom:14px; margin-bottom:18px ;
-  }
-  .title-block h1{font-size:26px; margin:0 0 4px; letter-spacing:1px; font-weight:900;}
-  .title-block p{margin:0; font-size:12.5px; color:var(--muted);}
-  .stamp{
-    flex-shrink:0; width:64px; height:64px; border:2.5px solid var(--stamp); border-radius:8px; color:var(--stamp);
-    display:flex; align-items:center; justify-content:center; font-weight:900; font-size:13px; line-height:1.2;
-    text-align:center; transform:rotate(-6deg); opacity:0.85;
-  }
-  .order-no{font-size:11px; color:var(--muted); margin-bottom:16px; text-align:right;}
-  .order-no span{font-weight:700; color:var(--ink);}
-
-  section{background:var(--paper-card); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:16px;}
-  .sheet section:nth-of-type(1) .sec-label::before { content: "📋 "; }
-  .sheet section:nth-of-type(2) .sec-label::before { content: "🛒 "; }
-  .sheet section:nth-of-type(3) .sec-label::before { content: "📍 "; }
-  .sec-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
-  .sec-label{display:flex; align-items:center; gap:8px; font-weight:800; font-size:14.5px; color:var(--leaf-dark);}
-  .sec-label .tag{background:var(--leaf); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; font-weight:700;}
-
-  .field{margin-bottom:12px;}
-  .field label{display:block; font-size:12.5px; font-weight:700; margin-bottom:5px; color:#5a4f43;}
-  .field .hint{font-weight:400; font-size:11px; color:var(--muted); margin-left:4px;}
-  input[type=text], input[type=number], input[type=email], input[type=tel]{
-    width:100%; padding:10px 11px; border:1px solid var(--line); border-radius:7px; font-size:15px; color:var(--ink);
-  }
-  input:focus{outline:2px solid var(--leaf); outline-offset:1px;}
-  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
-
-  .seg{display:flex; border:1px solid var(--line); border-radius:8px; overflow:hidden;}
-  .seg button{flex:1; padding:10px 6px; border:none; background:#fff; font-size:13.5px; font-weight:700; color:var(--muted); cursor:pointer;}
-  .seg button.active{background:var(--leaf); color:#fff;}
-  .seg button:not(:last-child){border-right:1px solid var(--line);}
-
-  .radio-row{display:flex; align-items:center; gap:8px; padding:9px 4px; border-bottom:1px solid #ece5d3; font-size:13.5px;}
-  .radio-row:last-child{border-bottom:none;}
-  .radio-row input[type=radio]{width:17px; height:17px; accent-color:var(--leaf); flex-shrink:0;}
-  .radio-row .sub-input{flex:1; margin-top:0;}
-  .radio-row .sub-input input{padding:7px 9px; font-size:13.5px;}
-  .hidden{display:none !important;}
-
-  .date-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .date-btn { background: #e8dcc4; border: 1.5px solid transparent; padding: 10px 4px; border-radius: 6px; font-weight: 700; color: var(--leaf); cursor: pointer; transition: 0.2s; font-size: 13.5px; }
-  .date-btn:hover { background: #dfccaa; }
-  .date-btn.active { background: var(--leaf); color: #fff; border-color: var(--leaf); box-shadow: 0 3px 8px rgba(109,82,60,0.3); }
-
-  .catalog-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 30px 0; font-size: 13.5px; color: var(--muted); font-weight: 700; }
-  .spinner { width: 32px; height: 32px; border: 3px solid rgba(109,82,60,0.15); border-top-color: var(--leaf); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .category-zone { margin-bottom: 22px; }
-  .category-title { font-size: 14px; font-weight: 800; color: var(--leaf-dark); letter-spacing: 1px; margin: 12px 0 8px; padding-bottom: 4px; border-bottom: 1px dashed var(--line); display: flex; align-items: center; gap: 4px; }
-  .catalog-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  
-  .product-card{
-    border:1.5px solid var(--line); border-radius:10px; background:#fff; padding:12px 10px;
-    text-align:left; cursor:pointer; font-family:inherit; transition:all 0.15s ease; position: relative;
-  }
-  .product-card:active{transform:translateY(1px);}
-  .product-card.in-cart{border-color:var(--leaf); background:#fdf9f4;}
-  .product-card:disabled{opacity:0.5; cursor:not-allowed; background:#eee;}
-  .product-card .p-name{display:block; font-weight:700; font-size:14px; margin-bottom:4px;}
-  .product-card .p-price{display:block; font-size:13px; color:var(--stamp-dark); font-weight:700;}
-  .product-card .p-stock{display:block; font-size:11px; color:var(--muted); margin-top:4px;}
-  .product-card .p-stock.low-stock{color:var(--stamp); font-weight:700;}
-  .product-card .p-badge{
-    display:inline-block; margin-top:6px; font-size:11px; font-weight:700; background:var(--leaf); color:#fff; padding:1px 7px; border-radius:10px;
-  }
-  .catalog-empty{ font-size:13px; color:var(--muted); text-align:center; padding:24px 0; line-height: 1.6; }
-
-  .cart{margin-top:14px; border-top:1px dashed var(--line); padding-top:12px;}
-  .cart-title{font-size:12px; font-weight:700; color:var(--muted); margin-bottom:8px;}
-  .cart-row{display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #ece5d3; font-size:13.5px;}
-  .cart-row:last-child{border-bottom:none;}
-  .cart-row .c-name{flex:1; font-weight:700;}
-  .cart-row .c-price{font-size:11.5px; color:var(--muted); display:block;}
-  .qty-ctrl{display:flex; align-items:center; gap:6px; flex-shrink:0;}
-  .qty-ctrl button{
-    width:26px; height:26px; border-radius:6px; border:1px solid var(--line);
-    background:#fff; font-size:15px; font-weight:700; cursor:pointer; color:var(--leaf-dark); line-height:1;
-  }
-  .qty-ctrl .qty-num{min-width:20px; text-align:center; font-weight:700;}
-  .cart-row .c-sub{width:64px; text-align:right; font-weight:800; flex-shrink:0;}
-  .cart-row .c-del{background:none; border:none; color:var(--stamp); font-size:17px; cursor:pointer; padding:0 2px;}
-  .empty-cart{font-size:12.5px; color:var(--muted); padding:6px 0;}
-
-  .totals{margin-top:14px; border-top:1px dashed var(--line); padding-top:12px;}
-  .totals .line{display:flex; justify-content:space-between; font-size:13px; padding:3px 0; color:#55503f;}
-  .totals .grand{
-    display:flex; justify-content:space-between; align-items:baseline; margin-top:6px;
-    padding-top:8px; border-top:2px solid var(--ink); font-size:18px; font-weight:900;
-  }
-  .totals .grand .amt{color:var(--stamp-dark);}
-
-  .submit-bar{position:sticky; bottom:14px; margin-top:8px;}
-  .submit-btn{
-    width:100%; padding:15px; background:var(--leaf); color:#fff; border:none; border-radius:9px;
-    font-size:16px; font-weight:800; letter-spacing:1px; cursor:pointer; box-shadow:0 4px 14px rgba(109,82,60,0.3);
-  }
-  .submit-btn:disabled{opacity:0.6; cursor:default;}
-  .note-text{font-size:11.5px; color:var(--muted); text-align:center; margin-top:10px; line-height:1.6;}
-  .validation-banner{ background:#fdeeea; border:1.5px solid var(--stamp); border-radius:9px; padding:11px 13px; margin-bottom:10px; font-size:12.5px; color:var(--stamp-dark); }
-  input.field-error{ border-color:var(--stamp) !important; background:#fdf3f1; }
-
-  .overlay{ position:fixed; inset:0; background:rgba(41,31,22,0.65); display:flex; align-items:flex-end; justify-content:center; z-index:50; }
-  .overlay.hidden{display:none;}
-  .modal{ background:var(--paper-card); width:100%; max-width:640px; border-radius:16px 16px 0 0; padding:26px 20px 30px; max-height:85vh; overflow-y:auto; }
-  .modal h2{margin:0 0 6px; font-size:20px; font-weight:900; color:var(--leaf-dark);}
-  .modal .modal-sub{font-size:13.5px; color:var(--muted); margin:0 0 6px; line-height:1.6; font-weight:700;}
-  .modal .modal-warning { color: var(--stamp-dark); font-size: 12.5px; font-weight: 700; margin: 0 0 16px; background: #fdf3f1; padding: 8px 12px; border-radius: 6px; }
-  .modal-actions{display:flex; gap:10px; margin-top:16px;}
-  .modal-actions button{ flex:1; padding:14px; border-radius:8px; font-weight:800; font-size:14.5px; cursor:pointer; border:none; letter-spacing:1px; }
-  .close-btn{background:var(--leaf); color:#fff; width:100%; padding:12px; border:none; border-radius:8px; font-weight:700; font-size:15px; margin-top:16px; cursor:pointer;}
-  .icon-circle{ width:54px; height:54px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:12px; }
-  .icon-circle.ok{background:#fdf9f4; color:var(--leaf-dark); border: 2px solid var(--leaf);}
-  
-  .pickup-map-container { background:#fffdfa; border-radius:12px; padding:20px 15px; border:2px solid var(--line); font-family:sans-serif; box-shadow:0 4px 12px rgba(109,82,60,0.05); margin-bottom: 14px; }
-
-  .menu-image-wrap{ margin-bottom:18px; border-radius:10px; overflow:hidden; border:1.5px solid var(--line); box-shadow:0 3px 10px rgba(109,82,60,0.08); }
-  .menu-image-wrap img{ display:block; width:100%; height:auto; }
-
-  .info-section{background:transparent; border:none; padding:0;}
-  .info-block{background:var(--paper-card); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:14px;}
-  .info-block h3{margin:0 0 10px; font-size:14.5px; font-weight:800; color:var(--leaf-dark); display:flex; align-items:center; gap:6px;}
-  .info-block ul{margin:0; padding-left:18px; font-size:13px; line-height:1.9; color:#4a4237;}
-  .info-block ul li{margin-bottom:2px;}
-  .info-block .warn-line{color:var(--stamp-dark); font-weight:700;}
-  .pay-row{display:flex; gap:16px; font-size:13.5px; font-weight:700; margin-bottom:8px;}
-  .pay-row .no{color:var(--stamp-dark);}
-  .pay-row .yes{color:var(--leaf-dark);}
-
-  /* 💡 這裡是你原本寫得非常好的表格樣式 */
-  .care-table{width:100%; border-collapse:separate; border-spacing:0 8px; font-size:12.5px;}
-  .care-table thead th{background:var(--leaf-dark); color:#fff; font-weight:800; padding:10px 8px; font-size:12px; text-align:left;}
-  .care-table thead tr th:first-child{border-radius:8px 0 0 8px;}
-  .care-table thead tr th:last-child{border-radius:0 8px 8px 0;}
-  .care-table tbody td{background:#e8dcc4; padding:10px 8px; color:var(--leaf-dark); font-weight:700;}
-  .care-table tbody tr td:first-child{border-radius:8px 0 0 8px; font-weight:800;}
-  .care-table tbody tr td:last-child{border-radius:0 8px 8px 0; text-align:center;}
-  .care-table tbody td.dash{text-align:center; font-weight:400; color:#a89a7f;}
-  .care-group-label{font-size:12.5px; font-weight:700; margin:12px 0 6px; color:#5a4f43;}
-  .care-group-label b{color:var(--stamp-dark);}
-</style>
-</head>
-<body>
-
+</html>
