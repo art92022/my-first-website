@@ -184,19 +184,15 @@
   <section>
     <div class="sec-head"><div class="sec-label"><span class="tag">01</span>菜單</div></div>
 
-    <!-- 🔁 每次開新單只要換這一行的網址，就能替換本次菜單圖片 -->
     <div class="menu-image-wrap">
       <img id="menuImage" src="https://img.shoplineapp.com/media/image_clips/6a6c50faba01200010303e81/original.jpg?1785483513=&owner_id=5dcd960dd9d3e3005a390332" alt="本次預購菜單">
     </div>
 
+    <!-- 🌟 動態載入自取日期區塊 -->
     <div class="field" style="margin-bottom:20px; border-bottom:1px dashed var(--line); padding-bottom:18px;">
       <label>自取日期 <span class="hint" style="color:var(--stamp-dark); font-weight:700;">必填，不可複選</span></label>
       <div class="date-grid" id="pickupDateGrid">
- 
-               <button type="button" class="date-btn" data-date="8/7(五)">8/7(五)</button>
-               <button type="button" class="date-btn" data-date="8/10(一)">8/10(一)</button>
-
-
+        <div style="font-size:13px; color:var(--muted); grid-column: span 4; text-align:center; padding: 10px 0;">自取日期載入中...</div>
       </div>
       <input type="hidden" id="selectedDateInput" value="">
     </div>
@@ -263,7 +259,6 @@
     </div>
     
     <div id="catalogContainer" class="hidden"></div>
-
     <div class="catalog-empty hidden" id="catalogEmpty">目前沒有開放預購的商品，請洽工作人員</div>
     
     <div class="cart">
@@ -275,6 +270,12 @@
       <div class="line"><span>未稅金額</span><span id="untaxed">$0</span></div>
       <div class="line"><span>稅額 (5%)</span><span id="taxAmt">$0</span></div>
       <div class="grand"><span>應付總額</span><span class="amt" id="grandTotal">$0</span></div>
+    </div>
+
+    <!-- 驗證提示與送出按鈕 -->
+    <div class="submit-bar">
+      <div class="validation-banner hidden" id="validationBanner"></div>
+      <button type="button" class="submit-btn" id="submitBtn">送出預購訂單</button>
     </div>
   </section>
 
@@ -383,35 +384,39 @@
       <h3>❄️ 保存與食用指南</h3>
       <p style="font-size:12.5px; color:#5a4f43; margin:0 0 12px; line-height:1.7;">所有的甜點皆無添加防腐劑。因公司與家用冰箱冷度不一，以下天數為「理想狀態」，建議收到後盡早食用完畢，並請勿久放於高溫環境。</p>
 
-      <div class="care-group-label">冷凍品項：所有品項無添加防腐劑，請務必保存於 <b>-18°C</b> 以下之冷凍保存。</div>
-      <table class="care-table">
-        <thead><tr><th>品項</th><th>冷凍</th><th>冷藏</th>   <th>常溫</th><th>享用前退冰</th></tr></thead>
-        <tbody>
-          <tr><td>達克瓦茲</td><td>14天</td><td class="dash">—</td><td class="dash">—</td><td>夏10-20分鐘／冬20-30分鐘</td></tr>
-          <tr><td>奶油餅／甘納許夾心餅</td><td>14天</td><td class="dash">—</td><td class="dash">—</td><td>夏10-20分鐘／冬20-30分鐘</td></tr>
-          <tr><td>冰磚／費南雪</td><td>14天</td><td class="dash">—</td><td class="dash">—</td><td>10分鐘</td></tr>
-          <tr><td>巧克力松露</td><td>14天</td><td class="dash">—</td><td class="dash">—</td><td>30分鐘</td></tr>
-        </tbody>
-      </table>
+      <div class="bh-storage-section">
+        <h3 class="bh-shipping-title" style="margin:0 0 8px; font-size:13.5px;">
+          <span class="bh-shipping-icon">🧊</span>保存食用建議
+        </h3>
 
-      <div class="care-group-label">冷藏品項：所有品項無添加防腐劑，請務必保存於 <b>7°C</b> 以下之冷藏環境。</div>
-      <table class="care-table">
-        <tbody>
-          <tr><td>冷藏款 柔雪</td><td class="dash">—</td><td>14天</td><td class="dash">—</td><td class="dash">—</td></tr>
-        </tbody>
-      </table>
+        <div class="bh-storage-list" style="border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#fff;">
+          <div class="bh-storage-row bh-storage-head" style="display:grid; grid-template-columns:2fr 1fr 1fr 2fr; padding:8px 10px; font-size:12px; background:var(--leaf-dark); color:#fff; font-weight:800;">
+            <span>品項</span><span>冷凍</span><span>冷藏</span><span>享用前退冰</span>
+          </div>
 
-      <div class="care-group-label">常溫品項：所有品項無添加防腐劑，建議 <b>28°C</b> 以下之陰涼處或冷藏保存，敬請儘早使用。</div>
-      <table class="care-table">
-        <tbody>
-          <tr><td>常溫款 柔雪</td><td class="dash">—</td><td class="dash">—</td><td>7天</td><td class="dash">—</td></tr>
-        </tbody>
-      </table>
+          <div class="bh-storage-category" style="background:#e8dcc4; color:var(--leaf-dark); font-weight:700; padding:6px 10px; font-size:11.5px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">冷凍品項:所有品項無添加防腐劑,請務必保存於 <strong>-18°C</strong> 以下之冷凍保存。</div>
+          
+          <div class="bh-storage-row" style="display:grid; grid-template-columns:2fr 1fr 1fr 2fr; padding:8px 10px; font-size:12px; border-bottom:1px solid #f0e6d2; align-items:center;">
+            <span>達克瓦茲</span><span>14 天</span><span style="color:#b8aba0; text-align:center;">—</span><span>夏 10–20 分鐘／冬 20–30 分鐘</span>
+          </div>
+          <div class="bh-storage-row" style="display:grid; grid-template-columns:2fr 1fr 1fr 2fr; padding:8px 10px; font-size:12px; border-bottom:1px solid #f0e6d2; align-items:center;">
+            <span>奶油餅／甘納許夾心餅</span><span>14 天</span><span style="color:#b8aba0; text-align:center;">—</span><span>夏 10–20 分鐘／冬 20–30 分鐘</span>
+          </div>
+          <div class="bh-storage-row" style="display:grid; grid-template-columns:2fr 1fr 1fr 2fr; padding:8px 10px; font-size:12px; border-bottom:1px solid #f0e6d2; align-items:center;">
+            <span>冰磚／費南雪</span><span>14 天</span><span style="color:#b8aba0; text-align:center;">—</span><span>10 分鐘</span>
+          </div>
+          <div class="bh-storage-row" style="display:grid; grid-template-columns:2fr 1fr 1fr 2fr; padding:8px 10px; font-size:12px; border-bottom:1px solid #f0e6d2; align-items:center;">
+            <span>巧克力松露</span><span>14 天</span><span style="color:#b8aba0; text-align:center;">—</span><span>30 分鐘</span>
+          </div>
+
+          <div class="bh-storage-category" style="background:#e8dcc4; color:var(--leaf-dark); font-weight:700; padding:6px 10px; font-size:11.5px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">冷藏品項:所有品項無添加防腐劑,請務必保存於 <strong>7°C</strong> 以下之冷藏環境。</div>
+          <div class="bh-storage-row" style="display:grid; grid-template-columns:2fr 1fr 1fr 2fr; padding:8px 10px; font-size:12px; align-items:center;">
+            <span>冷藏款 柔雪</span><span style="color:#b8aba0; text-align:center;">—</span><span>14 天</span><span style="color:#b8aba0; text-align:center;">—</span>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
-
-  <div class="validation-banner hidden" id="validationBanner"></div>
-  <div class="submit-bar"><button class="submit-btn" id="submitBtn">送出預購訂單</button></div>
 </div>
 
 <div class="overlay hidden" id="overlay">
@@ -419,14 +424,14 @@
     <div class="icon-circle ok">✓</div>
     <h2>預購訂單已送出</h2>
     <p class="modal-sub">預購成功！明細已發送至您的信箱，請依約定日期取貨。</p>
-    <p class="modal-warning">※ 提醒您：訂單確認信件有可能會跑到「垃圾信件匣」，請務必留意收信。</p>
+    <p class="modal-warning">※ 提醒您：訂單確認信件有可能會跑到〈垃圾信件匣〉，請務必留意收信。</p>
     <div id="summaryText"></div>
     <button class="close-btn" id="closeBtn">確認關閉</button>
   </div>
 </div>
 
 <script>
-// 已更新為您最新的部署連結
+// ⚠️ 請填入你部署好的 Google Apps Script 網址
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz5mRDNd9YU2_Rqh240FIt5hEINKYIDFOOevnKvjRz9TNFnla0W7QcFCzC1xAzbSdRr/exec';
 
 let catalog = [];
@@ -440,26 +445,49 @@ const cartBody = document.getElementById('cartBody');
 function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
 function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-const dateBtns = document.querySelectorAll('.date-btn');
-const dateInput = document.getElementById('selectedDateInput');
-dateBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    dateBtns.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    dateInput.value = btn.dataset.date;
-    btn.classList.remove('field-error');
+// 🌟 動態從後台試算表載入自取日期
+function loadDates() {
+  fetch(GOOGLE_SCRIPT_URL + '?action=getDates', { method: 'GET', credentials: 'omit' })
+  .then(res => { if (!res.ok) throw new Error('讀取日期失敗'); return res.json(); })
+  .then(data => {
+    const dates = (data && data.dates) ? data.dates : [];
+    const grid = document.getElementById('pickupDateGrid');
+    grid.innerHTML = '';
+
+    if (dates.length === 0) {
+      grid.innerHTML = '<div style="font-size:13px; color:var(--stamp-dark); grid-column: span 4; text-align:center;">目前無開放預購自取日期</div>';
+      return;
+    }
+
+    dates.forEach(dateStr => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'date-btn';
+      btn.dataset.date = dateStr;
+      btn.textContent = dateStr;
+
+      btn.addEventListener('click', () => {
+        grid.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('selectedDateInput').value = btn.dataset.date;
+        btn.classList.remove('field-error');
+      });
+
+      grid.appendChild(btn);
+    });
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById('pickupDateGrid').innerHTML = '<div style="font-size:13px; color:var(--stamp-dark); grid-column: span 4; text-align:center;">日期載入失敗</div>';
   });
-});
+}
 
 function loadCatalog(){
   catalogLoading.classList.remove('hidden');
   catalogContainer.classList.add('hidden');
   catalogEmpty.classList.add('hidden');
 
-  fetch(GOOGLE_SCRIPT_URL + '?action=getCatalog', {
-    method: 'GET',
-    credentials: 'omit'
-  })
+  fetch(GOOGLE_SCRIPT_URL + '?action=getCatalog', { method: 'GET', credentials: 'omit' })
   .then(response => {
     if (!response.ok) throw new Error('網路回應狀態錯誤');
     return response.json();
@@ -583,8 +611,8 @@ function markFieldError(el){ el.classList.add('field-error'); }
 
 function validateForm(){
   clearFieldErrors(); const errors = [];
-  const pickupDate = dateInput.value;
-  if (!pickupDate) { errors.push('請選擇自取日期'); dateBtns.forEach(b => b.classList.add('field-error')); }
+  const pickupDate = document.getElementById('selectedDateInput').value;
+  if (!pickupDate) { errors.push('請選擇自取日期'); document.querySelectorAll('.date-btn').forEach(b => b.classList.add('field-error')); }
   if (!document.getElementById('buyerName').value.trim()){ errors.push('請填寫姓名'); markFieldError(document.getElementById('buyerName')); }
   if (!document.getElementById('buyerPhone').value.trim()){ errors.push('請填寫聯絡電話'); markFieldError(document.getElementById('buyerPhone')); }
   if (!document.getElementById('buyerEmail').value.trim()){ errors.push('請填寫Email'); markFieldError(document.getElementById('buyerEmail')); }
@@ -594,12 +622,13 @@ function validateForm(){
 
 const submitBtn = document.getElementById('submitBtn');
 submitBtn.addEventListener('click', () => {
-  const errors = validateForm(); if (errors.length > 0){ 
+  const errors = validateForm(); 
+  if (errors.length > 0){ 
       document.getElementById('validationBanner').innerHTML = '<b>請完成以下項目再送出：</b><br>' + errors.map(e => '・' + e).join('<br>');
       document.getElementById('validationBanner').classList.remove('hidden'); return;
   }
+  document.getElementById('validationBanner').classList.add('hidden');
 
-  // 抓取發票與載具資訊
   const carrierRadio = document.querySelector('input[name="carrier"]:checked');
   const carrierType = carrierRadio ? carrierRadio.parentElement.textContent.trim() : '';
   let carrierValue = '';
@@ -610,7 +639,7 @@ submitBtn.addEventListener('click', () => {
       action: 'createOrder', 
       orderNo: document.getElementById('orderNo').textContent,
       orderDate: document.getElementById('orderDate').textContent,
-      pickupDate: dateInput.value,
+      pickupDate: document.getElementById('selectedDateInput').value,
       name: document.getElementById('buyerName').value,
       phone: document.getElementById('buyerPhone').value,
       email: document.getElementById('buyerEmail').value,
@@ -627,7 +656,6 @@ submitBtn.addEventListener('click', () => {
   submitBtn.disabled = true; submitBtn.textContent = '送出中...';
   fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(orderData) })
   .then(() => {
-      // 組合自訂的彈出視窗明細
       const modalHtml = `
         <div style="text-align:left; font-size:14px; line-height:1.8; margin-top:10px;">
           <div style="background:#fdf9f4; padding:12px; border-radius:8px; margin-bottom:12px;">
@@ -663,12 +691,15 @@ function resetFormForNextOrder(){
   document.getElementById('buyerName').value = '';
   document.getElementById('buyerPhone').value = '';
   document.getElementById('buyerEmail').value = '';
-  cart = []; dateInput.value = ''; dateBtns.forEach(b => b.classList.remove('active'));
-  newOrderNumber(); loadCatalog(); renderCart();
+  cart = []; 
+  document.getElementById('selectedDateInput').value = ''; 
+  newOrderNumber(); loadDates(); loadCatalog(); renderCart();
 }
 
 document.getElementById('closeBtn').addEventListener('click', () => document.getElementById('overlay').classList.add('hidden'));
 
+// 初始化載入
+loadDates();
 loadCatalog();
 </script>
 </body>
