@@ -156,6 +156,8 @@
   .pay-row{display:flex; gap:16px; font-size:13.5px; font-weight:700; margin-bottom:8px;}
   .pay-row .no{color:var(--stamp-dark);}
   .pay-row .yes{color:var(--leaf-dark);}
+
+  /* 💡 這裡是你原本寫得非常好的表格樣式 */
   .care-table{width:100%; border-collapse:separate; border-spacing:0 8px; font-size:12.5px;}
   .care-table thead th{background:var(--leaf-dark); color:#fff; font-weight:800; padding:10px 8px; font-size:12px; text-align:left;}
   .care-table thead tr th:first-child{border-radius:8px 0 0 8px;}
@@ -188,7 +190,7 @@
       <img id="menuImage" src="https://img.shoplineapp.com/media/image_clips/6a6c50faba01200010303e81/original.jpg?1785483513=&owner_id=5dcd960dd9d3e3005a390332" alt="本次預購菜單">
     </div>
 
-    <!-- 🌟 動態載入自取日期區塊 -->
+    <!-- 🌟 動態載入自取日期的容器 -->
     <div class="field" style="margin-bottom:20px; border-bottom:1px dashed var(--line); padding-bottom:18px;">
       <label>自取日期 <span class="hint" style="color:var(--stamp-dark); font-weight:700;">必填，不可複選</span></label>
       <div class="date-grid" id="pickupDateGrid">
@@ -380,41 +382,60 @@
       </ul>
     </div>
 
+    <!-- 💡 已還原套用完整 .care-table 樣式，完美對齊版！ -->
     <div class="info-block">
       <h3>❄️ 保存與食用指南</h3>
       <p style="font-size:12.5px; color:#5a4f43; margin:0 0 12px; line-height:1.7;">所有的甜點皆無添加防腐劑。因公司與家用冰箱冷度不一，以下天數為「理想狀態」，建議收到後盡早食用完畢，並請勿久放於高溫環境。</p>
 
-      <div class="bh-storage-section">
-        <h3 class="bh-shipping-title" style="margin:0 0 8px; font-size:13.5px;">
-          <span class="bh-shipping-icon">🧊</span>保存食用建議
-        </h3>
+      <div class="care-group-label">冷凍品項：所有品項無添加防腐劑，請務必保存於 <b>-18°C</b> 以下之冷凍保存。</div>
+      <table class="care-table">
+        <thead>
+          <tr>
+            <th>品項</th>
+            <th style="text-align:center;">冷凍</th>
+            <th style="text-align:center;">冷藏</th>
+            <th style="text-align:center;">享用前退冰</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>達克瓦茲</td>
+            <td style="text-align:center;">14 天</td>
+            <td class="dash">—</td>
+            <td style="text-align:left;">夏 10–20 分鐘 / 冬 20–30 分鐘</td>
+          </tr>
+          <tr>
+            <td>奶油餅 / 甘納許夾心餅</td>
+            <td style="text-align:center;">14 天</td>
+            <td class="dash">—</td>
+            <td style="text-align:left;">夏 10–20 分鐘 / 冬 20–30 分鐘</td>
+          </tr>
+          <tr>
+            <td>冰磚 / 費南雪</td>
+            <td style="text-align:center;">14 天</td>
+            <td class="dash">—</td>
+            <td style="text-align:left;">10 分鐘</td>
+          </tr>
+          <tr>
+            <td>巧克力松露</td>
+            <td style="text-align:center;">14 天</td>
+            <td class="dash">—</td>
+            <td style="text-align:left;">30 分鐘</td>
+          </tr>
+        </tbody>
+      </table>
 
-        <div class="bh-storage-list" style="border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#fff;">
-          <div class="bh-storage-row bh-storage-head" style="display:grid; grid-template-columns:2fr 1fr 1fr 2fr; padding:8px 10px; font-size:12px; background:var(--leaf-dark); color:#fff; font-weight:800;">
-            <span>品項</span><span>冷凍</span><span>冷藏</span><span>享用前退冰</span>
-          </div>
-
-          <div class="bh-storage-category" style="background:#e8dcc4; color:var(--leaf-dark); font-weight:700; padding:6px 10px; font-size:11.5px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">冷凍品項:所有品項無添加防腐劑,請務必保存於 <strong>-18°C</strong> 以下之冷凍保存。</div>
-          
-          <div class="bh-storage-row" style="display:grid; grid-template-columns:2fr 1fr 1fr 2fr; padding:8px 10px; font-size:12px; border-bottom:1px solid #f0e6d2; align-items:center;">
-            <span>達克瓦茲</span><span>14 天</span><span style="color:#b8aba0; text-align:center;">—</span><span>夏 10–20 分鐘／冬 20–30 分鐘</span>
-          </div>
-          <div class="bh-storage-row" style="display:grid; grid-template-columns:2fr 1fr 1fr 2fr; padding:8px 10px; font-size:12px; border-bottom:1px solid #f0e6d2; align-items:center;">
-            <span>奶油餅／甘納許夾心餅</span><span>14 天</span><span style="color:#b8aba0; text-align:center;">—</span><span>夏 10–20 分鐘／冬 20–30 分鐘</span>
-          </div>
-          <div class="bh-storage-row" style="display:grid; grid-template-columns:2fr 1fr 1fr 2fr; padding:8px 10px; font-size:12px; border-bottom:1px solid #f0e6d2; align-items:center;">
-            <span>冰磚／費南雪</span><span>14 天</span><span style="color:#b8aba0; text-align:center;">—</span><span>10 分鐘</span>
-          </div>
-          <div class="bh-storage-row" style="display:grid; grid-template-columns:2fr 1fr 1fr 2fr; padding:8px 10px; font-size:12px; border-bottom:1px solid #f0e6d2; align-items:center;">
-            <span>巧克力松露</span><span>14 天</span><span style="color:#b8aba0; text-align:center;">—</span><span>30 分鐘</span>
-          </div>
-
-          <div class="bh-storage-category" style="background:#e8dcc4; color:var(--leaf-dark); font-weight:700; padding:6px 10px; font-size:11.5px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">冷藏品項:所有品項無添加防腐劑,請務必保存於 <strong>7°C</strong> 以下之冷藏環境。</div>
-          <div class="bh-storage-row" style="display:grid; grid-template-columns:2fr 1fr 1fr 2fr; padding:8px 10px; font-size:12px; align-items:center;">
-            <span>冷藏款 柔雪</span><span style="color:#b8aba0; text-align:center;">—</span><span>14 天</span><span style="color:#b8aba0; text-align:center;">—</span>
-          </div>
-        </div>
-      </div>
+      <div class="care-group-label">冷藏品項：所有品項無添加防腐劑，請務必保存於 <b>7°C</b> 以下之冷藏環境。</div>
+      <table class="care-table">
+        <tbody>
+          <tr>
+            <td>冷藏款 柔雪</td>
+            <td class="dash" style="width:20%;">—</td>
+            <td style="text-align:center; width:20%;">14 天</td>
+            <td class="dash" style="text-align:center;">—</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </section>
 </div>
@@ -431,7 +452,733 @@
 </div>
 
 <script>
-// ⚠️ 請填入你部署好的 Google Apps Script 網址
+// 💡 網址已經幫你更新成最新的部署版本！
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzygJ3inIo4VhzDKFmJF0QLlJhWG2Jvg9KdPT14ABCw-gXaWYXzBxRxERmF6f0zQyyz/exec';
+
+let catalog = [];
+let cart = [];
+
+const catalogLoading = document.getElementById('catalogLoading');
+const catalogContainer = document.getElementById('catalogContainer');
+const catalogEmpty = document.getElementById('catalogEmpty');
+const cartBody = document.getElementById('cartBody');
+
+function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
+function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// 🌟 動態從後台試算表載入自取日期
+function loadDates() {
+  fetch(GOOGLE_SCRIPT_URL + '?action=getDates', { method: 'GET', credentials: 'omit' })
+  .then(res => { if (!res.ok) throw new Error('讀取日期失敗'); return res.json(); })
+  .then(data => {
+    const dates = (data && data.dates) ? data.dates : [];
+    const grid = document.getElementById('pickupDateGrid');
+    grid.innerHTML = '';
+
+    if (dates.length === 0) {
+      grid.innerHTML = '<div style="font-size:13px; color:var(--stamp-dark); grid-column: span 4; text-align:center;">目前無開放預購自取日期</div>';
+      return;
+    }
+
+    dates.forEach(dateStr => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'date-btn';
+      btn.dataset.date = dateStr;
+      btn.textContent = dateStr;
+
+      btn.addEventListener('click', () => {
+        grid.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('selectedDateInput').value = btn.dataset.date;
+        btn.classList.remove('field-error');
+      });
+
+      grid.appendChild(btn);
+    });
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById('pickupDateGrid').innerHTML = '<div style="font-size:13px; color:var(--stamp-dark); grid-column: span 4; text-align:center;">日期載入失敗</div>';
+  });
+}
+
+function loadCatalog(){
+  catalogLoading.classList.remove('hidden');
+  catalogContainer.classList.add('hidden');
+  catalogEmpty.classList.add('hidden');
+
+  fetch(GOOGLE_SCRIPT_URL + '?action=getCatalog', { method: 'GET', credentials: 'omit' })
+  .then(response => {
+    if (!response.ok) throw new Error('網路回應狀態錯誤');
+    return response.json();
+  })
+  .then(data => {
+    catalog = (data && data.products) ? data.products.filter(p => p.status !== 'hidden') : [];
+    renderCatalog();
+  })
+  .catch(error => {
+    console.error('讀取商品目錄失敗:', error);
+    catalogLoading.classList.add('hidden');
+    catalogEmpty.textContent = '目前無法載入商品，請重新整理或稍後再試。';
+    catalogEmpty.classList.remove('hidden');
+  });
+}
+
+function renderCatalog(){
+  catalogLoading.classList.add('hidden');
+  if (catalog.length === 0){
+    catalogEmpty.classList.remove('hidden'); catalogContainer.classList.add('hidden'); return;
+  }
+  catalogEmpty.classList.add('hidden'); 
+  catalogContainer.classList.remove('hidden');
+  catalogContainer.innerHTML = ''; 
+  
+  const groupedCatalog = {};
+  catalog.forEach(p => {
+    const zone = p.zone || "未分類商品";
+    if (!groupedCatalog[zone]) { groupedCatalog[zone] = []; }
+    groupedCatalog[zone].push(p);
+  });
+
+  for (const [zone, items] of Object.entries(groupedCatalog)) {
+    const zoneDiv = document.createElement('div');
+    zoneDiv.className = 'category-zone';
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'category-title';
+    titleDiv.innerHTML = `${escapeHtml(zone)}`;
+    zoneDiv.appendChild(titleDiv);
+    const gridDiv = document.createElement('div');
+    gridDiv.className = 'catalog-grid';
+
+    items.forEach(p => {
+      const inCart = cart.find(c => c.name === p.name);
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'product-card' + (inCart ? ' in-cart' : '');
+      
+      let stockText = `預購額度：${p.stock}`;
+      if (p.stock <= 0) { stockText = "❌ 已額滿"; card.disabled = true; } 
+      else if (p.stock <= 10) { stockText = `🔥 僅剩 ${p.stock} 份`; }
+
+      card.innerHTML = `<span class="p-name">${escapeHtml(p.name)}</span><span class="p-price">${fmt(p.price)}</span><span class="p-stock">${stockText}</span>`;
+      card.addEventListener('click', () => {
+        let existing = cart.find(c => c.name === p.name);
+        if (existing){ existing.qty += 1; }
+        else { cart.push({catalogId: p.id, name: p.name, price: p.price, qty: 1}); }
+        renderCatalog(); renderCart();
+      });
+      gridDiv.appendChild(card);
+    });
+    zoneDiv.appendChild(gridDiv);
+    catalogContainer.appendChild(zoneDiv);
+  }
+}
+
+function renderCart(){
+  cartBody.innerHTML = '';
+  document.getElementById('emptyCart').classList.toggle('hidden', cart.length > 0);
+  cart.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'cart-row';
+    row.innerHTML = `
+      <div class="c-name">${escapeHtml(item.name)}<span class="c-price">${fmt(item.price)} / 件</span></div>
+      <div class="qty-ctrl">
+        <button type="button" class="q-minus">−</button>
+        <span class="qty-num">${item.qty}</span>
+        <button type="button" class="q-plus">+</button>
+      </div>
+      <div class="c-sub">${fmt(item.price * item.qty)}</div>
+      <button type="button" class="c-del">×</button>
+    `;
+    row.querySelector('.q-minus').addEventListener('click', () => {
+      item.qty -= 1; if (item.qty <= 0){ cart = cart.filter(c => c !== item); }
+      renderCatalog(); renderCart();
+    });
+    row.querySelector('.q-plus').addEventListener('click', () => { item.qty += 1; renderCatalog(); renderCart(); });
+    row.querySelector('.c-del').addEventListener('click', () => { cart = cart.filter(c => c !== item); renderCatalog(); renderCart(); });
+    cartBody.appendChild(row);
+  });
+  recalcTotals();
+}
+
+function recalcTotals(){
+  const total = cart.reduce((sum, c) => sum + c.price * c.qty, 0);
+  const untaxed = total / 1.05; const tax = total - untaxed;
+  document.getElementById('untaxed').textContent = fmt(untaxed);
+  document.getElementById('taxAmt').textContent = fmt(tax);
+  document.getElementById('grandTotal').textContent = fmt(total);
+}
+
+const segBtns = document.querySelectorAll('#buyerTypeSeg button');
+segBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    segBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active');
+    const isCompany = btn.dataset.type === '公司';
+    document.getElementById('businessBlock').classList.toggle('hidden', !isCompany);
+    document.getElementById('individualBlock').classList.toggle('hidden', isCompany);
+  });
+});
+
+function newOrderNumber(){
+  const now = new Date();
+  document.getElementById('orderNo').textContent = 'P' + now.getFullYear().toString().slice(2) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + String(Math.floor(Math.random()*900)+100);
+  document.getElementById('orderDate').textContent = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
+}
+newOrderNumber();
+
+function clearFieldErrors(){ document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error')); }
+function markFieldError(el){ el.classList.add('field-error'); }
+
+function validateForm(){
+  clearFieldErrors(); const errors = [];
+  const pickupDate = document.getElementById('selectedDateInput').value;
+  if (!pickupDate) { errors.push('請選擇自取日期'); document.querySelectorAll('.date-btn').forEach(b => b.classList.add('field-error')); }
+  if (!document.getElementById('buyerName').value.trim()){ errors.push('請填寫姓名'); markFieldError(document.getElementById('buyerName')); }
+  if (!document.getElementById('buyerPhone').value.trim()){ errors.push('請填寫聯絡電話'); markFieldError(document.getElementById('buyerPhone')); }
+  if (!document.getElementById('buyerEmail').value.trim()){ errors.push('請填寫Email'); markFieldError(document.getElementById('buyerEmail')); }
+  if (cart.length === 0){ errors.push('請至少選擇一項商品'); }
+  return errors;
+}
+
+const submitBtn = document.getElementById('submitBtn');
+submitBtn.addEventListener('click', () => {
+  const errors = validateForm(); 
+  if (errors.length > 0){ 
+      document.getElementById('validationBanner').innerHTML = '<b>請完成以下項目再送出：</b><br>' + errors.map(e => '・' + e).join('<br>');
+      document.getElementById('validationBanner').classList.remove('hidden'); return;
+  }
+  document.getElementById('validationBanner').classList.add('hidden');
+
+  const carrierRadio = document.querySelector('input[name="carrier"]:checked');
+  const carrierType = carrierRadio ? carrierRadio.parentElement.textContent.trim() : '';
+  let carrierValue = '';
+  if (carrierRadio && carrierRadio.value === 'mobile') carrierValue = document.getElementById('mobileCarrier').value;
+  if (carrierRadio && carrierRadio.value === 'donate') carrierValue = document.getElementById('donateCode').value;
+
+  const orderData = { 
+      action: 'createOrder', 
+      orderNo: document.getElementById('orderNo').textContent,
+      orderDate: document.getElementById('orderDate').textContent,
+      pickupDate: document.getElementById('selectedDateInput').value,
+      name: document.getElementById('buyerName').value,
+      phone: document.getElementById('buyerPhone').value,
+      email: document.getElementById('buyerEmail').value,
+      buyerType: document.querySelector('#buyerTypeSeg .active').dataset.type,
+      carrierType: carrierType,
+      carrierValue: carrierValue,
+      companyName: document.getElementById('companyName').value,
+      items: cart.map(i => { return { name: i.name, qty: i.qty, price: i.price, subtotal: i.price * i.qty }; }),
+      untaxed: document.getElementById('untaxed').textContent,
+      tax: document.getElementById('taxAmt').textContent,
+      total: document.getElementById('grandTotal').textContent
+  };
+
+  submitBtn.disabled = true; submitBtn.textContent = '送出中...';
+  fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(orderData) })
+  .then(() => {
+      const modalHtml = `
+        <div style="text-align:left; font-size:14px; line-height:1.8; margin-top:10px;">
+          <div style="background:#fdf9f4; padding:12px; border-radius:8px; margin-bottom:12px;">
+            <div style="margin-bottom:4px;"><strong>訂單編號：</strong> ${orderData.orderNo}</div>
+            <div style="margin-bottom:4px;"><strong>約定日期：</strong> ${orderData.pickupDate}</div>
+          </div>
+          <div style="background:#fdf9f4; padding:12px; border-radius:8px; margin-bottom:12px;">
+            <strong>【買受人資料】</strong><br>
+            類別：${orderData.buyerType}<br>
+            姓名：${orderData.name}<br>
+            電話：${orderData.phone}<br>
+            發票：${orderData.carrierType} ${orderData.carrierValue}
+          </div>
+          <div style="background:#fdf9f4; padding:12px; border-radius:8px; margin-bottom:12px;">
+            <strong>【商品明細】</strong><br>
+            ${orderData.items.map((c, i) => `${i+1}. ${c.name} 數量：${c.qty} 單價：${fmt(c.price)} 小計：${fmt(c.subtotal)}`).join('<br>')}
+            <hr style="border:0; border-top:1px dashed var(--line); margin:10px 0;">
+            未稅金額：${orderData.untaxed}<br>
+            稅額(5%)：${orderData.tax}<br>
+            <div style="text-align:right; font-size:16px; font-weight:900; margin-top:8px; color:var(--stamp-dark);">
+              應付總額：${orderData.total}
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('summaryText').innerHTML = modalHtml;
+      document.getElementById('overlay').classList.remove('hidden');
+      resetFormForNextOrder();
+  }).finally(() => { submitBtn.disabled = false; submitBtn.textContent = '送出預購訂單'; });
+});
+
+function resetFormForNextOrder(){
+  document.getElementById('buyerName').value = '';
+  document.getElementById('buyerPhone').value = '';
+  document.getElementById('buyerEmail').value = '';
+  cart = []; 
+  document.getElementById('selectedDateInput').value = ''; 
+  newOrderNumber(); loadDates(); loadCatalog(); renderCart();
+}
+
+document.getElementById('closeBtn').addEventListener('click', () => document.getElementById('overlay').classList.add('hidden'));
+
+// 初始化載入
+loadDates();
+loadCatalog();
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bonheur Cookie 預購自取訂單管理表</title>
+<style>
+  :root{
+    --ink:#2d2521;
+    --paper:#f3ebd9;
+    --line:#dfd4be;
+    --stamp:#b5482e;
+    --stamp-dark:#8f3520;
+    --leaf:#6d523c; 
+    --leaf-dark:#412a1c;
+    --paper-card:#fffdfa;
+    --muted:#8b7e6c;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper);
+    background-image: radial-gradient(circle at 1px 1px, rgba(109,82,60,0.06) 1px, transparent 0);
+    background-size: 18px 18px; font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    color:var(--ink); padding:28px 16px 80px;
+  }
+  .sheet{max-width:640px; margin:0 auto;}
+  header{
+    display:flex; align-items:flex-start; justify-content:space-between;
+    border-bottom:3px double var(--line); padding-bottom:14px; margin-bottom:18px ;
+  }
+  .title-block h1{font-size:26px; margin:0 0 4px; letter-spacing:1px; font-weight:900;}
+  .title-block p{margin:0; font-size:12.5px; color:var(--muted);}
+  .stamp{
+    flex-shrink:0; width:64px; height:64px; border:2.5px solid var(--stamp); border-radius:8px; color:var(--stamp);
+    display:flex; align-items:center; justify-content:center; font-weight:900; font-size:13px; line-height:1.2;
+    text-align:center; transform:rotate(-6deg); opacity:0.85;
+  }
+  .order-no{font-size:11px; color:var(--muted); margin-bottom:16px; text-align:right;}
+  .order-no span{font-weight:700; color:var(--ink);}
+
+  section{background:var(--paper-card); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:16px;}
+  .sheet section:nth-of-type(1) .sec-label::before { content: "📋 "; }
+  .sheet section:nth-of-type(2) .sec-label::before { content: "🛒 "; }
+  .sheet section:nth-of-type(3) .sec-label::before { content: "📍 "; }
+  .sec-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .sec-label{display:flex; align-items:center; gap:8px; font-weight:800; font-size:14.5px; color:var(--leaf-dark);}
+  .sec-label .tag{background:var(--leaf); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; font-weight:700;}
+
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:12.5px; font-weight:700; margin-bottom:5px; color:#5a4f43;}
+  .field .hint{font-weight:400; font-size:11px; color:var(--muted); margin-left:4px;}
+  input[type=text], input[type=number], input[type=email], input[type=tel]{
+    width:100%; padding:10px 11px; border:1px solid var(--line); border-radius:7px; font-size:15px; color:var(--ink);
+  }
+  input:focus{outline:2px solid var(--leaf); outline-offset:1px;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+
+  .seg{display:flex; border:1px solid var(--line); border-radius:8px; overflow:hidden;}
+  .seg button{flex:1; padding:10px 6px; border:none; background:#fff; font-size:13.5px; font-weight:700; color:var(--muted); cursor:pointer;}
+  .seg button.active{background:var(--leaf); color:#fff;}
+  .seg button:not(:last-child){border-right:1px solid var(--line);}
+
+  .radio-row{display:flex; align-items:center; gap:8px; padding:9px 4px; border-bottom:1px solid #ece5d3; font-size:13.5px;}
+  .radio-row:last-child{border-bottom:none;}
+  .radio-row input[type=radio]{width:17px; height:17px; accent-color:var(--leaf); flex-shrink:0;}
+  .radio-row .sub-input{flex:1; margin-top:0;}
+  .radio-row .sub-input input{padding:7px 9px; font-size:13.5px;}
+  .hidden{display:none !important;}
+
+  .date-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .date-btn { background: #e8dcc4; border: 1.5px solid transparent; padding: 10px 4px; border-radius: 6px; font-weight: 700; color: var(--leaf); cursor: pointer; transition: 0.2s; font-size: 13.5px; }
+  .date-btn:hover { background: #dfccaa; }
+  .date-btn.active { background: var(--leaf); color: #fff; border-color: var(--leaf); box-shadow: 0 3px 8px rgba(109,82,60,0.3); }
+
+  .catalog-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 30px 0; font-size: 13.5px; color: var(--muted); font-weight: 700; }
+  .spinner { width: 32px; height: 32px; border: 3px solid rgba(109,82,60,0.15); border-top-color: var(--leaf); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .category-zone { margin-bottom: 22px; }
+  .category-title { font-size: 14px; font-weight: 800; color: var(--leaf-dark); letter-spacing: 1px; margin: 12px 0 8px; padding-bottom: 4px; border-bottom: 1px dashed var(--line); display: flex; align-items: center; gap: 4px; }
+  .catalog-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  
+  .product-card{
+    border:1.5px solid var(--line); border-radius:10px; background:#fff; padding:12px 10px;
+    text-align:left; cursor:pointer; font-family:inherit; transition:all 0.15s ease; position: relative;
+  }
+  .product-card:active{transform:translateY(1px);}
+  .product-card.in-cart{border-color:var(--leaf); background:#fdf9f4;}
+  .product-card:disabled{opacity:0.5; cursor:not-allowed; background:#eee;}
+  .product-card .p-name{display:block; font-weight:700; font-size:14px; margin-bottom:4px;}
+  .product-card .p-price{display:block; font-size:13px; color:var(--stamp-dark); font-weight:700;}
+  .product-card .p-stock{display:block; font-size:11px; color:var(--muted); margin-top:4px;}
+  .product-card .p-stock.low-stock{color:var(--stamp); font-weight:700;}
+  .product-card .p-badge{
+    display:inline-block; margin-top:6px; font-size:11px; font-weight:700; background:var(--leaf); color:#fff; padding:1px 7px; border-radius:10px;
+  }
+  .catalog-empty{ font-size:13px; color:var(--muted); text-align:center; padding:24px 0; line-height: 1.6; }
+
+  .cart{margin-top:14px; border-top:1px dashed var(--line); padding-top:12px;}
+  .cart-title{font-size:12px; font-weight:700; color:var(--muted); margin-bottom:8px;}
+  .cart-row{display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #ece5d3; font-size:13.5px;}
+  .cart-row:last-child{border-bottom:none;}
+  .cart-row .c-name{flex:1; font-weight:700;}
+  .cart-row .c-price{font-size:11.5px; color:var(--muted); display:block;}
+  .qty-ctrl{display:flex; align-items:center; gap:6px; flex-shrink:0;}
+  .qty-ctrl button{
+    width:26px; height:26px; border-radius:6px; border:1px solid var(--line);
+    background:#fff; font-size:15px; font-weight:700; cursor:pointer; color:var(--leaf-dark); line-height:1;
+  }
+  .qty-ctrl .qty-num{min-width:20px; text-align:center; font-weight:700;}
+  .cart-row .c-sub{width:64px; text-align:right; font-weight:800; flex-shrink:0;}
+  .cart-row .c-del{background:none; border:none; color:var(--stamp); font-size:17px; cursor:pointer; padding:0 2px;}
+  .empty-cart{font-size:12.5px; color:var(--muted); padding:6px 0;}
+
+  .totals{margin-top:14px; border-top:1px dashed var(--line); padding-top:12px;}
+  .totals .line{display:flex; justify-content:space-between; font-size:13px; padding:3px 0; color:#55503f;}
+  .totals .grand{
+    display:flex; justify-content:space-between; align-items:baseline; margin-top:6px;
+    padding-top:8px; border-top:2px solid var(--ink); font-size:18px; font-weight:900;
+  }
+  .totals .grand .amt{color:var(--stamp-dark);}
+
+  .submit-bar{position:sticky; bottom:14px; margin-top:8px;}
+  .submit-btn{
+    width:100%; padding:15px; background:var(--leaf); color:#fff; border:none; border-radius:9px;
+    font-size:16px; font-weight:800; letter-spacing:1px; cursor:pointer; box-shadow:0 4px 14px rgba(109,82,60,0.3);
+  }
+  .submit-btn:disabled{opacity:0.6; cursor:default;}
+  .note-text{font-size:11.5px; color:var(--muted); text-align:center; margin-top:10px; line-height:1.6;}
+  .validation-banner{ background:#fdeeea; border:1.5px solid var(--stamp); border-radius:9px; padding:11px 13px; margin-bottom:10px; font-size:12.5px; color:var(--stamp-dark); }
+  input.field-error{ border-color:var(--stamp) !important; background:#fdf3f1; }
+
+  .overlay{ position:fixed; inset:0; background:rgba(41,31,22,0.65); display:flex; align-items:flex-end; justify-content:center; z-index:50; }
+  .overlay.hidden{display:none;}
+  .modal{ background:var(--paper-card); width:100%; max-width:640px; border-radius:16px 16px 0 0; padding:26px 20px 30px; max-height:85vh; overflow-y:auto; }
+  .modal h2{margin:0 0 6px; font-size:20px; font-weight:900; color:var(--leaf-dark);}
+  .modal .modal-sub{font-size:13.5px; color:var(--muted); margin:0 0 6px; line-height:1.6; font-weight:700;}
+  .modal .modal-warning { color: var(--stamp-dark); font-size: 12.5px; font-weight: 700; margin: 0 0 16px; background: #fdf3f1; padding: 8px 12px; border-radius: 6px; }
+  .modal-actions{display:flex; gap:10px; margin-top:16px;}
+  .modal-actions button{ flex:1; padding:14px; border-radius:8px; font-weight:800; font-size:14.5px; cursor:pointer; border:none; letter-spacing:1px; }
+  .close-btn{background:var(--leaf); color:#fff; width:100%; padding:12px; border:none; border-radius:8px; font-weight:700; font-size:15px; margin-top:16px; cursor:pointer;}
+  .icon-circle{ width:54px; height:54px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:12px; }
+  .icon-circle.ok{background:#fdf9f4; color:var(--leaf-dark); border: 2px solid var(--leaf);}
+  
+  .pickup-map-container { background:#fffdfa; border-radius:12px; padding:20px 15px; border:2px solid var(--line); font-family:sans-serif; box-shadow:0 4px 12px rgba(109,82,60,0.05); margin-bottom: 14px; }
+
+  .menu-image-wrap{ margin-bottom:18px; border-radius:10px; overflow:hidden; border:1.5px solid var(--line); box-shadow:0 3px 10px rgba(109,82,60,0.08); }
+  .menu-image-wrap img{ display:block; width:100%; height:auto; }
+
+  .info-section{background:transparent; border:none; padding:0;}
+  .info-block{background:var(--paper-card); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:14px;}
+  .info-block h3{margin:0 0 10px; font-size:14.5px; font-weight:800; color:var(--leaf-dark); display:flex; align-items:center; gap:6px;}
+  .info-block ul{margin:0; padding-left:18px; font-size:13px; line-height:1.9; color:#4a4237;}
+  .info-block ul li{margin-bottom:2px;}
+  .info-block .warn-line{color:var(--stamp-dark); font-weight:700;}
+  .pay-row{display:flex; gap:16px; font-size:13.5px; font-weight:700; margin-bottom:8px;}
+  .pay-row .no{color:var(--stamp-dark);}
+  .pay-row .yes{color:var(--leaf-dark);}
+
+  /* 💡 這裡是你原本寫得非常好的表格樣式 */
+  .care-table{width:100%; border-collapse:separate; border-spacing:0 8px; font-size:12.5px;}
+  .care-table thead th{background:var(--leaf-dark); color:#fff; font-weight:800; padding:10px 8px; font-size:12px; text-align:left;}
+  .care-table thead tr th:first-child{border-radius:8px 0 0 8px;}
+  .care-table thead tr th:last-child{border-radius:0 8px 8px 0;}
+  .care-table tbody td{background:#e8dcc4; padding:10px 8px; color:var(--leaf-dark); font-weight:700;}
+  .care-table tbody tr td:first-child{border-radius:8px 0 0 8px; font-weight:800;}
+  .care-table tbody tr td:last-child{border-radius:0 8px 8px 0; text-align:center;}
+  .care-table tbody td.dash{text-align:center; font-weight:400; color:#a89a7f;}
+  .care-group-label{font-size:12.5px; font-weight:700; margin:12px 0 6px; color:#5a4f43;}
+  .care-group-label b{color:var(--stamp-dark);}
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <header>
+    <div class="title-block">
+      <h1>面交預購單</h1>
+      <p>請選擇預購品項並填寫個人資料，送出後請依約定日期前往取貨</p>
+    </div>
+    <div class="stamp">預購<br>自取</div>
+  </header>
+
+  <div class="order-no">訂單編號 <span id="orderNo"></span> ・ <span id="orderDate"></span></div>
+
+  <section>
+    <div class="sec-head"><div class="sec-label"><span class="tag">01</span>菜單</div></div>
+
+    <div class="menu-image-wrap">
+      <img id="menuImage" src="https://img.shoplineapp.com/media/image_clips/6a6c50faba01200010303e81/original.jpg?1785483513=&owner_id=5dcd960dd9d3e3005a390332" alt="本次預購菜單">
+    </div>
+
+    <!-- 🌟 動態載入自取日期的容器 -->
+    <div class="field" style="margin-bottom:20px; border-bottom:1px dashed var(--line); padding-bottom:18px;">
+      <label>自取日期 <span class="hint" style="color:var(--stamp-dark); font-weight:700;">必填，不可複選</span></label>
+      <div class="date-grid" id="pickupDateGrid">
+        <div style="font-size:13px; color:var(--muted); grid-column: span 4; text-align:center; padding: 10px 0;">自取日期載入中...</div>
+      </div>
+      <input type="hidden" id="selectedDateInput" value="">
+    </div>
+
+    <div class="field">
+      <label>發票類別</label>
+      <div class="seg" id="buyerTypeSeg">
+        <button type="button" class="active" data-type="個人">個人</button>
+        <button type="button" data-type="公司">公司行號</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>姓名 / 聯絡人</label>
+      <input type="text" id="buyerName" placeholder="王小明">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>聯絡電話 <span class="hint">必填</span></label>
+        <input type="tel" id="buyerPhone" placeholder="09xx-xxx-xxx">
+      </div>
+      <div class="field">
+        <label>Email <span class="hint" style="color:var(--stamp-dark); font-weight:700;">必填 後續會寄電子發票</span></label>
+        <input type="email" id="buyerEmail" placeholder="example@gmail.com">
+      </div>
+    </div>
+    <div id="individualBlock">
+      <div class="field" style="margin-bottom:6px;"><label>發票載具</label></div>
+      <div class="carrier-options">
+        <label class="radio-row">
+          <input type="radio" name="carrier" value="mobile" checked> 手機載具條碼
+          <span class="sub-input"><input type="text" id="mobileCarrier" placeholder="/ABC1234"></span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="carrier" value="duplicate"> 二聯式發票 <span class="hint"></span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="carrier" value="donate"> 捐贈發票
+          <span class="sub-input"><input type="text" id="donateCode" placeholder="919" value="919"></span>
+        </label>
+      </div>
+    </div>
+    <div id="businessBlock" class="hidden">
+      <div class="row2">
+        <div class="field">
+          <label>統一編號</label>
+          <input type="text" id="taxId" placeholder="8 位數字" maxlength="8">
+        </div>
+        <div class="field">
+          <label>發票抬頭 (公司名稱)</label>
+          <input type="text" id="companyName" placeholder="○○股份有限公司">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="sec-label"><span class="tag">02</span>選擇預購商品</div>
+    </div>
+    
+    <div class="catalog-loading" id="catalogLoading">
+      <div class="spinner"></div>
+      <span>商品目錄即時同步中...</span>
+    </div>
+    
+    <div id="catalogContainer" class="hidden"></div>
+    <div class="catalog-empty hidden" id="catalogEmpty">目前沒有開放預購的商品，請洽工作人員</div>
+    
+    <div class="cart">
+      <div class="cart-title">已選購商品</div>
+      <div id="cartBody"></div>
+      <div class="empty-cart" id="emptyCart">尚未選擇任何商品</div>
+    </div>
+    <div class="totals">
+      <div class="line"><span>未稅金額</span><span id="untaxed">$0</span></div>
+      <div class="line"><span>稅額 (5%)</span><span id="taxAmt">$0</span></div>
+      <div class="grand"><span>應付總額</span><span class="amt" id="grandTotal">$0</span></div>
+    </div>
+
+    <!-- 驗證提示與送出按鈕 -->
+    <div class="submit-bar">
+      <div class="validation-banner hidden" id="validationBanner"></div>
+      <button type="button" class="submit-btn" id="submitBtn">送出預購訂單</button>
+    </div>
+  </section>
+
+  <section style="background:transparent; border:none; padding:0; margin-top:24px;">
+    <div class="sec-head" style="margin-bottom:8px;">
+      <div class="sec-label"><span class="tag">03</span>取貨資訊與地圖</div>
+    </div>
+    <p style="font-size:13.5px; margin:0 0 14px; font-weight:700;">
+      地址導航：<a href="https://maps.app.goo.gl/JEKqvBWnrWyZni6C8" target="_blank" style="color:var(--stamp-dark); text-decoration:underline; font-weight:900;">點擊前往 Google 地圖</a>
+    </p>
+
+    <div class="pickup-map-container">
+      <div style="display:flex; justify-content:space-between; height:200px; margin-bottom:12px;">
+        <div style="width:28%; display:flex; flex-direction:column; justify-content:space-between;">
+          <div style="height:44%; border:1px solid #b8b8b8; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#b8b8b8; font-weight:900; font-size:16px; letter-spacing:2px;">
+            <div style="display:flex; gap:4px; margin-bottom:6px;">
+              <div style="width:22px; height:22px; background:#d4d4d4;"></div>
+              <div style="width:22px; height:22px; background:#d4d4d4;"></div>
+            </div>
+            電梯
+          </div>
+          <div style="height:44%; border:1px solid #b8b8b8; display:flex; align-items:center; justify-content:center; color:#b8b8b8; font-weight:900; font-size:18px; letter-spacing:4px;">
+            碼頭
+          </div>
+        </div>
+        <div style="width:28%; display:flex; flex-direction:column; justify-content:space-between;">
+          <div style="height:44%; display:flex; justify-content:space-between;">
+            <div style="width:28%; background:#d4d4d4;"></div>
+            <div style="width:28%; background:#d4d4d4;"></div>
+            <div style="width:28%; background:#d4d4d4;"></div>
+          </div>
+          <div style="height:12%; display:flex; align-items:center; justify-content:center; color:#b8b8b8; font-weight:900; font-size:18px; letter-spacing:4px;">
+            走廊
+          </div>
+          <div style="height:44%; display:flex; justify-content:space-between;">
+            <div style="width:30%; background:#d4d4d4;"></div>
+            <div style="width:34%; background:var(--leaf); position:relative; color:#fff; display:flex; align-items:center; justify-content:center; flex-direction:column; font-weight:900; font-size:15px; letter-spacing:4px;">
+              <div style="position:absolute; top:6px; width:10px; height:10px; background:#e8dcc4; border-radius:50%;"></div>
+              <span style="writing-mode: vertical-rl; text-orientation: upright; margin-top:14px;">取貨點</span>
+            </div>
+            <div style="width:30%; background:#d4d4d4;"></div>
+          </div>
+        </div>
+        <div style="width:40%; border:1px solid #b8b8b8; position:relative;">
+          <div style="position:absolute; top:12px; width:100%; display:flex; flex-direction:column; align-items:center; color:#b8b8b8; font-weight:900; font-size:16px; letter-spacing:2px;">
+            <div style="display:flex; gap:4px; margin-bottom:6px;">
+              <div style="width:20px; height:20px; background:#d4d4d4;"></div>
+              <div style="width:20px; height:20px; background:#d4d4d4;"></div>
+              <div style="width:20px; height:20px; background:#d4d4d4;"></div>
+              <div style="width:20px; height:20px; background:#d4d4d4;"></div>
+            </div>
+            電梯
+          </div>
+          <div style="position:absolute; bottom:35px; left:0; display:flex; align-items:center; color:#b8b8b8; font-weight:900; font-size:16px; letter-spacing:2px;">
+            <div style="width:12px; height:35px; background:#d4d4d4; margin-right:6px;"></div>信箱
+          </div>
+          <div style="position:absolute; bottom:45px; right:0; display:flex; align-items:center; color:#b8b8b8; font-weight:900; font-size:16px; letter-spacing:2px;">
+            警衛<div style="width:16px; height:55px; background:#d4d4d4; margin-left:6px;"></div>
+          </div>
+        </div>
+      </div>
+      <div style="background:#d4d4d4; color:#fff; text-align:center; padding:8px; font-weight:900; font-size:18px; letter-spacing:8px; margin-bottom:12px;">馬路</div>
+      <div style="background:#e8dcc4; color:var(--leaf-dark); font-size:13.5px; font-weight:900; text-align:center; padding:12px; border-radius:30px; letter-spacing:1px;">
+        取貨點A8後門：請按電鈴，有專人為您服務，並且提供訂購人手機後三碼。
+      </div>
+    </div>
+  </section>
+
+  <section class="info-section" style="margin-top:24px;">
+    <div class="sec-head" style="margin-bottom:8px;">
+      <div class="sec-label"><span class="tag">04</span>園區自取訂購須知</div>
+    </div>
+
+    <div class="info-block">
+      <h3>💰 付款方式</h3>
+      <div class="pay-row"><span class="no">❌ 無刷卡</span><span class="yes">⭕ 現場現金付款 / LINE Pay</span></div>
+      <ul>
+        <li>如需開立統編，請於預購表單的發票類別選擇「公司行號」，並完整輸入抬頭與統編。</li>
+        <li class="warn-line">⚠️ 恕不接受事後補打統編，請於送出前再次確認。</li>
+      </ul>
+    </div>
+
+    <div class="info-block">
+      <h3>🚗 取貨方式（園區自取限定）</h3>
+      <ul>
+        <li>取貨時段：週一跟週五 12:00～13:00</li>
+        <li>取貨地點：依表單地圖標示（A8後門）</li>
+        <li>商品皆為純手工製作，請務必於指定午休時段內前往取件。若請同事代領，請務必提供訂購人手機後三碼以便核對。</li>
+        <li>甜點離開冷藏／冷凍後請盡速食用，或妥善放入公司冰箱保存。</li>
+        <li>商品背後皆有成份標示與保存方式，盒內附食用小卡說明。</li>
+      </ul>
+    </div>
+
+    <div class="info-block">
+      <h3>📝 訂購須知</h3>
+      <ul>
+        <li>請務必確認填寫正確的「中文姓名」、「可聯絡的手機電話」與「Email」，以利取貨核對與寄送電子發票。</li>
+        <li>為確保製作與備貨順暢，下單後恕不接受改單或取消。若需增加品項，請直接新增一筆訂單。</li>
+        <li>依消保法規定，「生鮮食品」不適用於第 19 條，無 7 天鑑賞期。</li>
+        <li>圖片僅供參考，實際以收到之商品為主。</li>
+        <li>請於開箱時錄影，如有任何問題請於 LINE 官方帳號提供影片，我們將盡速為您後續處理。</li>
+      </ul>
+    </div>
+
+    <!-- 💡 已還原套用完整 .care-table 樣式，完美對齊版！ -->
+    <div class="info-block">
+      <h3>❄️ 保存與食用指南</h3>
+      <p style="font-size:12.5px; color:#5a4f43; margin:0 0 12px; line-height:1.7;">所有的甜點皆無添加防腐劑。因公司與家用冰箱冷度不一，以下天數為「理想狀態」，建議收到後盡早食用完畢，並請勿久放於高溫環境。</p>
+
+      <div class="care-group-label">冷凍品項：所有品項無添加防腐劑，請務必保存於 <b>-18°C</b> 以下之冷凍保存。</div>
+      <table class="care-table">
+        <thead>
+          <tr>
+            <th>品項</th>
+            <th style="text-align:center;">冷凍</th>
+            <th style="text-align:center;">冷藏</th>
+            <th style="text-align:center;">享用前退冰</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>達克瓦茲</td>
+            <td style="text-align:center;">14 天</td>
+            <td class="dash">—</td>
+            <td style="text-align:left;">夏 10–20 分鐘 / 冬 20–30 分鐘</td>
+          </tr>
+          <tr>
+            <td>奶油餅 / 甘納許夾心餅</td>
+            <td style="text-align:center;">14 天</td>
+            <td class="dash">—</td>
+            <td style="text-align:left;">夏 10–20 分鐘 / 冬 20–30 分鐘</td>
+          </tr>
+          <tr>
+            <td>冰磚 / 費南雪</td>
+            <td style="text-align:center;">14 天</td>
+            <td class="dash">—</td>
+            <td style="text-align:left;">10 分鐘</td>
+          </tr>
+          <tr>
+            <td>巧克力松露</td>
+            <td style="text-align:center;">14 天</td>
+            <td class="dash">—</td>
+            <td style="text-align:left;">30 分鐘</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="care-group-label">冷藏品項：所有品項無添加防腐劑，請務必保存於 <b>7°C</b> 以下之冷藏環境。</div>
+      <table class="care-table">
+        <tbody>
+          <tr>
+            <td>冷藏款 柔雪</td>
+            <td class="dash" style="width:20%;">—</td>
+            <td style="text-align:center; width:20%;">14 天</td>
+            <td class="dash" style="text-align:center;">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div class="overlay hidden" id="overlay">
+  <div class="modal">
+    <div class="icon-circle ok">✓</div>
+    <h2>預購訂單已送出</h2>
+    <p class="modal-sub">預購成功！明細已發送至您的信箱，請依約定日期取貨。</p>
+    <p class="modal-warning">※ 提醒您：訂單確認信件有可能會跑到〈垃圾信件匣〉，請務必留意收信。</p>
+    <div id="summaryText"></div>
+    <button class="close-btn" id="closeBtn">確認關閉</button>
+  </div>
+</div>
+
+<script>
+// 💡 網址已經幫你更新成最新的部署版本！
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzygJ3inIo4VhzDKFmJF0QLlJhWG2Jvg9KdPT14ABCw-gXaWYXzBxRxERmF6f0zQyyz/exec';
 
 let catalog = [];
