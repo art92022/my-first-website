@@ -11,7 +11,7 @@
     --line:#dfd4be;
     --stamp:#b5482e;
     --stamp-dark:#8f3520;
-    --leaf:#6d523c; 
+    --leaf:#6d523c;
     --leaf-dark:#412a1c;
     --paper-card:#fffdfa;
     --muted:#8b7e6c;
@@ -79,7 +79,7 @@
   .category-zone { margin-bottom: 22px; }
   .category-title { font-size: 14px; font-weight: 800; color: var(--leaf-dark); letter-spacing: 1px; margin: 12px 0 8px; padding-bottom: 4px; border-bottom: 1px dashed var(--line); display: flex; align-items: center; gap: 4px; }
   .catalog-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  
+
   .product-card{
     border:1.5px solid var(--line); border-radius:10px; background:#fff; padding:12px 10px;
     text-align:left; cursor:pointer; font-family:inherit; transition:all 0.15s ease; position: relative;
@@ -141,7 +141,7 @@
   .close-btn{background:var(--leaf); color:#fff; width:100%; padding:12px; border:none; border-radius:8px; font-weight:700; font-size:15px; margin-top:16px; cursor:pointer;}
   .icon-circle{ width:54px; height:54px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:12px; }
   .icon-circle.ok{background:#fdf9f4; color:var(--leaf-dark); border: 2px solid var(--leaf);}
-  
+
   .pickup-map-container { background:#fffdfa; border-radius:12px; padding:20px 15px; border:2px solid var(--line); font-family:sans-serif; box-shadow:0 4px 12px rgba(109,82,60,0.05); margin-bottom: 14px; }
 
   .menu-image-wrap{ margin-bottom:18px; border-radius:10px; overflow:hidden; border:1.5px solid var(--line); box-shadow:0 3px 10px rgba(109,82,60,0.08); }
@@ -254,15 +254,15 @@
     <div class="sec-head">
       <div class="sec-label"><span class="tag">02</span>選擇預購商品</div>
     </div>
-    
+
     <div class="catalog-loading" id="catalogLoading">
       <div class="spinner"></div>
       <span>商品目錄即時同步中...</span>
     </div>
-    
+
     <div id="catalogContainer" class="hidden"></div>
     <div class="catalog-empty hidden" id="catalogEmpty">目前沒有開放預購的商品，請洽工作人員</div>
-    
+
     <div class="cart">
       <div class="cart-title">已選購商品</div>
       <div id="cartBody"></div>
@@ -477,11 +477,46 @@ const cartBody = document.getElementById('cartBody');
 function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
 function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
+// 🔧 修正：改用 JSONP（動態插入 <script> 標籤）讀取資料，繞開 fetch() 對 Apps Script
+// 導向網址會卡住不回應的問題（直接開網址是正常的，但用 fetch() 呼叫會一路 pending 到逾時）。
+function jsonpRequest(action, onSuccess, onError, timeoutMs) {
+  const callbackName = 'jsonp_cb_' + action + '_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+  const script = document.createElement('script');
+  let done = false;
+
+  const cleanup = () => {
+    delete window[callbackName];
+    if (script.parentNode) script.parentNode.removeChild(script);
+    clearTimeout(timer);
+  };
+
+  window[callbackName] = (data) => {
+    if (done) return;
+    done = true;
+    cleanup();
+    onSuccess(data);
+  };
+
+  const timer = setTimeout(() => {
+    if (done) return;
+    done = true;
+    cleanup();
+    onError(new Error('讀取逾時，請稍後再試'));
+  }, timeoutMs || 10000);
+
+  script.src = GOOGLE_SCRIPT_URL + '?action=' + encodeURIComponent(action) + '&callback=' + callbackName;
+  script.onerror = () => {
+    if (done) return;
+    done = true;
+    cleanup();
+    onError(new Error('讀取失敗'));
+  };
+  document.body.appendChild(script);
+}
+
 // 🌟 動態從後台試算表載入自取日期
 function loadDates() {
-  fetch(GOOGLE_SCRIPT_URL + '?action=getDates', { method: 'GET', credentials: 'omit' })
-  .then(res => { if (!res.ok) throw new Error('讀取日期失敗'); return res.json(); })
-  .then(data => {
+  jsonpRequest('getDates', (data) => {
     const dates = (data && data.dates) ? data.dates : [];
     const grid = document.getElementById('pickupDateGrid');
     grid.innerHTML = '';
@@ -507,10 +542,9 @@ function loadDates() {
 
       grid.appendChild(btn);
     });
-  })
-  .catch(err => {
+  }, (err) => {
     console.error(err);
-    document.getElementById('pickupDateGrid').innerHTML = '<div style="font-size:13px; color:var(--stamp-dark); grid-column: span 4; text-align:center;">日期載入失敗</div>';
+    document.getElementById('pickupDateGrid').innerHTML = '<div style="font-size:13px; color:var(--stamp-dark); grid-column: span 4; text-align:center;">日期載入失敗，請重新整理頁面</div>';
   });
 }
 
@@ -519,17 +553,11 @@ function loadCatalog(){
   catalogContainer.classList.add('hidden');
   catalogEmpty.classList.add('hidden');
 
-  fetch(GOOGLE_SCRIPT_URL + '?action=getCatalog', { method: 'GET', credentials: 'omit' })
-  .then(response => {
-    if (!response.ok) throw new Error('網路回應狀態錯誤');
-    return response.json();
-  })
-  .then(data => {
+  jsonpRequest('getCatalog', (data) => {
     catalog = (data && data.products) ? data.products.filter(p => p.status !== 'hidden') : [];
     renderCatalog();
-  })
-  .catch(error => {
-    console.error('讀取商品目錄失敗:', error);
+  }, (err) => {
+    console.error('讀取商品目錄失敗:', err);
     catalogLoading.classList.add('hidden');
     catalogEmpty.textContent = '目前無法載入商品，請重新整理或稍後再試。';
     catalogEmpty.classList.remove('hidden');
@@ -541,10 +569,10 @@ function renderCatalog(){
   if (catalog.length === 0){
     catalogEmpty.classList.remove('hidden'); catalogContainer.classList.add('hidden'); return;
   }
-  catalogEmpty.classList.add('hidden'); 
+  catalogEmpty.classList.add('hidden');
   catalogContainer.classList.remove('hidden');
-  catalogContainer.innerHTML = ''; 
-  
+  catalogContainer.innerHTML = '';
+
   const groupedCatalog = {};
   catalog.forEach(p => {
     const zone = p.zone || "未分類商品";
@@ -567,9 +595,9 @@ function renderCatalog(){
       const card = document.createElement('button');
       card.type = 'button';
       card.className = 'product-card' + (inCart ? ' in-cart' : '');
-      
+
       let stockText = `預購額度：${p.stock}`;
-      if (p.stock <= 0) { stockText = "❌ 已額滿"; card.disabled = true; } 
+      if (p.stock <= 0) { stockText = "❌ 已額滿"; card.disabled = true; }
       else if (p.stock <= 10) { stockText = `🔥 僅剩 ${p.stock} 份`; }
 
       card.innerHTML = `<span class="p-name">${escapeHtml(p.name)}</span><span class="p-price">${fmt(p.price)}</span><span class="p-stock">${stockText}</span>`;
@@ -649,26 +677,44 @@ function validateForm(){
   if (!document.getElementById('buyerPhone').value.trim()){ errors.push('請填寫聯絡電話'); markFieldError(document.getElementById('buyerPhone')); }
   if (!document.getElementById('buyerEmail').value.trim()){ errors.push('請填寫Email'); markFieldError(document.getElementById('buyerEmail')); }
   if (cart.length === 0){ errors.push('請至少選擇一項商品'); }
+
+  // 🔧 修正：公司行號必須填統一編號與發票抬頭，原本完全沒有檢查
+  const isCompany = document.querySelector('#buyerTypeSeg .active').dataset.type === '公司';
+  if (isCompany) {
+    if (!document.getElementById('taxId').value.trim()){ errors.push('請填寫統一編號'); markFieldError(document.getElementById('taxId')); }
+    if (!document.getElementById('companyName').value.trim()){ errors.push('請填寫發票抬頭'); markFieldError(document.getElementById('companyName')); }
+  }
   return errors;
 }
 
 const submitBtn = document.getElementById('submitBtn');
 submitBtn.addEventListener('click', () => {
-  const errors = validateForm(); 
-  if (errors.length > 0){ 
+  const errors = validateForm();
+  if (errors.length > 0){
       document.getElementById('validationBanner').innerHTML = '<b>請完成以下項目再送出：</b><br>' + errors.map(e => '・' + e).join('<br>');
       document.getElementById('validationBanner').classList.remove('hidden'); return;
   }
   document.getElementById('validationBanner').classList.add('hidden');
 
-  const carrierRadio = document.querySelector('input[name="carrier"]:checked');
-  const carrierType = carrierRadio ? carrierRadio.parentElement.textContent.trim() : '';
+  const isCompany = document.querySelector('#buyerTypeSeg .active').dataset.type === '公司';
+  let carrierType = '';
   let carrierValue = '';
-  if (carrierRadio && carrierRadio.value === 'mobile') carrierValue = document.getElementById('mobileCarrier').value;
-  if (carrierRadio && carrierRadio.value === 'donate') carrierValue = document.getElementById('donateCode').value;
 
-  const orderData = { 
-      action: 'createOrder', 
+  if (isCompany) {
+    // 🔧 修正：公司行號要把「統一編號」送出並存進去（原本 taxId 完全沒有被送到後端）。
+    // 「載具/統編」這個後端欄位本來命名上就是設計成兩用的，所以借用同一個欄位存統編，
+    // 不需要另外新增欄位。同時避免個人發票那組被隱藏的 radio 選取狀態誤帶進公司訂單。
+    carrierType = '統一編號';
+    carrierValue = document.getElementById('taxId').value.trim();
+  } else {
+    const carrierRadio = document.querySelector('input[name="carrier"]:checked');
+    carrierType = carrierRadio ? carrierRadio.parentElement.textContent.trim() : '';
+    if (carrierRadio && carrierRadio.value === 'mobile') carrierValue = document.getElementById('mobileCarrier').value;
+    if (carrierRadio && carrierRadio.value === 'donate') carrierValue = document.getElementById('donateCode').value;
+  }
+
+  const orderData = {
+      action: 'createOrder',
       orderNo: document.getElementById('orderNo').textContent,
       orderDate: document.getElementById('orderDate').textContent,
       pickupDate: document.getElementById('selectedDateInput').value,
@@ -678,7 +724,7 @@ submitBtn.addEventListener('click', () => {
       buyerType: document.querySelector('#buyerTypeSeg .active').dataset.type,
       carrierType: carrierType,
       carrierValue: carrierValue,
-      companyName: document.getElementById('companyName').value,
+      companyName: isCompany ? document.getElementById('companyName').value : '',
       items: cart.map(i => { return { name: i.name, qty: i.qty, price: i.price, subtotal: i.price * i.qty }; }),
       untaxed: document.getElementById('untaxed').textContent,
       tax: document.getElementById('taxAmt').textContent,
@@ -686,7 +732,27 @@ submitBtn.addEventListener('click', () => {
   };
 
   submitBtn.disabled = true; submitBtn.textContent = '送出中...';
-  fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(orderData) })
+
+  // 🔧 修正：原本不管後端有沒有真的寫入成功，都會顯示「已送出」。
+  // 現在改成真的解析並檢查 result.status，並加上 20 秒逾時保護，避免卡住轉圈圈轉不停。
+  const ctrl = new AbortController();
+  const timeoutTimer = setTimeout(() => ctrl.abort(), 20000);
+
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(orderData),
+    signal: ctrl.signal
+  })
+  .then(async (response) => {
+    const text = await response.text();
+    let result;
+    try { result = JSON.parse(text); }
+    catch (e) { throw new Error('後端回應格式錯誤，請稍後再試或聯絡工作人員'); }
+    if (!response.ok || result.status !== 'success') {
+      throw new Error(result.message || '訂單寫入失敗，請稍後再試');
+    }
+    return result;
+  })
   .then(() => {
       const modalHtml = `
         <div style="text-align:left; font-size:14px; line-height:1.8; margin-top:10px;">
@@ -716,15 +782,38 @@ submitBtn.addEventListener('click', () => {
       document.getElementById('summaryText').innerHTML = modalHtml;
       document.getElementById('overlay').classList.remove('hidden');
       resetFormForNextOrder();
-  }).finally(() => { submitBtn.disabled = false; submitBtn.textContent = '送出預購訂單'; });
+  })
+  .catch((error) => {
+      // 🔧 修正：新增失敗提示，失敗不再被誤判成功
+      const msg = error.name === 'AbortError' ? '連線逾時，請確認網路後再試一次，或直接聯絡我們確認訂單是否成立。' : error.message;
+      document.getElementById('validationBanner').innerHTML = '<b>訂單未送出：</b>' + escapeHtml(msg);
+      document.getElementById('validationBanner').classList.remove('hidden');
+  })
+  .finally(() => {
+      clearTimeout(timeoutTimer);
+      submitBtn.disabled = false; submitBtn.textContent = '送出預購訂單';
+  });
 });
 
 function resetFormForNextOrder(){
   document.getElementById('buyerName').value = '';
   document.getElementById('buyerPhone').value = '';
   document.getElementById('buyerEmail').value = '';
-  cart = []; 
-  document.getElementById('selectedDateInput').value = ''; 
+
+  // 🔧 修正：原本重置時沒有清公司欄位、也沒切回「個人」，導致連續下單時上一筆的
+  // 統編／抬頭／發票類別會殘留，混進下一筆訂單。
+  document.getElementById('taxId').value = '';
+  document.getElementById('companyName').value = '';
+  document.getElementById('mobileCarrier').value = '';
+  document.getElementById('donateCode').value = '919';
+  document.querySelector('input[name="carrier"][value="mobile"]').checked = true;
+  segBtns.forEach(b => b.classList.remove('active'));
+  document.querySelector('#buyerTypeSeg button[data-type="個人"]').classList.add('active');
+  document.getElementById('businessBlock').classList.add('hidden');
+  document.getElementById('individualBlock').classList.remove('hidden');
+
+  cart = [];
+  document.getElementById('selectedDateInput').value = '';
   newOrderNumber(); loadDates(); loadCatalog(); renderCart();
 }
 
