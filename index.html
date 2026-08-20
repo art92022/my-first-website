@@ -269,8 +269,11 @@
       <div class="empty-cart" id="emptyCart">尚未選擇任何商品</div>
     </div>
     <div class="totals">
-      <div class="line"><span>未稅金額</span><span id="untaxed">$0</span></div>
-      <div class="line"><span>稅額 (5%)</span><span id="taxAmt">$0</span></div>
+      <!-- 🔧 修正：未稅金額／稅額不再單獨顯示給客人看——稅額已內含在應付總額裡，
+           不需要另外拉出來展示。這兩行改用 display:none 隱藏，只留給下面的 JS
+           計算與送出訂單用（例如寫入試算表做報稅記錄），畫面上客人只會看到「應付總額」。 -->
+      <div class="line" style="display:none;"><span>未稅金額</span><span id="untaxed">$0</span></div>
+      <div class="line" style="display:none;"><span>稅額 (5%)</span><span id="taxAmt">$0</span></div>
       <div class="grand"><span>應付總額</span><span class="amt" id="grandTotal">$0</span></div>
     </div>
 
@@ -669,13 +672,28 @@ newOrderNumber();
 function clearFieldErrors(){ document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error')); }
 function markFieldError(el){ el.classList.add('field-error'); }
 
+// 🔧 修正：Email 格式驗證加強。原本只檢查「有沒有填」，現在加上基本的格式檢查
+// （必須有 @ 跟網域），明顯打錯格式（漏 @、漏網域）的話直接擋下，不讓訂單送出，
+// 減少之後信件根本寄不到的狀況。
+function isValidEmailFormat(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
 function validateForm(){
   clearFieldErrors(); const errors = [];
   const pickupDate = document.getElementById('selectedDateInput').value;
   if (!pickupDate) { errors.push('請選擇自取日期'); document.querySelectorAll('.date-btn').forEach(b => b.classList.add('field-error')); }
   if (!document.getElementById('buyerName').value.trim()){ errors.push('請填寫姓名'); markFieldError(document.getElementById('buyerName')); }
   if (!document.getElementById('buyerPhone').value.trim()){ errors.push('請填寫聯絡電話'); markFieldError(document.getElementById('buyerPhone')); }
-  if (!document.getElementById('buyerEmail').value.trim()){ errors.push('請填寫Email'); markFieldError(document.getElementById('buyerEmail')); }
+
+  const emailVal = document.getElementById('buyerEmail').value.trim();
+  if (!emailVal){
+    errors.push('請填寫Email'); markFieldError(document.getElementById('buyerEmail'));
+  } else if (!isValidEmailFormat(emailVal)){
+    errors.push('Email 格式看起來不正確，請確認是否有打錯字（例如缺少 @ 或網域）');
+    markFieldError(document.getElementById('buyerEmail'));
+  }
+
   if (cart.length === 0){ errors.push('請至少選擇一項商品'); }
 
   // 🔧 修正：公司行號必須填統一編號與發票抬頭，原本完全沒有檢查
@@ -754,6 +772,8 @@ submitBtn.addEventListener('click', () => {
     return result;
   })
   .then(() => {
+      // 🔧 修正：確認彈窗不再單獨列出「未稅金額」「稅額(5%)」，只顯示「應付總額」
+      // （稅額仍然完整寫進試算表 P、Q 欄，只是不再印給客人看）。
       const modalHtml = `
         <div style="text-align:left; font-size:14px; line-height:1.8; margin-top:10px;">
           <div style="background:#fdf9f4; padding:12px; border-radius:8px; margin-bottom:12px;">
@@ -771,8 +791,6 @@ submitBtn.addEventListener('click', () => {
             <strong>【商品明細】</strong><br>
             ${orderData.items.map((c, i) => `${i+1}. ${c.name} 數量：${c.qty} 單價：${fmt(c.price)} 小計：${fmt(c.subtotal)}`).join('<br>')}
             <hr style="border:0; border-top:1px dashed var(--line); margin:10px 0;">
-            未稅金額：${orderData.untaxed}<br>
-            稅額(5%)：${orderData.tax}<br>
             <div style="text-align:right; font-size:16px; font-weight:900; margin-top:8px; color:var(--stamp-dark);">
               應付總額：${orderData.total}
             </div>
