@@ -108,6 +108,13 @@
     background:#fff; font-size:15px; font-weight:700; cursor:pointer; color:var(--leaf-dark); line-height:1;
   }
   .qty-ctrl .qty-num{min-width:20px; text-align:center; font-weight:700;}
+  .qty-ctrl .qty-num-input{
+    width:44px; text-align:center; font-weight:700; font-size:14px; color:var(--leaf-dark);
+    border:1px solid var(--line); border-radius:6px; padding:4px 2px; -moz-appearance:textfield;
+  }
+  .qty-ctrl .qty-num-input::-webkit-outer-spin-button, .qty-ctrl .qty-num-input::-webkit-inner-spin-button{
+    -webkit-appearance:none; margin:0;
+  }
   .cart-row .c-sub{width:64px; text-align:right; font-weight:800; flex-shrink:0;}
   .cart-row .c-del{background:none; border:none; color:var(--stamp); font-size:17px; cursor:pointer; padding:0 2px;}
   .empty-cart{font-size:12.5px; color:var(--muted); padding:6px 0;}
@@ -603,9 +610,27 @@ function renderCatalog(){
       if (p.stock <= 0) { stockText = "❌ 已額滿"; card.disabled = true; }
       else if (p.stock <= 10) { stockText = `🔥 僅剩 ${p.stock} 份`; }
 
+      // 🔧 修正：已加入購物車的數量如果已經到達庫存上限，卡片也要停用，
+      // 不然點下去雖然畫面上看不出變化，但如果之後改成別的加購方式又會
+      // 悄悄超賣。同時在庫存見底時顯示「已達上限」提示。
+      const inCartQty = inCart ? inCart.qty : 0;
+      if (p.stock > 0 && inCartQty >= p.stock) {
+        card.disabled = true;
+        stockText = `✅ 已達上限（${p.stock}）`;
+      }
+
       card.innerHTML = `<span class="p-name">${escapeHtml(p.name)}</span><span class="p-price">${fmt(p.price)}</span><span class="p-stock">${stockText}</span>`;
       card.addEventListener('click', () => {
         let existing = cart.find(c => c.name === p.name);
+        const currentQty = existing ? existing.qty : 0;
+        // 🔧 修正：原本點卡片就無限往上加，完全沒檢查庫存上限——這正是
+        // 「布雪」庫存只剩 48、購物車卻能加到 73 的原因。
+        // 這裡加上判斷：已達庫存上限就不再增加，並提示。
+        if (p.stock > 0 && currentQty >= p.stock) {
+          document.getElementById('validationBanner').innerHTML = `<b>已達庫存上限：</b>「${escapeHtml(p.name)}」目前預購額度只剩 ${p.stock} 份`;
+          document.getElementById('validationBanner').classList.remove('hidden');
+          return;
+        }
         if (existing){ existing.qty += 1; }
         else { cart.push({catalogId: p.id, name: p.name, price: p.price, qty: 1}); }
         renderCatalog(); renderCart();
@@ -617,17 +642,41 @@ function renderCatalog(){
   }
 }
 
+// 🔧 新增：依商品名稱查目前商品目錄裡的庫存上限，購物車數量調整（不管是
+// +/- 按鈕還是直接輸入數字）都要拿這個值來做上限檢查，避免超過預購額度。
+function getStockLimit_(name){
+  const p = catalog.find(c => c.name === name);
+  return p ? p.stock : Infinity;
+}
+
+// 🔧 新增：把數量統一套用上限（1 ~ 庫存）後寫回，並顯示提示訊息（如果有被砍掉）
+function applyQtyClamp_(item, requestedQty){
+  const limit = getStockLimit_(item.name);
+  let finalQty = requestedQty;
+  if (finalQty > limit) {
+    finalQty = limit;
+    document.getElementById('validationBanner').innerHTML = `<b>已達庫存上限：</b>「${escapeHtml(item.name)}」目前預購額度只剩 ${limit} 份，數量已自動調整`;
+    document.getElementById('validationBanner').classList.remove('hidden');
+  } else {
+    document.getElementById('validationBanner').classList.add('hidden');
+  }
+  item.qty = finalQty;
+}
+
 function renderCart(){
   cartBody.innerHTML = '';
   document.getElementById('emptyCart').classList.toggle('hidden', cart.length > 0);
   cart.forEach(item => {
     const row = document.createElement('div');
     row.className = 'cart-row';
+    // 🔧 修正：數量原本只能靠 +/- 按鈕一次加 1，如果客人一次要訂 200 份，
+    // 要點兩百下才能加完。改成中間放一個可以直接打數字的輸入框，+/- 按鈕
+    // 保留給微調用，兩種方式都會套用庫存上限檢查。
     row.innerHTML = `
       <div class="c-name">${escapeHtml(item.name)}<span class="c-price">${fmt(item.price)} / 件</span></div>
       <div class="qty-ctrl">
         <button type="button" class="q-minus">−</button>
-        <span class="qty-num">${item.qty}</span>
+        <input type="number" class="qty-num-input" min="1" value="${item.qty}" inputmode="numeric">
         <button type="button" class="q-plus">+</button>
       </div>
       <div class="c-sub">${fmt(item.price * item.qty)}</div>
@@ -637,7 +686,17 @@ function renderCart(){
       item.qty -= 1; if (item.qty <= 0){ cart = cart.filter(c => c !== item); }
       renderCatalog(); renderCart();
     });
-    row.querySelector('.q-plus').addEventListener('click', () => { item.qty += 1; renderCatalog(); renderCart(); });
+    row.querySelector('.q-plus').addEventListener('click', () => {
+      applyQtyClamp_(item, item.qty + 1);
+      renderCatalog(); renderCart();
+    });
+    const qtyInput = row.querySelector('.qty-num-input');
+    qtyInput.addEventListener('change', () => {
+      let typed = parseInt(qtyInput.value, 10);
+      if (isNaN(typed) || typed <= 0) { cart = cart.filter(c => c !== item); renderCatalog(); renderCart(); return; }
+      applyQtyClamp_(item, typed);
+      renderCatalog(); renderCart();
+    });
     row.querySelector('.c-del').addEventListener('click', () => { cart = cart.filter(c => c !== item); renderCatalog(); renderCart(); });
     cartBody.appendChild(row);
   });
