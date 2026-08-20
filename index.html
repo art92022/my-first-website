@@ -191,7 +191,7 @@
   <div class="order-no">訂單編號 <span id="orderNo"></span> ・ <span id="orderDate"></span></div>
 
   <section>
-    <div class="sec-head"><div class="sec-label"><span class="tag">01</span>菜單 <span class="hint" style="color:var(--stamp-dark); font-weight:700;"></span>※ 溫馨提醒：面交請自備購物提袋</div></div>
+    <div class="sec-head"><div class="sec-label"><span class="tag">01</span>菜單 <span class="hint" style="color:var(--stamp-dark); font-weight:700;"></span>♻️ 溫馨提醒：響應環保與愛護地球，來店取甜點時請自備環保提袋</div></div>
 
     <div class="menu-image-wrap">
       <img id="menuImage" src="https://img.shoplineapp.com/media/image_clips/6a6c50faba01200010303e81/original.jpg?1785483513=&owner_id=5dcd960dd9d3e3005a390332" alt="本次預購菜單">
@@ -607,7 +607,7 @@ function renderCatalog(){
       card.className = 'product-card' + (inCart ? ' in-cart' : '');
 
       let stockText = `預購額度：${p.stock}`;
-      if (p.stock <= 0) { stockText = "❌ 已額滿"; card.disabled = true; }
+      if (p.stock <= 0) { stockText = "❌ 已售完"; card.disabled = true; }
       else if (p.stock <= 10) { stockText = `🔥 僅剩 ${p.stock} 份`; }
 
       // 🔧 修正：已加入購物車的數量如果已經到達庫存上限，卡片也要停用，
