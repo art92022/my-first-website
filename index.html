@@ -126,6 +126,9 @@
   .submit-btn:active{transform:translateY(1px);}
   .submit-btn:disabled{opacity:.6; cursor:default;}
   .validation-banner{background:#fbf1ee; border:1px solid #e6c4bb; border-radius:14px; padding:13px 15px; margin-bottom:12px; font-size:13px; line-height:1.7; color:var(--alert);}
+  .field-msg{font-size:12.5px; color:var(--alert); margin-top:6px; line-height:1.6; min-height:0;}
+  .field-msg:empty{display:none;}
+  .field-msg button{background:none; border:0; padding:0; color:var(--accent); text-decoration:underline; font:inherit; cursor:pointer;}
   input.field-error, .date-btn.field-error{border-color:var(--alert) !important; background:#fdf6f4;}
 
   /* ── 送出後視窗 ── */
@@ -169,13 +172,25 @@
   .bank-card td:first-child{color:var(--muted); width:4.5em; white-space:nowrap;}
   .copy-btn{margin-left:8px; font-size:12px; padding:2px 10px; border:1px solid var(--ink); border-radius:99px; background:#fff; color:var(--ink); cursor:pointer; font-family:inherit;}
   .bank-note{font-size:12.5px; color:var(--accent); margin-top:10px; line-height:1.7;}
+  .pay-options{border:1px solid var(--line); border-radius:16px; padding:4px 14px; background:#fff;}
+  .transfer-box{background:var(--paper); border-radius:16px; padding:16px 18px; margin-top:12px;}
+  .transfer-box .bank-card{background:#fff; margin-bottom:12px;}
+  .transfer-box .field{margin-bottom:12px;}
+  #bankLast5{letter-spacing:.4em; font-size:18px; max-width:220px;}
+  .transfer-rules{margin:0; padding-left:18px; font-size:12.5px; line-height:1.85; color:var(--accent);}
+  .care-list{margin:0 0 6px; padding:16px 18px 16px 34px; background:var(--paper); border-radius:16px; font-size:13.5px; line-height:2; color:var(--ink);}
+  .care-list li.note{color:var(--muted); list-style:none; margin-left:-16px;}
+  .care-warn{font-size:13px; line-height:1.8; color:var(--accent); background:#fbf1ee; border-radius:14px; padding:12px 14px; margin:10px 0 18px;}
+  .care-warn b{color:var(--ink);}
   .care-intro{font-size:13px; color:var(--ink-2); margin:0 0 14px; line-height:1.85;}
 
   .care-table{width:100%; border-collapse:collapse; font-size:13px; table-layout:fixed; margin-bottom:6px;}
   .care-table thead th{color:var(--muted); font-weight:500; padding:10px 6px; font-size:12px; text-align:left; border-bottom:1px solid var(--ink); letter-spacing:.08em;}
   .care-table tbody td{padding:12px 6px; color:var(--ink); border-bottom:1px solid var(--line); word-wrap:break-word; line-height:1.6;}
   .care-table tbody tr td:first-child{font-family:var(--serif);}
-  .care-table tbody tr td:last-child{text-align:center;}
+  .care-table .c{text-align:center; white-space:nowrap;}
+  @media (max-width:480px){ .care-table thead th, .care-table tbody td{padding-left:3px; padding-right:3px;} .care-table tbody td{font-size:12.5px;} .care-table td.t{font-size:12px;} } .care-table td.t{font-size:12.5px; color:var(--ink-2);}
+  .care-intro b{color:var(--ink); font-weight:500;}
   .care-table tbody td.dash{text-align:center; color:#c4b7a9;}
   .care-group-label{font-size:13px; margin:16px 0 6px; color:var(--ink-2); line-height:1.7;}
   .care-group-label b{color:var(--accent); font-weight:500;}
@@ -226,11 +241,13 @@
     <div class="row2">
       <div class="field">
         <label>聯絡電話 <span class="hint">必填</span></label>
-        <input type="tel" id="buyerPhone" placeholder="09xx-xxx-xxx">
+        <input type="tel" id="buyerPhone" placeholder="09xx-xxx-xxx" inputmode="numeric" maxlength="12" autocomplete="tel">
+        <div class="field-msg" id="phoneMsg"></div>
       </div>
       <div class="field">
         <label>Email <span class="hint">必填</span></label>
-        <input type="email" id="buyerEmail" placeholder="example@gmail.com">
+        <input type="email" id="buyerEmail" placeholder="example@gmail.com" autocomplete="email" autocapitalize="off" spellcheck="false">
+        <div class="field-msg" id="emailMsg"></div>
       </div>
     </div>
     <div id="individualBlock">
@@ -260,6 +277,31 @@
           <input type="text" id="companyName" placeholder="○○股份有限公司">
         </div>
       </div>
+    </div>
+
+    <div class="field" style="margin-top:22px; margin-bottom:10px;"><label>付款方式 <span class="hint">必填</span></label></div>
+    <div class="pay-options">
+      <label class="radio-row"><input type="radio" name="payMethod" value="現場付現金"> 取貨時現場付現金</label>
+      <label class="radio-row"><input type="radio" name="payMethod" value="匯款"> 匯款</label>
+    </div>
+    <div class="transfer-box hidden" id="transferBox">
+      <div class="bank-card">
+        <div class="bank-title">匯款資訊</div>
+        <table>
+          <tr><td>銀行</td><td>上海銀行 011（承德分行）</td></tr>
+          <tr><td>帳號</td><td>44102000066029<button type="button" class="copy-btn" onclick="navigator.clipboard&&navigator.clipboard.writeText('44102000066029').then(()=>{this.textContent='已複製';setTimeout(()=>this.textContent='複製',1500)})">複製</button></td></tr>
+          <tr><td>戶名</td><td>幸福手作烘焙食坊代表人黃O絜</td></tr>
+        </table>
+      </div>
+      <div class="field">
+        <label>匯款帳號後五碼 <span class="hint">必填，以便我們查帳</span></label>
+        <input type="text" id="bankLast5" inputmode="numeric" maxlength="5" placeholder="12345">
+      </div>
+      <ul class="transfer-rules">
+        <li>提醒您，請詳閱訂單明細，確認無誤後再進行匯款作業。</li>
+        <li>如匯款金額錯誤需退款，需自行負擔退款手續費。</li>
+        <li>下單後 24 小時內未完成付款，訂單將自動取消。</li>
+      </ul>
     </div>
   </section>
 
@@ -371,11 +413,14 @@
         <table>
           <tr><td>銀行</td><td>上海銀行 011（承德分行）</td></tr>
           <tr><td>帳號</td><td>44102000066029<button type="button" class="copy-btn" onclick="navigator.clipboard&&navigator.clipboard.writeText('44102000066029').then(()=>{this.textContent='已複製';setTimeout(()=>this.textContent='複製',1500)})">複製</button></td></tr>
-          <tr><td>戶名</td><td>幸福手作烘焙食坊代表人黃苡絜</td></tr>
+          <tr><td>戶名</td><td>幸福手作烘焙食坊代表人黃O絜</td></tr>
         </table>
-        <div class="bank-note">※ 匯款後，請透過 LINE 官方帳號提供您的帳號後五碼，以便核對。</div>
+        <div class="bank-note">※ 選擇匯款者，請於訂購表單填寫匯款帳號後五碼，以便我們查帳。</div>
       </div>
       <ul>
+        <li>提醒您，請詳閱訂單明細，確認無誤後再進行匯款作業。</li>
+        <li>如匯款金額錯誤需退款，需自行負擔退款手續費。</li>
+        <li class="warn-line">下單後 24 小時內未完成付款，訂單將自動取消。</li>
         <li>如需開立統編，請於預購表單的發票類別選擇「公司行號」，並完整輸入抬頭與統編。</li>
         <li class="warn-line">恕不接受事後補打統編，請於送出前再次確認。</li>
       </ul>
@@ -388,7 +433,7 @@
         <li>取貨地點：依表單地圖標示（A8後門）</li>
         <li>商品皆為純手工製作，請務必於指定午休時段內前往取件。若請同事代領，請務必提供訂購人手機後三碼以便核對。</li>
         <li>產品無添加防腐劑，請依產品背面營養標示之建議溫層妥善保存。</li>
-        <li>商品背後皆有成份標示與保存方式，禮盒內附食用小卡說明。</li>
+        <li>商品包裝或禮盒背後皆有成份標示與保存方式，禮盒內附食用小卡說明。</li>
       </ul>
     </div>
 
@@ -405,67 +450,34 @@
 
     <div class="info-block">
       <h3>保存與食用指南</h3>
-      <p class="care-intro">所有的甜點皆無添加防腐劑。因公司與家用冰箱冷度不一，以下天數為「理想狀態」，建議收到後盡早食用完畢，並請勿久放於高溫環境。</p>
+      <p class="care-intro">所有甜點皆不添加人工色素、甜味劑、防腐劑及抗氧化劑。因公司與家用冰箱冷度不一，以下天數為「理想狀態」，溫度不足容易使甜點受潮變質（特別是鹽奶油紅豆），建議收到後<b>盡早食用完畢</b>，並請勿久放於高溫環境。</p>
 
       <div class="care-group-label">冷凍品項：請務必保存於 <b>-18°C</b> 以下之冷凍環境。</div>
       <table class="care-table">
-        <colgroup>
-          <col style="width: 35%;">
-          <col style="width: 15%;">
-          <col style="width: 15%;">
-          <col style="width: 35%;">
-        </colgroup>
-        <thead>
-          <tr>
-            <th>品項</th>
-            <th style="text-align:center;">冷凍</th>
-            <th style="text-align:center;">冷藏</th>
-            <th style="text-align:center;">享用前退冰</th>
-          </tr>
-        </thead>
+        <colgroup><col style="width:25%"><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:33%"></colgroup>
+        <thead><tr><th>品項</th><th class="c">常溫</th><th class="c">冷凍</th><th class="c">冷藏</th><th>享用前退冰</th></tr></thead>
         <tbody>
-          <tr>
-            <td>達克瓦茲</td>
-            <td style="text-align:center;">14 天</td>
-            <td class="dash">—</td>
-            <td style="text-align:left;">夏 10–20 分鐘 / 冬 20–30 分鐘</td>
-          </tr>
-          <tr>
-            <td>奶油餅 / 甘納許夾心餅</td>
-            <td style="text-align:center;">14 天</td>
-            <td class="dash">—</td>
-            <td style="text-align:left;">夏 10–20 分鐘 / 冬 20–30 分鐘</td>
-          </tr>
-          <tr>
-            <td>冰磚 / 費南雪</td>
-            <td style="text-align:center;">14 天</td>
-            <td class="dash">—</td>
-            <td style="text-align:left;">10 分鐘</td>
-          </tr>
-          <tr>
-            <td>巧克力松露</td>
-            <td style="text-align:center;">14 天</td>
-            <td class="dash">—</td>
-            <td style="text-align:left;">30 分鐘</td>
-          </tr>
+          <tr><td>達克瓦茲</td><td class="dash">—</td><td class="c">14 天</td><td class="dash">—</td><td class="t">夏 10–20 分鐘 / 冬 20–30 分鐘</td></tr>
+          <tr><td>奶油餅 / 甘納許夾心餅</td><td class="dash">—</td><td class="c">14 天</td><td class="dash">—</td><td class="t">夏 10–20 分鐘 / 冬 20–30 分鐘</td></tr>
+          <tr><td>冰磚</td><td class="dash">—</td><td class="c">14 天</td><td class="dash">—</td><td class="t">10 分鐘</td></tr>
+          <tr><td>巧克力松露</td><td class="dash">—</td><td class="c">14 天</td><td class="dash">—</td><td class="t">30 分鐘</td></tr>
+          <tr><td>費南雪</td><td class="c">10 天</td><td class="c">14 天</td><td class="dash">—</td><td class="t">5–10 分鐘</td></tr>
         </tbody>
       </table>
 
       <div class="care-group-label">冷藏品項：請務必保存於 <b>7°C</b> 以下之冷藏環境。</div>
       <table class="care-table">
-        <colgroup>
-          <col style="width: 35%;">
-          <col style="width: 15%;">
-          <col style="width: 15%;">
-          <col style="width: 35%;">
-        </colgroup>
+        <colgroup><col style="width:25%"><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:33%"></colgroup>
         <tbody>
-          <tr>
-            <td>冷藏款 柔雪</td>
-            <td class="dash">—</td>
-            <td style="text-align:center;">14 天</td>
-            <td class="dash">—</td>
-          </tr>
+          <tr><td>柔雪</td><td class="dash">—</td><td class="dash">—</td><td class="c">14 天</td><td class="t">冷藏無需退冰；冷凍保存請退冰 10 分鐘</td></tr>
+        </tbody>
+      </table>
+
+      <div class="care-group-label">常溫品項：請置於<b>陰涼乾燥處</b>，避免陽光直射。</div>
+      <table class="care-table">
+        <colgroup><col style="width:25%"><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:33%"></colgroup>
+        <tbody>
+          <tr><td>馬林糖 / 鐵盒餅乾</td><td class="c">20 天</td><td class="dash">—</td><td class="dash">—</td><td class="t">開封即可享用</td></tr>
         </tbody>
       </table>
     </div>
@@ -711,6 +723,11 @@ function recalcTotals(){
   document.getElementById('grandTotal').textContent = fmt(total);
 }
 
+document.querySelectorAll('input[name="payMethod"]').forEach(r => r.addEventListener('change', () => {
+  document.getElementById('transferBox').classList.toggle('hidden', r.value !== '匯款' || !r.checked);
+}));
+document.getElementById('bankLast5').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g,'').slice(0,5); });
+
 const segBtns = document.querySelectorAll('#buyerTypeSeg button');
 segBtns.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -731,24 +748,75 @@ newOrderNumber();
 function clearFieldErrors(){ document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error')); }
 function markFieldError(el){ el.classList.add('field-error'); }
 
-// Email 基本格式檢查（必須有 @ 跟網域）
-function isValidEmailFormat(email){
-  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+// ── 手機：只收台灣手機 09 開頭共 10 碼（可含 - 或空白）──
+function phoneDigits(v){ return (v||'').replace(/[\s\-()]/g,''); }
+function checkPhone(v){
+  const d = phoneDigits(v);
+  if (!d) return '請填寫聯絡電話';
+  if (!/^\d+$/.test(d)) return '電話只能填數字';
+  if (!/^09\d{8}$/.test(d)) return '請填寫正確的手機號碼（09 開頭共 10 碼）';
+  return '';
 }
+// ── Email：格式 + 常見打錯網域提醒 ──
+const EMAIL_FIX = {
+  'gmial.com':'gmail.com','gmai.com':'gmail.com','gmal.com':'gmail.com','gamil.com':'gmail.com','gmail.co':'gmail.com',
+  'gmail.con':'gmail.com','gmail.cmo':'gmail.com','gmail.om':'gmail.com','gmail.comm':'gmail.com','gmaill.com':'gmail.com','gmail.com.tw':'gmail.com',
+  'yahoo.com.t':'yahoo.com.tw','yahoo.come.tw':'yahoo.com.tw','yaho.com.tw':'yahoo.com.tw','yahoo.con.tw':'yahoo.com.tw','yahoo.tw':'yahoo.com.tw',
+  'hotmial.com':'hotmail.com','hotmai.com':'hotmail.com','hotmail.con':'hotmail.com','outlook.con':'outlook.com','outlok.com':'outlook.com',
+  'icloud.con':'icloud.com','iclould.com':'icloud.com','icoud.com':'icloud.com'
+};
+function cleanEmail(v){ return (v||'').trim().replace(/＠/g,'@').replace(/．|。/g,'.').toLowerCase(); }
+function isValidEmailFormat(email){
+  return /^[a-z0-9._%+\-]+@[a-z0-9\-]+(\.[a-z0-9\-]+)*\.[a-z]{2,}$/.test(email) && !/\.\./.test(email);
+}
+function checkEmail(v){
+  const e = cleanEmail(v);
+  if (!e) return {msg:'請填寫 Email'};
+  if (/\s/.test(e)) return {msg:'Email 裡不能有空格'};
+  if (!isValidEmailFormat(e)) return {msg:'請輸入正確的電子郵件（例如 name@gmail.com）'};
+  const dom = e.split('@')[1];
+  if (EMAIL_FIX[dom]) return {msg:'網域好像打錯了', fix: e.split('@')[0] + '@' + EMAIL_FIX[dom]};
+  return {msg:''};
+}
+function showPhoneMsg(){
+  const el = document.getElementById('buyerPhone'), m = checkPhone(el.value);
+  document.getElementById('phoneMsg').textContent = el.value ? m : '';
+  el.classList.toggle('field-error', !!(el.value && m));
+}
+function showEmailMsg(){
+  const el = document.getElementById('buyerEmail'), r = checkEmail(el.value), box = document.getElementById('emailMsg');
+  if (!el.value){ box.textContent=''; el.classList.remove('field-error'); return; }
+  el.classList.toggle('field-error', !!r.msg);
+  if (r.fix){
+    box.innerHTML = '您是不是要輸入 <button type="button" id="emailFixBtn">' + escapeHtml(r.fix) + '</button>？';
+    document.getElementById('emailFixBtn').onclick = () => { el.value = r.fix; showEmailMsg(); };
+  } else box.textContent = r.msg;
+}
+document.getElementById('buyerPhone').addEventListener('input', e => { e.target.value = e.target.value.replace(/[^\d\-\s]/g,''); if (e.target.classList.contains('field-error')) showPhoneMsg(); });
+document.getElementById('buyerPhone').addEventListener('blur', showPhoneMsg);
+document.getElementById('buyerEmail').addEventListener('input', e => { if (e.target.classList.contains('field-error')) showEmailMsg(); });
+document.getElementById('buyerEmail').addEventListener('blur', e => { e.target.value = cleanEmail(e.target.value); showEmailMsg(); });
 
 function validateForm(){
   clearFieldErrors(); const errors = [];
   const pickupDate = document.getElementById('selectedDateInput').value;
   if (!pickupDate) { errors.push('請選擇自取日期'); document.querySelectorAll('.date-btn').forEach(b => b.classList.add('field-error')); }
   if (!document.getElementById('buyerName').value.trim()){ errors.push('請填寫姓名'); markFieldError(document.getElementById('buyerName')); }
-  if (!document.getElementById('buyerPhone').value.trim()){ errors.push('請填寫聯絡電話'); markFieldError(document.getElementById('buyerPhone')); }
+  const phoneErr = checkPhone(document.getElementById('buyerPhone').value);
+  if (phoneErr){ errors.push(phoneErr); markFieldError(document.getElementById('buyerPhone')); document.getElementById('phoneMsg').textContent = phoneErr; }
 
-  const emailVal = document.getElementById('buyerEmail').value.trim();
-  if (!emailVal){
-    errors.push('請填寫Email'); markFieldError(document.getElementById('buyerEmail'));
-  } else if (!isValidEmailFormat(emailVal)){
-    errors.push('Email 格式看起來不正確，請確認是否有打錯字（例如缺少 @ 或網域）');
-    markFieldError(document.getElementById('buyerEmail'));
+  const emailEl = document.getElementById('buyerEmail');
+  emailEl.value = cleanEmail(emailEl.value);
+  const emailChk = checkEmail(emailEl.value);
+  if (emailChk.msg){
+    errors.push(emailChk.fix ? '請確認 Email 是否打錯（您是不是要輸入 ' + emailChk.fix + '？）' : emailChk.msg);
+    markFieldError(emailEl); showEmailMsg();
+  }
+
+  const payRadio = document.querySelector('input[name="payMethod"]:checked');
+  if (!payRadio){ errors.push('請選擇付款方式'); }
+  else if (payRadio.value === '匯款' && !/^\d{5}$/.test(document.getElementById('bankLast5').value)){
+    errors.push('請填寫匯款帳號後五碼（5 位數字）'); markFieldError(document.getElementById('bankLast5'));
   }
 
   if (cart.length === 0){ errors.push('請至少選擇一項商品'); }
@@ -792,12 +860,14 @@ submitBtn.addEventListener('click', () => {
       orderDate: document.getElementById('orderDate').textContent,
       pickupDate: document.getElementById('selectedDateInput').value,
       name: document.getElementById('buyerName').value,
-      phone: document.getElementById('buyerPhone').value,
-      email: document.getElementById('buyerEmail').value,
+      phone: phoneDigits(document.getElementById('buyerPhone').value).replace(/^(\d{4})(\d{3})(\d{3})$/,'$1-$2-$3'),
+      email: cleanEmail(document.getElementById('buyerEmail').value),
       buyerType: document.querySelector('#buyerTypeSeg .active').dataset.type,
       carrierType: carrierType,
       carrierValue: carrierValue,
       companyName: isCompany ? document.getElementById('companyName').value : '',
+      paymentMethod: document.querySelector('input[name="payMethod"]:checked').value,
+      bankLast5: document.querySelector('input[name="payMethod"]:checked').value === '匯款' ? document.getElementById('bankLast5').value : '',
       items: cart.map(i => { return { name: i.name, qty: i.qty, price: i.price, subtotal: i.price * i.qty }; }),
       untaxed: document.getElementById('untaxed').textContent,
       tax: document.getElementById('taxAmt').textContent,
@@ -837,7 +907,8 @@ submitBtn.addEventListener('click', () => {
             類別：${orderData.buyerType}<br>
             姓名：${orderData.name}<br>
             電話：${orderData.phone}<br>
-            發票：${orderData.carrierType} ${orderData.carrierValue}
+            發票：${orderData.carrierType} ${orderData.carrierValue}<br>
+            付款：${orderData.paymentMethod}${orderData.bankLast5 ? '（帳號後五碼 ' + orderData.bankLast5 + '）' : ''}
           </div>
           <div style="background:#f6efe5; padding:14px 16px; border-radius:14px; margin-bottom:12px;">
             <strong>商品明細</strong><br>
@@ -854,7 +925,14 @@ submitBtn.addEventListener('click', () => {
       resetFormForNextOrder();
   })
   .catch((error) => {
-      const msg = error.name === 'AbortError' ? '連線逾時，請確認網路後再試一次，或直接聯絡我們確認訂單是否成立。' : error.message;
+      let msg = error.name === 'AbortError' ? '連線逾時，請確認網路後再試一次，或直接聯絡我們確認訂單是否成立。' : error.message;
+      // 後台回報 Email 寄不出去 → 請客人改正確的電子郵件
+      if (/email|e-mail|mail|信箱|郵件|recipient/i.test(msg || '')) {
+        msg = '請輸入正確的電子郵件，訂單明細才能寄給您。';
+        const em = document.getElementById('buyerEmail');
+        markFieldError(em); document.getElementById('emailMsg').textContent = msg;
+        em.scrollIntoView({behavior:'smooth', block:'center'});
+      }
       document.getElementById('validationBanner').innerHTML = '<b>訂單未送出：</b>' + escapeHtml(msg);
       document.getElementById('validationBanner').classList.remove('hidden');
   })
@@ -868,6 +946,7 @@ function resetFormForNextOrder(){
   document.getElementById('buyerName').value = '';
   document.getElementById('buyerPhone').value = '';
   document.getElementById('buyerEmail').value = '';
+  document.getElementById('phoneMsg').textContent = ''; document.getElementById('emailMsg').textContent = '';
 
   // 清公司欄位並切回「個人」，避免上一筆資料殘留
   document.getElementById('taxId').value = '';
@@ -879,6 +958,10 @@ function resetFormForNextOrder(){
   document.querySelector('#buyerTypeSeg button[data-type="個人"]').classList.add('active');
   document.getElementById('businessBlock').classList.add('hidden');
   document.getElementById('individualBlock').classList.remove('hidden');
+
+  document.querySelectorAll('input[name="payMethod"]').forEach(r => r.checked = false);
+  document.getElementById('bankLast5').value = '';
+  document.getElementById('transferBox').classList.add('hidden');
 
   cart = [];
   document.getElementById('selectedDateInput').value = '';
