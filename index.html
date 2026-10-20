@@ -194,6 +194,23 @@
   .care-table tbody td.dash{text-align:center; color:#c4b7a9;}
   .care-group-label{font-size:13px; margin:16px 0 6px; color:var(--ink-2); line-height:1.7;}
   .care-group-label b{color:var(--accent); font-weight:500;}
+  .closed-card{text-align:center; padding:48px 26px;}
+  .pay-report{background:var(--paper); border-radius:16px; padding:18px; margin-top:4px; text-align:left;}
+  .pay-report .pr-title{font-family:var(--serif); font-size:16px; letter-spacing:.14em; color:var(--ink); margin-bottom:6px;}
+  .pay-report .pr-sub{font-size:12.5px; color:var(--ink-2); line-height:1.7; margin:0 0 12px;}
+  .pay-report .pr-row{display:flex; gap:8px;}
+  .pay-report .pr-row input{flex:1; min-width:0;}
+  .pay-report button{flex-shrink:0; padding:0 18px; border:0; border-radius:14px; background:var(--ink); color:var(--cream); font-family:inherit; font-size:14px; letter-spacing:.1em; cursor:pointer;}
+  .pay-report button:disabled{opacity:.6;}
+  .pay-report .pr-msg{font-size:13px; line-height:1.7; margin-top:10px; color:var(--accent);}
+  .pay-report .pr-msg:empty{display:none;}
+  .pay-card{padding:36px 22px;}
+  .pay-card .field{margin-bottom:14px;}
+  body.report-mode .order-no, body.report-mode .title-block p, body.report-mode .sheet > section:not(#payCard){display:none;}
+  .closed-card .closed-mark{font-family:var(--latin); font-size:13px; letter-spacing:.5em; color:var(--muted); margin-bottom:14px; padding-left:.5em;}
+  .closed-card h2{font-family:var(--serif); font-weight:500; font-size:24px; letter-spacing:.3em; margin:0 0 14px; padding-left:.3em;}
+  .closed-card p{font-size:14px; color:var(--ink-2); line-height:1.9; margin:0;}
+  body.shop-closed .order-no, body.shop-closed .title-block p, body.shop-closed .sheet > section.form-sec{display:none;}
 </style>
 </head>
 <body>
@@ -210,7 +227,23 @@
 
   <div class="order-no">訂單編號 <span id="orderNo"></span>　<span id="orderDate"></span></div>
 
-  <section>
+  <section class="pay-card hidden" id="payCard">
+    <div class="sec-head"><div class="sec-label">回報匯款</div></div>
+    <p class="eco-note" style="margin-top:0">匯款完成後填寫，我們會盡快確認入帳。</p>
+    <div class="field"><label>訂單編號</label><input type="text" id="prOrderNo" placeholder="P261020-123"></div>
+    <div class="field"><label>訂購人手機後三碼</label><input type="text" id="prPhone3" inputmode="numeric" maxlength="3" placeholder="678"></div>
+    <div class="field"><label>匯款金額</label><input type="text" id="prAmount" inputmode="numeric" placeholder="例如 450"></div>
+    <button type="button" class="submit-btn" id="prSubmit">送出回報</button>
+    <div class="validation-banner hidden" id="prBanner" style="margin-top:14px"></div>
+  </section>
+
+  <section class="closed-card hidden" id="closedCard">
+    <div class="closed-mark">CLOSED</div>
+    <h2>暫停接單中</h2>
+    <p id="closedMsg"></p>
+  </section>
+
+  <section class="form-sec">
     <div class="sec-head"><div class="sec-label"><span class="tag">01</span>菜單</div></div>
     <div class="eco-note">響應環保，來店取甜點時請自備提袋，謝謝您。</div>
 
@@ -294,7 +327,7 @@
         </table>
       </div>
       <div class="field">
-        <label>匯款帳號後五碼 <span class="hint">必填，以便我們查帳</span></label>
+        <label>付費的匯出帳號後五碼 <span class="hint">必填，以便我們查帳（不是本店帳號）</span></label>
         <input type="text" id="bankLast5" inputmode="numeric" maxlength="5" placeholder="12345">
       </div>
       <ul class="transfer-rules">
@@ -305,7 +338,7 @@
     </div>
   </section>
 
-  <section>
+  <section class="form-sec">
     <div class="sec-head">
       <div class="sec-label"><span class="tag">02</span>選擇預購商品</div>
     </div>
@@ -415,7 +448,7 @@
           <tr><td>帳號</td><td>44102000066029<button type="button" class="copy-btn" onclick="navigator.clipboard&&navigator.clipboard.writeText('44102000066029').then(()=>{this.textContent='已複製';setTimeout(()=>this.textContent='複製',1500)})">複製</button></td></tr>
           <tr><td>戶名</td><td>幸福手作烘焙食坊代表人黃O絜</td></tr>
         </table>
-        <div class="bank-note">※ 選擇匯款者，請於訂購表單填寫匯款帳號後五碼，以便我們查帳。</div>
+        <div class="bank-note">※ 選擇匯款者，請於訂購表單填寫您付費的匯出帳號後五碼（不是本店帳號），以便我們查帳。</div>
       </div>
       <ul>
         <li>提醒您，請詳閱訂單明細，確認無誤後再進行匯款作業。</li>
@@ -548,6 +581,15 @@ function jsonpRequest(action, onSuccess, onError, timeoutMs) {
 // 動態從後台試算表載入自取日期
 function loadDates() {
   jsonpRequest('getDates', (data) => {
+    // 後台按「暫停接單」時，網頁只顯示暫停說明與取貨資訊
+    if (data && data.open === false) {
+      document.body.classList.add('shop-closed');
+      document.getElementById('closedMsg').textContent = data.closedMessage || '園區預購暫停中，下次開放時間請留意 LINE 官方帳號公告。';
+      document.getElementById('closedCard').classList.remove('hidden');
+      return;
+    }
+    document.body.classList.remove('shop-closed');
+    document.getElementById('closedCard').classList.add('hidden');
     const dates = (data && data.dates) ? data.dates : [];
     const grid = document.getElementById('pickupDateGrid');
     grid.innerHTML = '';
@@ -816,7 +858,7 @@ function validateForm(){
   const payRadio = document.querySelector('input[name="payMethod"]:checked');
   if (!payRadio){ errors.push('請選擇付款方式'); }
   else if (payRadio.value === '匯款' && !/^\d{5}$/.test(document.getElementById('bankLast5').value)){
-    errors.push('請填寫匯款帳號後五碼（5 位數字）'); markFieldError(document.getElementById('bankLast5'));
+    errors.push('請填寫付費的匯出帳號後五碼（5 位數字）'); markFieldError(document.getElementById('bankLast5'));
   }
 
   if (cart.length === 0){ errors.push('請至少選擇一項商品'); }
@@ -908,7 +950,7 @@ submitBtn.addEventListener('click', () => {
             姓名：${orderData.name}<br>
             電話：${orderData.phone}<br>
             發票：${orderData.carrierType} ${orderData.carrierValue}<br>
-            付款：${orderData.paymentMethod}${orderData.bankLast5 ? '（帳號後五碼 ' + orderData.bankLast5 + '）' : ''}
+            付款：${orderData.paymentMethod}${orderData.bankLast5 ? '（匯出帳號後五碼 ' + orderData.bankLast5 + '）' : ''}
           </div>
           <div style="background:#f6efe5; padding:14px 16px; border-radius:14px; margin-bottom:12px;">
             <strong>商品明細</strong><br>
@@ -920,7 +962,31 @@ submitBtn.addEventListener('click', () => {
           </div>
         </div>
       `;
-      document.getElementById('summaryText').innerHTML = modalHtml;
+      const isTransfer = orderData.paymentMethod === '匯款';
+      const reportHtml = isTransfer ? `
+        <div class="pay-report">
+          <div class="pr-title">匯款完成了嗎？</div>
+          <p class="pr-sub">匯款後在這裡填金額，我們能第一時間確認。<br>還沒匯也沒關係，確認信裡有回報連結。</p>
+          <div class="pr-row">
+            <input type="text" id="mrAmount" inputmode="numeric" placeholder="匯款金額，例如 ${String(orderData.total).replace(/[^0-9]/g,'')}">
+            <button type="button" id="mrSubmit">送出</button>
+          </div>
+          <div class="pr-msg" id="mrMsg"></div>
+        </div>` : '';
+      document.getElementById('summaryText').innerHTML = modalHtml + reportHtml;
+      if (isTransfer) {
+        const no = orderData.orderNo, last3 = String(orderData.phone).replace(/\D/g,'').slice(-3);
+        document.getElementById('mrAmount').addEventListener('input', e => { e.target.value = e.target.value.replace(/[^\d]/g,''); });
+        document.getElementById('mrSubmit').addEventListener('click', () => {
+          const btn = document.getElementById('mrSubmit'), msg = document.getElementById('mrMsg');
+          const amt = document.getElementById('mrAmount').value;
+          if (!amt) { msg.textContent = '請填寫匯款金額'; return; }
+          btn.disabled = true; btn.textContent = '送出中';
+          sendPaymentReport({ orderNo: no, phoneLast3: last3, amount: amt })
+            .then(m => { msg.textContent = '✓ ' + m; btn.textContent = '已送出'; document.getElementById('mrAmount').disabled = true; })
+            .catch(err => { msg.textContent = err.message; btn.disabled = false; btn.textContent = '送出'; });
+        });
+      }
       document.getElementById('overlay').classList.remove('hidden');
       resetFormForNextOrder();
   })
@@ -971,8 +1037,45 @@ function resetFormForNextOrder(){
 document.getElementById('closeBtn').addEventListener('click', () => document.getElementById('overlay').classList.add('hidden'));
 
 // 初始化載入
-loadDates();
-loadCatalog();
+// ── 回報匯款：送到後台寫入「訂單」X、Y 欄 ──
+function sendPaymentReport(data){
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 20000);
+  return fetch(GOOGLE_SCRIPT_URL, { method:'POST', body: JSON.stringify(Object.assign({ action:'reportPayment' }, data)), signal: ctrl.signal })
+    .then(async r => {
+      let res; try { res = JSON.parse(await r.text()); } catch(e){ throw new Error('連線異常，請稍後再試'); }
+      if (res.status !== 'success') throw new Error(String(res.message || '回報失敗').replace(/^Error:\s*/,''));
+      return res.message;
+    })
+    .catch(e => { throw (e.name === 'AbortError' ? new Error('連線逾時，請稍後再試') : e); })
+    .finally(() => clearTimeout(t));
+}
+
+const payParam = new URLSearchParams(location.search).get('pay');
+if (payParam !== null) {
+  // 從確認信的「回報金額」連結進來：只顯示回報表單
+  document.body.classList.add('report-mode');
+  document.getElementById('payCard').classList.remove('hidden');
+  document.getElementById('prOrderNo').value = payParam;
+  document.getElementById('prPhone3').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g,'').slice(0,3); });
+  document.getElementById('prAmount').addEventListener('input', e => { e.target.value = e.target.value.replace(/[^\d]/g,''); });
+  document.getElementById('prSubmit').addEventListener('click', () => {
+    const banner = document.getElementById('prBanner'), btn = document.getElementById('prSubmit');
+    const d = { orderNo: document.getElementById('prOrderNo').value.trim(), phoneLast3: document.getElementById('prPhone3').value, amount: document.getElementById('prAmount').value };
+    const errs = [];
+    if (!d.orderNo) errs.push('請填寫訂單編號');
+    if (!/^\d{3}$/.test(d.phoneLast3)) errs.push('請填寫訂購人手機後三碼');
+    if (!d.amount) errs.push('請填寫匯款金額');
+    if (errs.length) { banner.innerHTML = errs.map(e => '・' + e).join('<br>'); banner.classList.remove('hidden'); return; }
+    btn.disabled = true; btn.textContent = '送出中⋯';
+    sendPaymentReport(d)
+      .then(m => { banner.style.background = 'var(--paper)'; banner.style.color = 'var(--ink)'; banner.style.borderColor = 'var(--line)'; banner.textContent = '✓ ' + m; banner.classList.remove('hidden'); btn.textContent = '已送出'; })
+      .catch(err => { banner.textContent = err.message; banner.classList.remove('hidden'); btn.disabled = false; btn.textContent = '送出回報'; });
+  });
+} else {
+  loadDates();
+  loadCatalog();
+}
 </script>
 </body>
 </html>
