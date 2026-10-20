@@ -203,6 +203,9 @@
   .pay-report button{flex-shrink:0; padding:0 18px; border:0; border-radius:14px; background:var(--ink); color:var(--cream); font-family:inherit; font-size:14px; letter-spacing:.1em; cursor:pointer;}
   .pay-report button:disabled{opacity:.6;}
   .pay-report .pr-msg{font-size:13px; line-height:1.7; margin-top:10px; color:var(--accent);}
+  .proof-pick{display:block !important; margin:10px 0 0; padding:12px 14px; border:1px dashed var(--line); border-radius:14px; background:#fff; font-size:13.5px !important; color:var(--ink-2) !important; cursor:pointer; letter-spacing:.04em !important;}
+  .proof-pick input{display:none;}
+  .pay-report .pr-send{width:100%; margin-top:10px; padding:13px;}
   .pay-report .pr-msg:empty{display:none;}
   .pay-card{padding:36px 22px;}
   .pay-card .field{margin-bottom:14px;}
@@ -233,6 +236,7 @@
     <div class="field"><label>訂單編號</label><input type="text" id="prOrderNo" placeholder="P261020-123"></div>
     <div class="field"><label>訂購人手機後三碼</label><input type="text" id="prPhone3" inputmode="numeric" maxlength="3" placeholder="678"></div>
     <div class="field"><label>匯款金額</label><input type="text" id="prAmount" inputmode="numeric" placeholder="例如 450"></div>
+    <div class="field"><label class="proof-pick"><input type="file" id="prProof" accept="image/*"> <span id="prProofName">＋ 附上匯款截圖（選填）</span></label></div>
     <button type="button" class="submit-btn" id="prSubmit">送出回報</button>
     <div class="validation-banner hidden" id="prBanner" style="margin-top:14px"></div>
   </section>
@@ -965,12 +969,15 @@ submitBtn.addEventListener('click', () => {
       const isTransfer = orderData.paymentMethod === '匯款';
       const reportHtml = isTransfer ? `
         <div class="pay-report">
-          <div class="pr-title">匯款完成了嗎？</div>
+          <div class="pr-title">請於 24 小時內匯款</div>
+          <p class="pr-sub">上海銀行 011（承德分行）<br>帳號 <b>44102000066029</b>　應匯 <b>${orderData.total}</b><br>超過 24 小時未付款，訂單將自動取消。</p>
+          <div class="pr-title" style="margin-top:14px">匯款完成了嗎？</div>
           <p class="pr-sub">匯款後在這裡填金額，我們能第一時間確認。<br>還沒匯也沒關係，確認信裡有回報連結。</p>
           <div class="pr-row">
             <input type="text" id="mrAmount" inputmode="numeric" placeholder="匯款金額，例如 ${String(orderData.total).replace(/[^0-9]/g,'')}">
-            <button type="button" id="mrSubmit">送出</button>
           </div>
+          <label class="proof-pick"><input type="file" id="mrProof" accept="image/*"> <span id="mrProofName">＋ 附上匯款截圖（選填）</span></label>
+          <button type="button" id="mrSubmit" class="pr-send">送出回報</button>
           <div class="pr-msg" id="mrMsg"></div>
         </div>` : '';
       document.getElementById('summaryText').innerHTML = modalHtml + reportHtml;
@@ -982,10 +989,12 @@ submitBtn.addEventListener('click', () => {
           const amt = document.getElementById('mrAmount').value;
           if (!amt) { msg.textContent = '請填寫匯款金額'; return; }
           btn.disabled = true; btn.textContent = '送出中';
-          sendPaymentReport({ orderNo: no, phoneLast3: last3, amount: amt })
+          readProof(document.getElementById('mrProof'))
+            .then(proof => sendPaymentReport({ orderNo: no, phoneLast3: last3, amount: amt, proofBase64: proof }))
             .then(m => { msg.textContent = '✓ ' + m; btn.textContent = '已送出'; document.getElementById('mrAmount').disabled = true; })
-            .catch(err => { msg.textContent = err.message; btn.disabled = false; btn.textContent = '送出'; });
+            .catch(err => { msg.textContent = err.message; btn.disabled = false; btn.textContent = '送出回報'; });
         });
+        bindProofName('mrProof', 'mrProofName');
       }
       document.getElementById('overlay').classList.remove('hidden');
       resetFormForNextOrder();
@@ -1051,12 +1060,36 @@ function sendPaymentReport(data){
     .finally(() => clearTimeout(t));
 }
 
+// 匯款截圖：在手機上先縮小成 JPG（約 200KB）再送出
+function readProof(input){
+  const f = input && input.files && input.files[0];
+  if (!f) return Promise.resolve('');
+  return new Promise((resolve, reject) => {
+    const img = new Image(), url = URL.createObjectURL(f);
+    img.onload = () => {
+      const s = Math.min(1, 1400 / Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg', 0.82));
+    };
+    img.onerror = () => reject(new Error('讀不到這張圖片，請換一張截圖'));
+    img.src = url;
+  });
+}
+function bindProofName(inputId, labelId){
+  document.getElementById(inputId).addEventListener('change', e => {
+    const f = e.target.files[0];
+    document.getElementById(labelId).textContent = f ? '✓ 已選擇：' + f.name : '＋ 附上匯款截圖（選填）';
+  });
+}
+
 const payParam = new URLSearchParams(location.search).get('pay');
 if (payParam !== null) {
   // 從確認信的「回報金額」連結進來：只顯示回報表單
   document.body.classList.add('report-mode');
   document.getElementById('payCard').classList.remove('hidden');
   document.getElementById('prOrderNo').value = payParam;
+  bindProofName('prProof', 'prProofName');
   document.getElementById('prPhone3').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g,'').slice(0,3); });
   document.getElementById('prAmount').addEventListener('input', e => { e.target.value = e.target.value.replace(/[^\d]/g,''); });
   document.getElementById('prSubmit').addEventListener('click', () => {
@@ -1068,7 +1101,8 @@ if (payParam !== null) {
     if (!d.amount) errs.push('請填寫匯款金額');
     if (errs.length) { banner.innerHTML = errs.map(e => '・' + e).join('<br>'); banner.classList.remove('hidden'); return; }
     btn.disabled = true; btn.textContent = '送出中⋯';
-    sendPaymentReport(d)
+    readProof(document.getElementById('prProof'))
+      .then(proof => sendPaymentReport(Object.assign(d, { proofBase64: proof })))
       .then(m => { banner.style.background = 'var(--paper)'; banner.style.color = 'var(--ink)'; banner.style.borderColor = 'var(--line)'; banner.textContent = '✓ ' + m; banner.classList.remove('hidden'); btn.textContent = '已送出'; })
       .catch(err => { banner.textContent = err.message; banner.classList.remove('hidden'); btn.disabled = false; btn.textContent = '送出回報'; });
   });
