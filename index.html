@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bonheur Cookie 預購自取訂單管理表</title>
+<title>Bonheur Cookie 園區限定自取</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600&family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -161,6 +161,14 @@
   .pay-row span{border:1px solid var(--line); border-radius:99px; padding:6px 14px; background:#fff;}
   .pay-row .no{color:var(--muted); text-decoration:line-through; text-decoration-color:rgba(154,138,126,.6);}
   .pay-row .yes{color:var(--ink); border-color:var(--ink);}
+  .bank-card{background:var(--paper); border-radius:16px; padding:16px 18px; margin:0 0 14px;}
+  .bank-card .bank-title{font-family:var(--serif); font-size:14px; letter-spacing:.16em; color:var(--ink); margin-bottom:8px;}
+  .bank-card table{width:100%; border-collapse:collapse; font-size:14px;}
+  .bank-card td{padding:7px 0; border-bottom:1px solid var(--line); color:var(--ink); vertical-align:top;}
+  .bank-card tr:last-child td{border-bottom:0;}
+  .bank-card td:first-child{color:var(--muted); width:4.5em; white-space:nowrap;}
+  .copy-btn{margin-left:8px; font-size:12px; padding:2px 10px; border:1px solid var(--ink); border-radius:99px; background:#fff; color:var(--ink); cursor:pointer; font-family:inherit;}
+  .bank-note{font-size:12.5px; color:var(--accent); margin-top:10px; line-height:1.7;}
   .care-intro{font-size:13px; color:var(--ink-2); margin:0 0 14px; line-height:1.85;}
 
   .care-table{width:100%; border-collapse:collapse; font-size:13px; table-layout:fixed; margin-bottom:6px;}
@@ -179,7 +187,7 @@
   <header>
     <div class="eyebrow">BONHEUR COOKIE</div>
     <div class="title-block">
-      <h1>面交預購單</h1>
+      <h1>園區限定自取</h1>
       <p>請選擇預購品項並填寫個人資料<br>送出後請依約定日期前往取貨</p>
     </div>
     <div class="rule"></div>
@@ -357,7 +365,16 @@
 
     <div class="info-block">
       <h3>付款方式</h3>
-      <div class="pay-row"><span class="no">刷卡</span><span class="yes">現場現金</span><span class="yes">LINE Pay</span></div>
+      <div class="pay-row"><span class="yes">現場付現金</span><span class="yes">匯款</span></div>
+      <div class="bank-card">
+        <div class="bank-title">匯款資訊</div>
+        <table>
+          <tr><td>銀行</td><td>上海銀行 011（承德分行）</td></tr>
+          <tr><td>帳號</td><td>44102000066029<button type="button" class="copy-btn" onclick="navigator.clipboard&&navigator.clipboard.writeText('44102000066029').then(()=>{this.textContent='已複製';setTimeout(()=>this.textContent='複製',1500)})">複製</button></td></tr>
+          <tr><td>戶名</td><td>幸福手作烘焙食坊代表人黃苡絜</td></tr>
+        </table>
+        <div class="bank-note">※ 匯款後，請透過 LINE 官方帳號提供您的帳號後五碼，以便核對。</div>
+      </div>
       <ul>
         <li>如需開立統編，請於預購表單的發票類別選擇「公司行號」，並完整輸入抬頭與統編。</li>
         <li class="warn-line">恕不接受事後補打統編，請於送出前再次確認。</li>
@@ -367,7 +384,7 @@
     <div class="info-block">
       <h3>取貨方式（園區自取限定）</h3>
       <ul>
-        <li>取貨時段：週一跟週五 12:00～13:00</li>
+        <li>取貨時段：週二跟週五 12:00～13:00</li>
         <li>取貨地點：依表單地圖標示（A8後門）</li>
         <li>商品皆為純手工製作，請務必於指定午休時段內前往取件。若請同事代領，請務必提供訂購人手機後三碼以便核對。</li>
         <li>產品無添加防腐劑，請依產品背面營養標示之建議溫層妥善保存。</li>
