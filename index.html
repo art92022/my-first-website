@@ -206,6 +206,15 @@
   .proof-pick{display:block !important; margin:10px 0 0; padding:12px 14px; border:1px dashed var(--line); border-radius:14px; background:#fff; font-size:13.5px !important; color:var(--ink-2) !important; cursor:pointer; letter-spacing:.04em !important;}
   .proof-pick input{display:none;}
   .pay-report .pr-send{width:100%; margin-top:10px; padding:13px;}
+  .pay-report-main{margin:6px 0 14px; border:1px solid var(--ink); background:#fff;}
+  .pr-step{font-family:var(--serif); font-size:15px; letter-spacing:.12em; color:var(--ink); margin-bottom:10px;}
+  .pr-bank{background:var(--paper); border-radius:12px; padding:12px 14px; font-size:14px; line-height:1.9; color:var(--ink); margin-bottom:8px;}
+  .pr-bank .pr-acc{font-size:17px; letter-spacing:.06em; font-weight:500;}
+  .pr-bank .pr-total{color:var(--accent); font-size:17px;}
+  .pay-report .copy-btn{padding:2px 10px; border:1px solid var(--ink); background:#fff; color:var(--ink); border-radius:99px; font-size:12px; letter-spacing:.04em;}
+  .order-detail{margin-top:6px;}
+  .order-detail summary{cursor:pointer; font-size:13.5px; color:var(--ink-2); padding:10px 2px; letter-spacing:.06em;}
+  .pr-later{font-size:12.5px; color:var(--muted); line-height:1.7; margin:10px 2px 0;}
   .pay-report .pr-msg:empty{display:none;}
   .pay-card{padding:36px 22px;}
   .pay-card .field{margin-bottom:14px;}
@@ -452,12 +461,13 @@
           <tr><td>帳號</td><td>44102000066029<button type="button" class="copy-btn" onclick="navigator.clipboard&&navigator.clipboard.writeText('44102000066029').then(()=>{this.textContent='已複製';setTimeout(()=>this.textContent='複製',1500)})">複製</button></td></tr>
           <tr><td>戶名</td><td>幸福手作烘焙食坊代表人黃O絜</td></tr>
         </table>
-        <div class="bank-note">※ 選擇匯款者，請於訂購表單填寫您付款的匯出帳號後五碼（不是本店帳號），以便我們查帳。</div>
+        <div class="bank-note">※ 選擇匯款者，請於訂購表單填寫您付費的匯出帳號後五碼（不是本店帳號），以便我們查帳。</div>
       </div>
       <ul>
         <li>提醒您，請詳閱訂單明細，確認無誤後再進行匯款作業。</li>
+        <li>匯款完成後，請在送出成功畫面或確認信的「回報金額」連結，填寫匯款金額（可附匯款截圖），我們會盡快確認入帳。</li>
         <li>如匯款金額錯誤需退款，需自行負擔退款手續費。</li>
-        <li class="warn-line">下單後 24 小時內未完成付款，訂單將自動取消。</li>
+        <li class="warn-line">下單後 24 小時內未完成付款，訂單將自動取消，並以 Email 通知；如已匯款，請透過 LINE 官方帳號提供明細。</li>
         <li>如需開立統編，請於預購表單的發票類別選擇「公司行號」，並完整輸入抬頭與統編。</li>
         <li class="warn-line">恕不接受事後補打統編，請於送出前再次確認。</li>
       </ul>
@@ -524,8 +534,8 @@
 <div class="overlay hidden" id="overlay">
   <div class="modal">
     <div class="icon-circle ok">✓</div>
-    <h2>預購訂單已送出</h2>
-    <p class="modal-sub">預購成功！明細已發送至您的信箱，請依約定日期取貨。</p>
+    <h2 id="modalTitle">預購訂單已送出</h2>
+    <p class="modal-sub" id="modalSub">預購成功！明細已發送至您的信箱，請依約定日期取貨。</p>
     <p class="modal-warning">※ 訂單確認信件有可能會跑到〈垃圾信件匣〉，請務必留意收信。</p>
     <div id="summaryText"></div>
     <button class="close-btn" id="closeBtn">確認關閉</button>
@@ -968,11 +978,15 @@ submitBtn.addEventListener('click', () => {
       `;
       const isTransfer = orderData.paymentMethod === '匯款';
       const reportHtml = isTransfer ? `
-        <div class="pay-report">
-          <div class="pr-title">請於 24 小時內匯款</div>
-          <p class="pr-sub">上海銀行 011（承德分行）<br>帳號 <b>44102000066029</b>　應匯 <b>${orderData.total}</b><br>超過 24 小時未付款，訂單將自動取消。</p>
-          <div class="pr-title" style="margin-top:14px">匯款完成了嗎？</div>
-          <p class="pr-sub">匯款後在這裡填金額，我們能第一時間確認。<br>還沒匯也沒關係，確認信裡有回報連結。</p>
+        <div class="pay-report pay-report-main">
+          <div class="pr-step">STEP 1　請匯款</div>
+          <div class="pr-bank">
+            <div>上海銀行 011（承德分行）</div>
+            <div class="pr-acc">44102000066029 <button type="button" class="copy-btn" onclick="navigator.clipboard&&navigator.clipboard.writeText('44102000066029').then(()=>{this.textContent='已複製';setTimeout(()=>this.textContent='複製',1500)})">複製</button></div>
+            <div>應匯金額 <b class="pr-total">${orderData.total}</b></div>
+          </div>
+          <p class="pr-sub">下單後 24 小時內未完成付款，訂單將自動取消。</p>
+          <div class="pr-step" style="margin-top:16px">STEP 2　匯款完成後，回傳匯款金額</div>
           <div class="pr-row">
             <input type="text" id="mrAmount" inputmode="numeric" placeholder="匯款金額，例如 ${String(orderData.total).replace(/[^0-9]/g,'')}">
           </div>
@@ -980,7 +994,22 @@ submitBtn.addEventListener('click', () => {
           <button type="button" id="mrSubmit" class="pr-send">送出回報</button>
           <div class="pr-msg" id="mrMsg"></div>
         </div>` : '';
-      document.getElementById('summaryText').innerHTML = modalHtml + reportHtml;
+      const closeBtnEl = document.getElementById('closeBtn');
+      if (isTransfer) {
+        document.getElementById('modalTitle').textContent = '訂單已送出，請完成匯款';
+        document.getElementById('modalSub').textContent = '匯款後請在下方回傳金額，我們會第一時間為您確認。';
+        document.getElementById('summaryText').innerHTML = reportHtml +
+          '<details class="order-detail"><summary>查看訂單明細</summary>' + modalHtml + '</details>' +
+          '<p class="pr-later">還沒匯款也沒關係，確認信裡有「回報金額」連結，匯款後再回傳即可。</p>';
+        closeBtnEl.textContent = '稍後再回傳';
+        closeBtnEl.dataset.pending = '1';
+      } else {
+        document.getElementById('modalTitle').textContent = '預購訂單已送出';
+        document.getElementById('modalSub').textContent = '預購成功！明細已發送至您的信箱，請依約定日期取貨。';
+        document.getElementById('summaryText').innerHTML = modalHtml;
+        closeBtnEl.textContent = '確認關閉';
+        closeBtnEl.dataset.pending = '';
+      }
       if (isTransfer) {
         const no = orderData.orderNo, last3 = String(orderData.phone).replace(/\D/g,'').slice(-3);
         document.getElementById('mrAmount').addEventListener('input', e => { e.target.value = e.target.value.replace(/[^\d]/g,''); });
@@ -991,7 +1020,8 @@ submitBtn.addEventListener('click', () => {
           btn.disabled = true; btn.textContent = '送出中';
           readProof(document.getElementById('mrProof'))
             .then(proof => sendPaymentReport({ orderNo: no, phoneLast3: last3, amount: amt, proofBase64: proof }))
-            .then(m => { msg.textContent = '✓ ' + m; btn.textContent = '已送出'; document.getElementById('mrAmount').disabled = true; })
+            .then(m => { msg.textContent = '✓ ' + m; btn.textContent = '已送出'; document.getElementById('mrAmount').disabled = true;
+              closeBtnEl.textContent = '完成'; closeBtnEl.dataset.pending = ''; })
             .catch(err => { msg.textContent = err.message; btn.disabled = false; btn.textContent = '送出回報'; });
         });
         bindProofName('mrProof', 'mrProofName');
@@ -1043,7 +1073,10 @@ function resetFormForNextOrder(){
   newOrderNumber(); loadDates(); loadCatalog(); renderCart();
 }
 
-document.getElementById('closeBtn').addEventListener('click', () => document.getElementById('overlay').classList.add('hidden'));
+document.getElementById('closeBtn').addEventListener('click', (e) => {
+  if (e.currentTarget.dataset.pending && !confirm('還沒回傳匯款金額。\n匯款後可從確認信的「回報金額」連結回傳，確定要先關閉嗎？')) return;
+  document.getElementById('overlay').classList.add('hidden');
+});
 
 // 初始化載入
 // ── 回報匯款：送到後台寫入「訂單」X、Y 欄 ──
