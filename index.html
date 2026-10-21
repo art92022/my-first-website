@@ -91,6 +91,17 @@
   .product-card:active{transform:scale(.98);}
   .product-card.in-cart{border-color:var(--ink); background:#f8f1e7; box-shadow:inset 0 0 0 1px var(--ink);}
   .product-card:disabled{opacity:.45; cursor:not-allowed;}
+  .product-card.has-img{display:flex; gap:12px; align-items:flex-start;}
+  /* 商品小方圖：固定正方形，原圖不是正方形也會自動置中裁切 */
+  .product-card .p-img{flex-shrink:0; width:84px; height:84px; aspect-ratio:1/1; border-radius:14px; object-fit:cover; object-position:center; background:var(--paper); border:1px solid var(--line);}
+  .product-card .p-body{flex:1; min-width:0;}
+  /* 手機：一排一個商品（左圖右文），名稱不會被擠成好幾行 */
+  @media (max-width:560px){
+    .catalog-grid{grid-template-columns:1fr;}
+    .product-card .p-img{width:76px; height:76px; border-radius:12px;}
+    .product-card.has-img{gap:14px; align-items:center;}
+    .product-card .p-name{margin-bottom:4px;}
+  }
   .product-card .p-name{display:block; font-family:var(--serif); font-weight:500; font-size:15px; line-height:1.6; color:var(--ink); letter-spacing:.04em; margin-bottom:8px;}
   .product-card .p-price{display:block; font-family:var(--latin); font-size:20px; color:var(--accent); font-weight:500;}
   .product-card .p-stock{display:block; font-size:11.5px; color:var(--muted); margin-top:4px; letter-spacing:.04em;}
@@ -253,7 +264,7 @@
       <p>請選擇預購品項並填寫個人資料<br>送出後請依約定日期前往取貨</p>
     </div>
     <div class="op-status open" id="opStatus"><span class="op-dot"></span><span id="opText">試營運中・開放預購</span></div>
-    <div class="op-sub" id="opSub">取貨時段：週二、週五 12:00～13:00</div>
+    <div class="op-sub" id="opSub">取貨時段 12:00～13:00・日期依下方可選的自取日期</div>
     <div class="rule"></div>
   </header>
 
@@ -316,16 +327,17 @@
       <div class="carrier-options">
         <label class="radio-row">
           <input type="radio" name="carrier" value="mobile" checked> 手機載具條碼
-          <span class="sub-input"><input type="text" id="mobileCarrier" placeholder="/ABC1234"></span>
+          <span class="sub-input"><input type="text" id="mobileCarrier" placeholder="/ABC1234" maxlength="8" autocapitalize="characters" autocomplete="off" spellcheck="false"></span>
         </label>
         <label class="radio-row">
           <input type="radio" name="carrier" value="duplicate"> 二聯式發票 <span class="hint"></span>
         </label>
         <label class="radio-row">
           <input type="radio" name="carrier" value="donate"> 捐贈發票
-          <span class="sub-input"><input type="text" id="donateCode" placeholder="919" value="919"></span>
+          <span class="sub-input"><input type="text" id="donateCode" placeholder="919" value="919" inputmode="numeric" maxlength="7"></span>
         </label>
       </div>
+      <div class="field-msg" id="carrierMsg"></div>
     </div>
     <div id="businessBlock" class="hidden">
       <div class="row2">
@@ -349,16 +361,7 @@
     </div>
     <div class="cash-note hidden" id="linepayNote" style="background:#06c755; box-shadow:none;"><span class="cn-icon" style="color:#06c755;">✓</span><span>送出訂單後會出現「開啟 LINE Pay 付款」按鈕，請於 4 小時內完成付款，付款後按「我已完成付款」。</span></div>
     <div class="cash-note hidden" id="cashNote"><span class="cn-icon">!</span><span>為加快結帳速度，本店僅接受現金支付且<u>不找零</u>，敬請見諒。<br>取貨時請備妥剛好的金額。</span></div>
-    <div class="transfer-box hidden" id="transferBox">
-      <div class="bank-card">
-        <div class="bank-title">匯款資訊</div>
-        <table>
-          <tr><td>銀行</td><td>上海銀行 011（承德分行）</td></tr>
-          <tr><td>帳號</td><td>44102000066029<button type="button" class="copy-btn" onclick="navigator.clipboard&&navigator.clipboard.writeText('44102000066029').then(()=>{this.textContent='已複製';setTimeout(()=>this.textContent='複製',1500)})">複製</button></td></tr>
-          <tr><td>戶名</td><td>幸福手作烘焙食坊代表人黃O絜</td></tr>
-        </table>
-      </div>
-    </div>
+    <div class="cash-note hidden" id="transferBox" style="background:var(--ink); box-shadow:none;"><span class="cn-icon" style="color:var(--ink);">i</span><span>送出訂單後會顯示匯款帳號（確認信也會附上），請於 4 小時內匯款，並回傳您的匯出帳號後五碼。</span></div>
   </section>
 
   <section class="form-sec">
@@ -465,18 +468,10 @@
       <h3>付款方式</h3>
       <div class="pay-row"><span class="yes" data-pay="現場付現金">現場付現金</span><span class="yes" data-pay="匯款">匯款</span><span class="yes hidden" data-pay="LINE Pay">LINE Pay</span></div>
       <div class="care-warn" style="margin:0 0 14px;">現場付現金：<b>為加快結帳速度，本店僅接受現金支付且不找零，敬請見諒</b>，請備妥剛好的金額。</div>
-      <div class="bank-card">
-        <div class="bank-title">匯款資訊</div>
-        <table>
-          <tr><td>銀行</td><td>上海銀行 011（承德分行）</td></tr>
-          <tr><td>帳號</td><td>44102000066029<button type="button" class="copy-btn" onclick="navigator.clipboard&&navigator.clipboard.writeText('44102000066029').then(()=>{this.textContent='已複製';setTimeout(()=>this.textContent='複製',1500)})">複製</button></td></tr>
-          <tr><td>戶名</td><td>幸福手作烘焙食坊代表人黃O絜</td></tr>
-        </table>
-        <div class="bank-note">※ 選擇匯款者，匯款後請回傳您付費的匯出帳號後五碼（不是本店帳號），以便我們查帳。</div>
-      </div>
       <ul>
+        <li>選擇匯款者，<b>送出訂單後才會顯示匯款帳號</b>（確認信也會附上）。</li>
         <li>提醒您，請詳閱訂單明細，確認無誤後再進行匯款作業。</li>
-        <li>匯款完成後，請在送出成功畫面或確認信的「回報金額」連結，填寫付費的匯出帳號後五碼，我們會盡快確認入帳。</li>
+        <li>匯款完成後，請在送出成功畫面或確認信的回報連結，填寫您付費的匯出帳號後五碼（不是本店帳號），我們會盡快確認入帳。</li>
         <li>如匯款金額錯誤需退款，需自行負擔退款手續費。</li>
         <li class="warn-line">下單後 4 小時內未完成付款，訂單將自動取消，並以 Email 通知；如已匯款，請透過 LINE 官方帳號提供明細。</li>
         <li>如需開立統編，請於預購表單的發票類別選擇「公司行號」，並完整輸入抬頭與統編。</li>
@@ -487,7 +482,8 @@
     <div class="info-block">
       <h3>取貨方式（園區自取限定）</h3>
       <ul>
-        <li>取貨時段：週二跟週五 12:00～13:00</li>
+        <li>取貨日期：依訂購表單上開放選擇的「自取日期」為準。</li>
+        <li>取貨時段：12:00～13:00</li>
         <li>取貨地點：依表單地圖標示（A8後門）</li>
         <li>商品皆為純手工製作，請務必於指定午休時段內前往取件。若請同事代領，請務必提供訂購人手機後三碼以便核對。</li>
         <li>產品無添加防腐劑，請依產品背面營養標示之建議溫層妥善保存。</li>
@@ -733,7 +729,13 @@ function renderCatalog(){
         stockText = `已達上限（${p.stock}）`;
       }
 
-      card.innerHTML = `<span class="p-name">${escapeHtml(p.name)}</span><span class="p-price">${fmt(p.price)}</span><span class="p-stock">${stockText}</span>`;
+      const info = `<span class="p-name">${escapeHtml(p.name)}</span><span class="p-price">${fmt(p.price)}</span><span class="p-stock">${stockText}</span>`;
+      if (p.image) {
+        card.classList.add('has-img');
+        card.innerHTML = `<img class="p-img" src="${escapeHtml(p.image)}" alt="" loading="lazy" onerror="this.remove()"><span class="p-body">${info}</span>`;
+      } else {
+        card.innerHTML = info;
+      }
       card.addEventListener('click', () => {
         let existing = cart.find(c => c.name === p.name);
         const currentQty = existing ? existing.qty : 0;
@@ -895,6 +897,33 @@ document.getElementById('buyerPhone').addEventListener('blur', showPhoneMsg);
 document.getElementById('buyerEmail').addEventListener('input', e => { if (e.target.classList.contains('field-error')) showEmailMsg(); });
 document.getElementById('buyerEmail').addEventListener('blur', e => { e.target.value = cleanEmail(e.target.value); showEmailMsg(); });
 
+// ── 手機條碼：/ 開頭共 8 碼，後 7 碼為數字、大寫英文或 . - + ──
+function cleanCarrier(v){ return (v||'').trim().toUpperCase().replace(/\s/g,'').replace(/^／/,'/'); }
+function checkCarrier(v){
+  if (!v) return '請填寫手機載具條碼（例如 /ABC1234）';
+  if (v[0] !== '/') return '手機條碼要以「/」開頭，例如 /ABC1234';
+  if (!/^\/[0-9A-Z.+\-]{7}$/.test(v)) return '手機條碼格式不對：「/」加 7 碼，共 8 碼';
+  return '';
+}
+function showCarrierMsg(){
+  const el = document.getElementById('mobileCarrier');
+  el.value = cleanCarrier(el.value);
+  const m = el.value ? checkCarrier(el.value) : '';
+  document.getElementById('carrierMsg').textContent = m;
+  el.classList.toggle('field-error', !!m);
+}
+document.getElementById('mobileCarrier').addEventListener('input', e => {
+  const pos = e.target.value; e.target.value = pos.toUpperCase().replace(/^／/,'/');
+  if (e.target.classList.contains('field-error')) showCarrierMsg();
+});
+document.getElementById('mobileCarrier').addEventListener('blur', showCarrierMsg);
+document.getElementById('mobileCarrier').addEventListener('focus', () => { document.querySelector('input[name="carrier"][value="mobile"]').checked = true; });
+document.getElementById('donateCode').addEventListener('focus', () => { document.querySelector('input[name="carrier"][value="donate"]').checked = true; });
+document.querySelectorAll('input[name="carrier"]').forEach(r => r.addEventListener('change', () => {
+  document.getElementById('carrierMsg').textContent = '';
+  ['mobileCarrier','donateCode'].forEach(id => document.getElementById(id).classList.remove('field-error'));
+}));
+
 function validateForm(){
   clearFieldErrors(); const errors = [];
   const pickupDate = document.getElementById('selectedDateInput').value;
@@ -914,12 +943,27 @@ function validateForm(){
   const payRadio = document.querySelector('input[name="payMethod"]:checked');
   if (!payRadio){ errors.push('請選擇付款方式'); }
 
+  // 發票載具：選手機條碼一定要填正確格式；選捐贈要填愛心碼
+  if (document.querySelector('#buyerTypeSeg .active').dataset.type !== '公司') {
+    const cr = document.querySelector('input[name="carrier"]:checked');
+    if (cr && cr.value === 'mobile') {
+      const el = document.getElementById('mobileCarrier');
+      el.value = cleanCarrier(el.value);
+      const m = checkCarrier(el.value);
+      if (m) { errors.push(m); markFieldError(el); document.getElementById('carrierMsg').textContent = m; }
+    }
+    if (cr && cr.value === 'donate') {
+      const el = document.getElementById('donateCode');
+      if (!/^\d{3,7}$/.test(el.value.trim())) { errors.push('請填寫捐贈碼（3～7 位數字）'); markFieldError(el); document.getElementById('carrierMsg').textContent = '請填寫捐贈碼（3～7 位數字）'; }
+    }
+  }
+
   if (cart.length === 0){ errors.push('請至少選擇一項商品'); }
 
   // 公司行號必須填統一編號與發票抬頭
   const isCompany = document.querySelector('#buyerTypeSeg .active').dataset.type === '公司';
   if (isCompany) {
-    if (!document.getElementById('taxId').value.trim()){ errors.push('請填寫統一編號'); markFieldError(document.getElementById('taxId')); }
+    if (!/^\d{8}$/.test(document.getElementById('taxId').value.trim())){ errors.push('請填寫正確的統一編號（8 位數字）'); markFieldError(document.getElementById('taxId')); }
     if (!document.getElementById('companyName').value.trim()){ errors.push('請填寫發票抬頭'); markFieldError(document.getElementById('companyName')); }
   }
   return errors;
@@ -1135,6 +1179,7 @@ function resetFormForNextOrder(){
   document.getElementById('taxId').value = '';
   document.getElementById('companyName').value = '';
   document.getElementById('mobileCarrier').value = '';
+  document.getElementById('carrierMsg').textContent = '';
   document.getElementById('donateCode').value = '919';
   document.querySelector('input[name="carrier"][value="mobile"]').checked = true;
   segBtns.forEach(b => b.classList.remove('active'));
