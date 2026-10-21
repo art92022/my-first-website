@@ -173,6 +173,13 @@
   .copy-btn{margin-left:8px; font-size:12px; padding:2px 10px; border:1px solid var(--ink); border-radius:99px; background:#fff; color:var(--ink); cursor:pointer; font-family:inherit;}
   .bank-note{font-size:12.5px; color:var(--accent); margin-top:10px; line-height:1.7;}
   .pay-options{border:1px solid var(--line); border-radius:16px; padding:4px 14px; background:#fff;}
+  .pay-options > .radio-row{border-bottom:0;}
+  .pay-options > .radio-row:not(.hidden) ~ .radio-row{border-top:1px solid var(--line);}
+  .cash-note{margin-top:12px; padding:16px 18px; border-radius:16px; background:var(--alert); color:#fff; font-size:15.5px; font-weight:600; line-height:1.75; letter-spacing:.06em; display:flex; gap:10px; align-items:flex-start; box-shadow:0 10px 24px -14px rgba(168,86,74,.8);}
+  .cash-note .cn-icon{flex-shrink:0; width:24px; height:24px; border-radius:50%; background:#fff; color:var(--alert); font-size:15px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:2px;}
+  .cash-tag{display:block; font-size:12.5px; color:var(--alert); font-weight:600; margin-top:3px; letter-spacing:.04em;}
+  .pay-cash-row{align-items:flex-start !important;}
+  .pay-cash-row input{margin-top:3px;}
   .transfer-box{background:var(--paper); border-radius:16px; padding:16px 18px; margin-top:12px;}
   .transfer-box .bank-card{background:#fff; margin-bottom:12px;}
   .transfer-box .field{margin-bottom:12px;}
@@ -331,9 +338,13 @@
 
     <div class="field" style="margin-top:22px; margin-bottom:10px;"><label>付款方式 <span class="hint">必填</span></label></div>
     <div class="pay-options">
-      <label class="radio-row"><input type="radio" name="payMethod" value="現場付現金"> 取貨時現場付現金</label>
-      <label class="radio-row"><input type="radio" name="payMethod" value="匯款"> 匯款</label>
+      <label class="radio-row pay-cash-row" data-pay="現場付現金"><input type="radio" name="payMethod" value="現場付現金"> <span>取貨時現場付現金<span class="cash-tag">※ 僅收現金・不找零，請備妥剛好金額</span></span></label>
+      <label class="radio-row" data-pay="匯款"><input type="radio" name="payMethod" value="匯款"> 匯款</label>
+      <label class="radio-row hidden" data-pay="LINE Pay"><input type="radio" name="payMethod" value="LINE Pay"> 取貨時現場 LINE Pay 付款</label>
+      <div class="radio-row hidden" id="payNone" style="color:var(--alert);">目前暫無可用的付款方式，請洽 LINE 官方帳號</div>
     </div>
+    <div class="cash-note hidden" id="linepayNote" style="background:#06c755; box-shadow:none;"><span class="cn-icon" style="color:#06c755;">✓</span><span>取貨時請打開 LINE Pay，現場掃碼付款。</span></div>
+    <div class="cash-note hidden" id="cashNote"><span class="cn-icon">!</span><span>為加快結帳速度，本店僅接受現金支付且<u>不找零</u>，敬請見諒。<br>取貨時請備妥剛好的金額。</span></div>
     <div class="transfer-box hidden" id="transferBox">
       <div class="bank-card">
         <div class="bank-title">匯款資訊</div>
@@ -448,7 +459,8 @@
 
     <div class="info-block">
       <h3>付款方式</h3>
-      <div class="pay-row"><span class="yes">現場付現金</span><span class="yes">匯款</span></div>
+      <div class="pay-row"><span class="yes" data-pay="現場付現金">現場付現金</span><span class="yes" data-pay="匯款">匯款</span><span class="yes hidden" data-pay="LINE Pay">LINE Pay</span></div>
+      <div class="care-warn" style="margin:0 0 14px;">現場付現金：<b>為加快結帳速度，本店僅接受現金支付且不找零，敬請見諒</b>，請備妥剛好的金額。</div>
       <div class="bank-card">
         <div class="bank-title">匯款資訊</div>
         <table>
@@ -589,6 +601,17 @@ function jsonpRequest(action, onSuccess, onError, timeoutMs) {
   document.body.appendChild(script);
 }
 
+// 依後台「付款方式設定」只顯示開放的付款方式
+function applyPayMethods(list) {
+  document.querySelectorAll('[data-pay]').forEach(el => {
+    const on = list.indexOf(el.dataset.pay) !== -1;
+    el.classList.toggle('hidden', !on);
+    const r = el.querySelector && el.querySelector('input[type=radio]');
+    if (r && !on && r.checked) { r.checked = false; r.dispatchEvent(new Event('change')); }
+  });
+  document.getElementById('payNone').classList.toggle('hidden', list.length > 0);
+}
+
 // 動態從後台試算表載入自取日期
 function loadDates() {
   jsonpRequest('getDates', (data) => {
@@ -601,6 +624,7 @@ function loadDates() {
     }
     document.body.classList.remove('shop-closed');
     document.getElementById('closedCard').classList.add('hidden');
+    applyPayMethods((data && Array.isArray(data.payMethods)) ? data.payMethods : ['現場付現金', '匯款']);
     const dates = (data && data.dates) ? data.dates : [];
     const grid = document.getElementById('pickupDateGrid');
     grid.innerHTML = '';
@@ -777,7 +801,10 @@ function recalcTotals(){
 }
 
 document.querySelectorAll('input[name="payMethod"]').forEach(r => r.addEventListener('change', () => {
-  document.getElementById('transferBox').classList.toggle('hidden', r.value !== '匯款' || !r.checked);
+  const v = document.querySelector('input[name="payMethod"]:checked')?.value;
+  document.getElementById('transferBox').classList.toggle('hidden', v !== '匯款');
+  document.getElementById('cashNote').classList.toggle('hidden', v !== '現場付現金');
+  document.getElementById('linepayNote').classList.toggle('hidden', v !== 'LINE Pay');
 }));
 
 const segBtns = document.querySelectorAll('#buyerTypeSeg button');
@@ -1002,7 +1029,7 @@ submitBtn.addEventListener('click', () => {
         closeBtnEl.dataset.pending = '1';
       } else {
         document.getElementById('modalTitle').textContent = '預購訂單已送出';
-        document.getElementById('modalSub').textContent = '預購成功！明細已發送至您的信箱，請依約定日期取貨。';
+        document.getElementById('modalSub').textContent = '預購成功！明細已發送至您的信箱，請依約定日期取貨。' + (orderData.paymentMethod === 'LINE Pay' ? '取貨時請以 LINE Pay 掃碼付款 ' + orderData.total + '。' : '為加快結帳速度，本店僅接受現金支付且不找零，敬請見諒，請備妥 ' + orderData.total + ' 剛好的現金。');
         document.getElementById('summaryText').innerHTML = `
           <div class="line-join">
             <div class="lj-title">最後一步：加入官方 LINE</div>
@@ -1067,6 +1094,8 @@ function resetFormForNextOrder(){
 
   document.querySelectorAll('input[name="payMethod"]').forEach(r => r.checked = false);
   document.getElementById('transferBox').classList.add('hidden');
+  document.getElementById('cashNote').classList.add('hidden');
+  document.getElementById('linepayNote').classList.add('hidden');
 
   cart = [];
   document.getElementById('selectedDateInput').value = '';
