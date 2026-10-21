@@ -150,8 +150,14 @@
   .pickup-map-container > div:last-child{background:var(--paper-card) !important; color:var(--ink) !important; font-weight:500 !important; border-radius:14px !important; line-height:1.7;}
 
   /* ── 菜單圖 ── */
-  .menu-image-wrap{margin-bottom:22px; border-radius:18px; overflow:hidden;}
-  .menu-image-wrap img{display:block; width:100%; height:auto;}
+  .op-status{display:inline-flex; align-items:center; gap:8px; margin-top:20px; padding:8px 18px; border-radius:99px; background:#fff; border:1px solid var(--line); font-size:14px; letter-spacing:.12em; color:var(--muted);}
+  .op-dot{width:9px; height:9px; border-radius:50%; background:#c4b7a9;}
+  .op-status.open{border-color:#9cc79a; color:#2f5d2a; background:#eef7ec;}
+  .op-status.open .op-dot{background:#3f9a3a; box-shadow:0 0 0 4px rgba(63,154,58,.18);}
+  .op-status.closed{border-color:#e6c4bb; color:var(--alert); background:#fbf1ee;}
+  .op-status.closed .op-dot{background:var(--alert);}
+  .op-sub{font-size:12.5px; color:var(--ink-2); margin-top:10px; letter-spacing:.08em;}
+  body.report-mode .op-status, body.report-mode .op-sub{display:none;}
 
   /* ── 須知 ── */
   .info-block{border-top:1px solid var(--line); padding:20px 0 4px;}
@@ -246,6 +252,8 @@
       <h1>園區限定自取</h1>
       <p>請選擇預購品項並填寫個人資料<br>送出後請依約定日期前往取貨</p>
     </div>
+    <div class="op-status open" id="opStatus"><span class="op-dot"></span><span id="opText">試營運中・開放預購</span></div>
+    <div class="op-sub" id="opSub">取貨時段：週二、週五 12:00～13:00</div>
     <div class="rule"></div>
   </header>
 
@@ -268,12 +276,8 @@
   </section>
 
   <section class="form-sec">
-    <div class="sec-head"><div class="sec-label"><span class="tag">01</span>菜單</div></div>
+    <div class="sec-head"><div class="sec-label"><span class="tag">01</span>預購資料</div></div>
     <div class="eco-note">響應環保，來店取甜點時請自備提袋，謝謝您。</div>
-
-    <div class="menu-image-wrap">
-      <img id="menuImage" src="https://img.shoplineapp.com/media/image_clips/6a6c50faba01200010303e81/original.jpg?1785483513=&owner_id=5dcd960dd9d3e3005a390332" alt="本次預購菜單">
-    </div>
 
     <!-- 動態載入自取日期的容器 -->
     <div class="field" style="margin-bottom:24px;">
@@ -615,17 +619,29 @@ function applyPayMethods(list) {
   document.getElementById('payNone').classList.toggle('hidden', list.length > 0);
 }
 
+// 網頁開頭的營運狀態（正式營運時把下面這行改成 '營運中・開放預購'）
+const OP_LABEL = '試營運中・開放預購';
+function setOpStatus(open) {
+  const el = document.getElementById('opStatus');
+  el.classList.toggle('open', open !== false);
+  el.classList.toggle('closed', open === false);
+  document.getElementById('opText').textContent = open === false ? '暫停接單中' : OP_LABEL;
+  document.getElementById('opSub').classList.toggle('hidden', open === false);
+}
+
 // 動態從後台試算表載入自取日期
 function loadDates() {
   jsonpRequest('getDates', (data) => {
     // 後台按「暫停接單」時，網頁只顯示暫停說明與取貨資訊
     if (data && data.open === false) {
       document.body.classList.add('shop-closed');
+      setOpStatus(false);
       document.getElementById('closedMsg').textContent = data.closedMessage || '園區預購暫停中，下次開放時間請留意 LINE 官方帳號公告。';
       document.getElementById('closedCard').classList.remove('hidden');
       return;
     }
     document.body.classList.remove('shop-closed');
+    setOpStatus(true);
     document.getElementById('closedCard').classList.add('hidden');
     applyPayMethods((data && Array.isArray(data.payMethods)) ? data.payMethods : ['現場付現金', '匯款']);
     const dates = (data && data.dates) ? data.dates : [];
