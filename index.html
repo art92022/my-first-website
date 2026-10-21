@@ -249,8 +249,7 @@
     <p class="eco-note" style="margin-top:0">匯款完成後填寫，我們會盡快確認入帳。</p>
     <div class="field"><label>訂單編號</label><input type="text" id="prOrderNo" placeholder="P261020-123"></div>
     <div class="field"><label>訂購人手機後三碼</label><input type="text" id="prPhone3" inputmode="numeric" maxlength="3" placeholder="678"></div>
-    <div class="field"><label>匯款金額</label><input type="text" id="prAmount" inputmode="numeric" placeholder="例如 450"></div>
-    <div class="field"><label class="proof-pick"><input type="file" id="prProof" accept="image/*"> <span id="prProofName">＋ 附上匯款截圖（選填）</span></label></div>
+    <div class="field"><label>付費的匯出帳號後五碼 <span class="hint">不是本店帳號</span></label><input type="text" id="prLast5" inputmode="numeric" maxlength="5" placeholder="12345"></div>
     <button type="button" class="submit-btn" id="prSubmit">送出回報</button>
     <div class="validation-banner hidden" id="prBanner" style="margin-top:14px"></div>
   </section>
@@ -344,15 +343,6 @@
           <tr><td>戶名</td><td>幸福手作烘焙食坊代表人黃O絜</td></tr>
         </table>
       </div>
-      <div class="field">
-        <label>付費的匯出帳號後五碼 <span class="hint">必填，以便我們查帳（不是本店帳號）</span></label>
-        <input type="text" id="bankLast5" inputmode="numeric" maxlength="5" placeholder="12345">
-      </div>
-      <ul class="transfer-rules">
-        <li>提醒您，請詳閱訂單明細，確認無誤後再進行匯款作業。</li>
-        <li>如匯款金額錯誤需退款，需自行負擔退款手續費。</li>
-        <li>下單後 24 小時內未完成付款，訂單將自動取消。</li>
-      </ul>
     </div>
   </section>
 
@@ -466,13 +456,13 @@
           <tr><td>帳號</td><td>44102000066029<button type="button" class="copy-btn" onclick="navigator.clipboard&&navigator.clipboard.writeText('44102000066029').then(()=>{this.textContent='已複製';setTimeout(()=>this.textContent='複製',1500)})">複製</button></td></tr>
           <tr><td>戶名</td><td>幸福手作烘焙食坊代表人黃O絜</td></tr>
         </table>
-        <div class="bank-note">※ 選擇匯款者，請於訂購表單填寫您付費的匯出帳號後五碼（不是本店帳號），以便我們查帳。</div>
+        <div class="bank-note">※ 選擇匯款者，匯款後請回傳您付費的匯出帳號後五碼（不是本店帳號），以便我們查帳。</div>
       </div>
       <ul>
         <li>提醒您，請詳閱訂單明細，確認無誤後再進行匯款作業。</li>
-        <li>匯款完成後，請在送出成功畫面或確認信的「回報金額」連結，填寫匯款金額（可附匯款截圖），我們會盡快確認入帳。</li>
+        <li>匯款完成後，請在送出成功畫面或確認信的「回報金額」連結，填寫付費的匯出帳號後五碼，我們會盡快確認入帳。</li>
         <li>如匯款金額錯誤需退款，需自行負擔退款手續費。</li>
-        <li class="warn-line">下單後 24 小時內未完成付款，訂單將自動取消，並以 Email 通知；如已匯款，請透過 LINE 官方帳號提供明細。</li>
+        <li class="warn-line">下單後 4 小時內未完成付款，訂單將自動取消，並以 Email 通知；如已匯款，請透過 LINE 官方帳號提供明細。</li>
         <li>如需開立統編，請於預購表單的發票類別選擇「公司行號」，並完整輸入抬頭與統編。</li>
         <li class="warn-line">恕不接受事後補打統編，請於送出前再次確認。</li>
       </ul>
@@ -789,7 +779,6 @@ function recalcTotals(){
 document.querySelectorAll('input[name="payMethod"]').forEach(r => r.addEventListener('change', () => {
   document.getElementById('transferBox').classList.toggle('hidden', r.value !== '匯款' || !r.checked);
 }));
-document.getElementById('bankLast5').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g,'').slice(0,5); });
 
 const segBtns = document.querySelectorAll('#buyerTypeSeg button');
 segBtns.forEach(btn => {
@@ -878,9 +867,6 @@ function validateForm(){
 
   const payRadio = document.querySelector('input[name="payMethod"]:checked');
   if (!payRadio){ errors.push('請選擇付款方式'); }
-  else if (payRadio.value === '匯款' && !/^\d{5}$/.test(document.getElementById('bankLast5').value)){
-    errors.push('請填寫付費的匯出帳號後五碼（5 位數字）'); markFieldError(document.getElementById('bankLast5'));
-  }
 
   if (cart.length === 0){ errors.push('請至少選擇一項商品'); }
 
@@ -930,7 +916,7 @@ submitBtn.addEventListener('click', () => {
       carrierValue: carrierValue,
       companyName: isCompany ? document.getElementById('companyName').value : '',
       paymentMethod: document.querySelector('input[name="payMethod"]:checked').value,
-      bankLast5: document.querySelector('input[name="payMethod"]:checked').value === '匯款' ? document.getElementById('bankLast5').value : '',
+      bankLast5: '',
       items: cart.map(i => { return { name: i.name, qty: i.qty, price: i.price, subtotal: i.price * i.qty }; }),
       untaxed: document.getElementById('untaxed').textContent,
       tax: document.getElementById('taxAmt').textContent,
@@ -992,12 +978,11 @@ submitBtn.addEventListener('click', () => {
             <div class="pr-acc">44102000066029 <button type="button" class="copy-btn" onclick="navigator.clipboard&&navigator.clipboard.writeText('44102000066029').then(()=>{this.textContent='已複製';setTimeout(()=>this.textContent='複製',1500)})">複製</button></div>
             <div>應匯金額 <b class="pr-total">${orderData.total}</b></div>
           </div>
-          <p class="pr-sub">下單後 24 小時內未完成付款，訂單將自動取消。</p>
-          <div class="pr-step" style="margin-top:16px">STEP 2　匯款完成後，回傳匯款金額</div>
+          <p class="pr-sub">下單後 4 小時內未完成付款，訂單將自動取消。</p>
+          <div class="pr-step" style="margin-top:16px">STEP 2　匯款完成後，回傳匯出帳號後五碼</div>
           <div class="pr-row">
-            <input type="text" id="mrAmount" inputmode="numeric" placeholder="匯款金額，例如 ${String(orderData.total).replace(/[^0-9]/g,'')}">
+            <input type="text" id="mrLast5" inputmode="numeric" maxlength="5" placeholder="付費的匯出帳號後五碼（不是本店帳號）">
           </div>
-          <label class="proof-pick"><input type="file" id="mrProof" accept="image/*"> <span id="mrProofName">＋ 附上匯款截圖（選填）</span></label>
           <button type="button" id="mrSubmit" class="pr-send">送出回報</button>
           <div class="pr-msg" id="mrMsg"></div>
           <div class="line-join hidden" id="mrLine">
@@ -1009,7 +994,7 @@ submitBtn.addEventListener('click', () => {
       const closeBtnEl = document.getElementById('closeBtn');
       if (isTransfer) {
         document.getElementById('modalTitle').textContent = '訂單已送出，請完成匯款';
-        document.getElementById('modalSub').textContent = '匯款後請在下方回傳金額，我們會第一時間為您確認。';
+        document.getElementById('modalSub').textContent = '匯款後請在下方回傳匯出帳號後五碼，我們會第一時間為您確認。';
         document.getElementById('summaryText').innerHTML = reportHtml +
           '<details class="order-detail"><summary>查看訂單明細</summary>' + modalHtml + '</details>' +
           '<p class="pr-later">還沒匯款也沒關係，確認信裡有「回報金額」連結，匯款後再回傳即可。</p>';
@@ -1029,20 +1014,18 @@ submitBtn.addEventListener('click', () => {
       }
       if (isTransfer) {
         const no = orderData.orderNo, last3 = String(orderData.phone).replace(/\D/g,'').slice(-3);
-        document.getElementById('mrAmount').addEventListener('input', e => { e.target.value = e.target.value.replace(/[^\d]/g,''); });
+        document.getElementById('mrLast5').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g,'').slice(0,5); });
         document.getElementById('mrSubmit').addEventListener('click', () => {
           const btn = document.getElementById('mrSubmit'), msg = document.getElementById('mrMsg');
-          const amt = document.getElementById('mrAmount').value;
-          if (!amt) { msg.textContent = '請填寫匯款金額'; return; }
+          const l5 = document.getElementById('mrLast5').value;
+          if (!/^\d{5}$/.test(l5)) { msg.textContent = '請填寫付費的匯出帳號後五碼（5 位數字）'; return; }
           btn.disabled = true; btn.textContent = '送出中';
-          readProof(document.getElementById('mrProof'))
-            .then(proof => sendPaymentReport({ orderNo: no, phoneLast3: last3, amount: amt, proofBase64: proof }))
-            .then(m => { msg.textContent = '✓ ' + m; btn.textContent = '已送出'; document.getElementById('mrAmount').disabled = true;
+          sendPaymentReport({ orderNo: no, phoneLast3: last3, bankLast5: l5 })
+            .then(m => { msg.textContent = '✓ ' + m; btn.textContent = '已送出'; document.getElementById('mrLast5').disabled = true;
               closeBtnEl.textContent = '完成'; closeBtnEl.dataset.pending = '';
               const lj = document.getElementById('mrLine'); lj.classList.remove('hidden'); lj.scrollIntoView({behavior:'smooth', block:'center'}); })
             .catch(err => { msg.textContent = err.message; btn.disabled = false; btn.textContent = '送出回報'; });
         });
-        bindProofName('mrProof', 'mrProofName');
       }
       document.getElementById('overlay').classList.remove('hidden');
       resetFormForNextOrder();
@@ -1083,7 +1066,6 @@ function resetFormForNextOrder(){
   document.getElementById('individualBlock').classList.remove('hidden');
 
   document.querySelectorAll('input[name="payMethod"]').forEach(r => r.checked = false);
-  document.getElementById('bankLast5').value = '';
   document.getElementById('transferBox').classList.add('hidden');
 
   cart = [];
@@ -1092,7 +1074,7 @@ function resetFormForNextOrder(){
 }
 
 document.getElementById('closeBtn').addEventListener('click', (e) => {
-  if (e.currentTarget.dataset.pending && !confirm('還沒回傳匯款金額。\n匯款後可從確認信的「回報金額」連結回傳，確定要先關閉嗎？')) return;
+  if (e.currentTarget.dataset.pending && !confirm('還沒回傳匯出帳號後五碼。\n匯款後可從確認信的「回報金額」連結回傳，確定要先關閉嗎？')) return;
   document.getElementById('overlay').classList.add('hidden');
 });
 
@@ -1140,20 +1122,18 @@ if (payParam !== null) {
   document.body.classList.add('report-mode');
   document.getElementById('payCard').classList.remove('hidden');
   document.getElementById('prOrderNo').value = payParam;
-  bindProofName('prProof', 'prProofName');
   document.getElementById('prPhone3').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g,'').slice(0,3); });
-  document.getElementById('prAmount').addEventListener('input', e => { e.target.value = e.target.value.replace(/[^\d]/g,''); });
+  document.getElementById('prLast5').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g,'').slice(0,5); });
   document.getElementById('prSubmit').addEventListener('click', () => {
     const banner = document.getElementById('prBanner'), btn = document.getElementById('prSubmit');
-    const d = { orderNo: document.getElementById('prOrderNo').value.trim(), phoneLast3: document.getElementById('prPhone3').value, amount: document.getElementById('prAmount').value };
+    const d = { orderNo: document.getElementById('prOrderNo').value.trim(), phoneLast3: document.getElementById('prPhone3').value, bankLast5: document.getElementById('prLast5').value };
     const errs = [];
     if (!d.orderNo) errs.push('請填寫訂單編號');
     if (!/^\d{3}$/.test(d.phoneLast3)) errs.push('請填寫訂購人手機後三碼');
-    if (!d.amount) errs.push('請填寫匯款金額');
+    if (!/^\d{5}$/.test(d.bankLast5)) errs.push('請填寫付費的匯出帳號後五碼（5 位數字）');
     if (errs.length) { banner.innerHTML = errs.map(e => '・' + e).join('<br>'); banner.classList.remove('hidden'); return; }
     btn.disabled = true; btn.textContent = '送出中⋯';
-    readProof(document.getElementById('prProof'))
-      .then(proof => sendPaymentReport(Object.assign(d, { proofBase64: proof })))
+    sendPaymentReport(d)
       .then(m => { banner.style.background = 'var(--paper)'; banner.style.color = 'var(--ink)'; banner.style.borderColor = 'var(--line)'; banner.textContent = '✓ ' + m; banner.classList.remove('hidden'); btn.textContent = '已送出'; })
       .catch(err => { banner.textContent = err.message; banner.classList.remove('hidden'); btn.disabled = false; btn.textContent = '送出回報'; });
   });
