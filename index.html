@@ -256,7 +256,7 @@
     <p class="eco-note" style="margin-top:0">匯款完成後填寫，我們會盡快確認入帳。</p>
     <div class="field"><label>訂單編號</label><input type="text" id="prOrderNo" placeholder="P261020-123"></div>
     <div class="field"><label>訂購人手機後三碼</label><input type="text" id="prPhone3" inputmode="numeric" maxlength="3" placeholder="678"></div>
-    <div class="field"><label>付費的匯出帳號後五碼 <span class="hint">不是本店帳號</span></label><input type="text" id="prLast5" inputmode="numeric" maxlength="5" placeholder="12345"></div>
+    <div class="field"><label>付費的匯出帳號後五碼 <span class="hint">匯款才要填；LINE Pay 付款請留空直接送出</span></label><input type="text" id="prLast5" inputmode="numeric" maxlength="5" placeholder="12345"></div>
     <button type="button" class="submit-btn" id="prSubmit">送出回報</button>
     <div class="validation-banner hidden" id="prBanner" style="margin-top:14px"></div>
   </section>
@@ -340,10 +340,10 @@
     <div class="pay-options">
       <label class="radio-row pay-cash-row" data-pay="現場付現金"><input type="radio" name="payMethod" value="現場付現金"> <span>取貨時現場付現金<span class="cash-tag">※ 僅收現金・不找零，請備妥剛好金額</span></span></label>
       <label class="radio-row" data-pay="匯款"><input type="radio" name="payMethod" value="匯款"> 匯款</label>
-      <label class="radio-row hidden" data-pay="LINE Pay"><input type="radio" name="payMethod" value="LINE Pay"> 取貨時現場 LINE Pay 付款</label>
+      <label class="radio-row hidden" data-pay="LINE Pay"><input type="radio" name="payMethod" value="LINE Pay"> LINE Pay（下單後線上付款）</label>
       <div class="radio-row hidden" id="payNone" style="color:var(--alert);">目前暫無可用的付款方式，請洽 LINE 官方帳號</div>
     </div>
-    <div class="cash-note hidden" id="linepayNote" style="background:#06c755; box-shadow:none;"><span class="cn-icon" style="color:#06c755;">✓</span><span>取貨時請打開 LINE Pay，現場掃碼付款。</span></div>
+    <div class="cash-note hidden" id="linepayNote" style="background:#06c755; box-shadow:none;"><span class="cn-icon" style="color:#06c755;">✓</span><span>送出訂單後會出現「開啟 LINE Pay 付款」按鈕，請於 4 小時內完成付款，付款後按「我已完成付款」。</span></div>
     <div class="cash-note hidden" id="cashNote"><span class="cn-icon">!</span><span>為加快結帳速度，本店僅接受現金支付且<u>不找零</u>，敬請見諒。<br>取貨時請備妥剛好的金額。</span></div>
     <div class="transfer-box hidden" id="transferBox">
       <div class="bank-card">
@@ -552,6 +552,9 @@
 <script>
 // 官方 LINE 加好友連結（換帳號只改這裡）
 const LINE_ADD_URL = 'https://line.me/R/ti/p/@gfx1332q';
+// LINE Pay 收款連結（店家 QR code 的網址，換 QR 只改這裡和下面圖片）
+const LINEPAY_URL = 'https://qrcodepay.line.me/qr/payment/iQHSex3dDS3zDGOQG9hMEabBl%252FEo1PTeNJ0mJuATzYcDEBGBEbSzmaGh%252BDViFHSl';
+const LINEPAY_QR = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASYAAAEmAQAAAADnvwB3AAADH0lEQVR4nO2aQY7jOgxEnyIDWco3yFHkmzXmZvJRcgN6GYBG/QXlzOwmH2igbWEEr2QuWKBIVolK4u9rv31gBP+sfs4KGUC26iA1GV4ENVuVVQCqn9X7jzFWSVmSVRlempdGaRR56fsDYISaDYqyegSdCnhRNvLlMR5WpemZYJWxz0wRzW35cb++1apOpfm27PMK+LZMMJ3Br2+ykhpbcpiKslUZlOZUqVHkP+bXN1qtKSWo0/bFEb77c7k/l2lb9pTSfGrvP1nqq2WJ0mRV1svO8UuXrznbMkGa2WdkTKxpBtYJpm3ZZ6ZtObH3Hy1JgIwsZUNq/TO8yKnX5wA3WLPVqbRXWqDu6SvK6f5Qfi5AtlN7/8mSIannYGmx40XZalaLvxePYz+c2QiYlJYlj/AB4GUMjIoIAlCl5qU5eJHURuCr6grSgdI6d6WT2Di0l8fYa2lvjhRJokhWY3+EOIa2shoSg6JsyMhGjoN6+XzsVq8ZL22fka2vmf3RvLTXDKz35wgcIFIyuBxFUAFZzWqMwAHoVbS0yEGKQnFIcnBG6Y8GBwOPopqNyEpGwHiDOlFlpJQmVqfKcHg92j5XGXu6ej7eCHEBlLanL2CC9FAIyQnudmbvP7MqvwAHpzpM4Kz5meJCIAJ6Yu8/WlFbgNzJOURR7flYfZS6+q48TqU0GfF5aUNwudqjpha6IyBn9YYyBMZoExWqh7Dq8qrLyetzuSMHI2QSRUHLA2MnA2f1/v+cVaQWpTUE8rHTac/lMUpQg6aGhIxbjggiMIS2Iphq3MtlKfcxVtDyMeLYgBxyWHJqtviI8dwIGK2Li6Pv/77PiXnHCGdVOhqHpAhcR3oc4AEwNqjRJd88J3a89Euey2OMqXHAObhrNJRjXR9jrDiuv9GF6KhRXS+O8caWQh3LuBtpfo+P6926hDyx9x+t97uOrPbOxHdnHGTeEe86+li8P8jhj0N7/f74tqqwhrACvLT98WufcdYhZnN9tBE8PKsR0xzD+9Tj6nF852Pzg5Zn6WDjeBlDWwHEsCMGHPFMLltk5QC9I/172zmE1X/xRBjV0D+uowAAAABJRU5ErkJggg==';
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzygJ3inIo4VhzDKFmJF0QLlJhWG2Jvg9KdPT14ABCw-gXaWYXzBxRxERmF6f0zQyyz/exec';
 
 let catalog = [];
@@ -997,7 +1000,26 @@ submitBtn.addEventListener('click', () => {
         </div>
       `;
       const isTransfer = orderData.paymentMethod === '匯款';
-      const reportHtml = isTransfer ? `
+      const isLinePay = orderData.paymentMethod === 'LINE Pay';
+      const reportHtml = isLinePay ? `
+        <div class="pay-report pay-report-main">
+          <div class="pr-step">STEP 1　用 LINE Pay 付款</div>
+          <div class="pr-bank" style="text-align:center">
+            <div>付款金額 <b class="pr-total">${orderData.total}</b>（付款時請輸入這個金額）</div>
+            <a style="display:block; margin:10px 0 6px; background:#06c755; color:#fff; text-decoration:none; padding:14px; border-radius:99px; font-size:16px; font-weight:600; letter-spacing:.1em;" href="${LINEPAY_URL}" target="_blank" rel="noopener">開啟 LINE Pay 付款</a>
+            <img src="${LINEPAY_QR}" alt="LINE Pay QR code" style="width:150px;height:150px;display:block;margin:6px auto 0;image-rendering:pixelated">
+            <div style="font-size:12px;color:var(--muted)">用電腦開啟的話，請用手機 LINE 掃這個 QR code</div>
+          </div>
+          <p class="pr-sub">下單後 4 小時內未完成付款，訂單將自動取消。</p>
+          <div class="pr-step" style="margin-top:16px">STEP 2　付款完成後，按下面的按鈕</div>
+          <button type="button" id="mrSubmit" class="pr-send">我已完成付款</button>
+          <div class="pr-msg" id="mrMsg"></div>
+          <div class="line-join hidden" id="mrLine">
+            <div class="lj-title">最後一步：加入官方 LINE</div>
+            <p>確認入帳、取貨提醒都會在官方 LINE 通知您。</p>
+            <a class="lj-btn" href="${LINE_ADD_URL}" target="_blank" rel="noopener">加入官方 LINE</a>
+          </div>
+        </div>` : isTransfer ? `
         <div class="pay-report pay-report-main">
           <div class="pr-step">STEP 1　請匯款</div>
           <div class="pr-bank">
@@ -1019,12 +1041,12 @@ submitBtn.addEventListener('click', () => {
           </div>
         </div>` : '';
       const closeBtnEl = document.getElementById('closeBtn');
-      if (isTransfer) {
-        document.getElementById('modalTitle').textContent = '訂單已送出，請完成匯款';
-        document.getElementById('modalSub').textContent = '匯款後請在下方回傳匯出帳號後五碼，我們會第一時間為您確認。';
+      if (isTransfer || isLinePay) {
+        document.getElementById('modalTitle').textContent = isLinePay ? '訂單已送出，請完成 LINE Pay 付款' : '訂單已送出，請完成匯款';
+        document.getElementById('modalSub').textContent = isLinePay ? '付款後請按「我已完成付款」，我們會第一時間為您確認。' : '匯款後請在下方回傳匯出帳號後五碼，我們會第一時間為您確認。';
         document.getElementById('summaryText').innerHTML = reportHtml +
           '<details class="order-detail"><summary>查看訂單明細</summary>' + modalHtml + '</details>' +
-          '<p class="pr-later">還沒匯款也沒關係，確認信裡有「回報金額」連結，匯款後再回傳即可。</p>';
+          '<p class="pr-later">' + (isLinePay ? '還沒付款也沒關係，確認信裡有 LINE Pay 付款按鈕和回報連結。' : '還沒匯款也沒關係，確認信裡有「回報金額」連結，匯款後再回傳即可。') + '</p>';
         closeBtnEl.textContent = '稍後再回傳';
         closeBtnEl.dataset.pending = '1';
       } else {
@@ -1038,6 +1060,18 @@ submitBtn.addEventListener('click', () => {
           </div>` + modalHtml;
         closeBtnEl.textContent = '確認關閉';
         closeBtnEl.dataset.pending = '';
+      }
+      if (isLinePay) {
+        const no = orderData.orderNo, last3 = String(orderData.phone).replace(/\D/g,'').slice(-3);
+        document.getElementById('mrSubmit').addEventListener('click', () => {
+          const btn = document.getElementById('mrSubmit'), msg = document.getElementById('mrMsg');
+          btn.disabled = true; btn.textContent = '送出中';
+          sendPaymentReport({ orderNo: no, phoneLast3: last3, bankLast5: '' })
+            .then(m => { msg.textContent = '✓ ' + m; btn.textContent = '已送出';
+              closeBtnEl.textContent = '完成'; closeBtnEl.dataset.pending = '';
+              const lj = document.getElementById('mrLine'); lj.classList.remove('hidden'); lj.scrollIntoView({behavior:'smooth', block:'center'}); })
+            .catch(err => { msg.textContent = err.message; btn.disabled = false; btn.textContent = '我已完成付款'; });
+        });
       }
       if (isTransfer) {
         const no = orderData.orderNo, last3 = String(orderData.phone).replace(/\D/g,'').slice(-3);
@@ -1103,7 +1137,7 @@ function resetFormForNextOrder(){
 }
 
 document.getElementById('closeBtn').addEventListener('click', (e) => {
-  if (e.currentTarget.dataset.pending && !confirm('還沒回傳匯出帳號後五碼。\n匯款後可從確認信的「回報金額」連結回傳，確定要先關閉嗎？')) return;
+  if (e.currentTarget.dataset.pending && !confirm('還沒回報付款。\n付款後可從確認信裡的連結回報，確定要先關閉嗎？')) return;
   document.getElementById('overlay').classList.add('hidden');
 });
 
@@ -1159,7 +1193,7 @@ if (payParam !== null) {
     const errs = [];
     if (!d.orderNo) errs.push('請填寫訂單編號');
     if (!/^\d{3}$/.test(d.phoneLast3)) errs.push('請填寫訂購人手機後三碼');
-    if (!/^\d{5}$/.test(d.bankLast5)) errs.push('請填寫付費的匯出帳號後五碼（5 位數字）');
+    if (d.bankLast5 && !/^\d{5}$/.test(d.bankLast5)) errs.push('匯出帳號後五碼要填 5 位數字');
     if (errs.length) { banner.innerHTML = errs.map(e => '・' + e).join('<br>'); banner.classList.remove('hidden'); return; }
     btn.disabled = true; btn.textContent = '送出中⋯';
     sendPaymentReport(d)
